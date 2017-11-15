@@ -9,14 +9,14 @@ import (
 const frameCap time.Duration = 5000
 
 func Main(log Logger) error {
-
+	window := NewWindow(800, 600, "games")
+	InitGraphics()
 	input := NewInput()
 	game := &Core{
 		game: NewGame(),
 		input: input,
-		win: NewWindow(800, 600, "games"),
+		win: window,
 	}
-	InitGraphics()
 	game.Start()
 	//if err := win.Open(); err != nil {
 	//	return err

@@ -4,13 +4,26 @@ import (
 	"fmt"
 
 	"github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/go-gl/mathgl/mgl32"
 )
 
 func NewGame() *Game {
-	return &Game{}
+	g := &Game{
+		mesh: NewMesh(),
+	}
+
+	vertices := []Vertex{
+		NewVertex(mgl32.Vec3{-1, -1, 0}),
+		NewVertex(mgl32.Vec3{0, 1, 0}),
+		NewVertex(mgl32.Vec3{-1, 1, 0}),
+	}
+	g.mesh.AddVertices(vertices)
+	return g
 }
 
-type Game struct {}
+type Game struct {
+	mesh *Mesh
+}
 
 func (g *Game) Input(i *Input) {
 
@@ -38,8 +51,5 @@ func (g *Game) Update() {
 }
 
 func (g *Game) Render() {
-
+	g.mesh.Draw()
 }
-
-
-
