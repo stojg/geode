@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/go-gl/mathgl/mgl32"
@@ -29,22 +30,20 @@ func Main(log Logger) error {
 	cameraObject.Transform().LookAt(mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
 	engine.Game().AddObject(cameraObject)
 
-	mesh := rendering.NewMesh()
-	vertices := []rendering.Vertex{
-		{Pos: [3]float32{-0.5, -0.5, 0.0}, TexCoords: [2]float32{0, 0}},
-		{Pos: [3]float32{0.5, -0.5, 0.0}, TexCoords: [2]float32{1, 0}},
-		{Pos: [3]float32{0, 0.5, 0.0}, TexCoords: [2]float32{0.5, 1}},
+	cubeMesh, err := rendering.NewMesh("res/meshes/cube/model.obj")
+	if err != nil {
+		fmt.Printf("Model loading failed: %v", err)
+		return err
 	}
-	mesh.AddVertices(vertices)
 	material := rendering.NewMaterial()
 	material.AddTexture("diffuse", rendering.NewTexture("res/textures/test.png"))
 
-	meshRenderer := components.NewMeshRenderer(mesh, material)
-	triangleObject := NewGameObject()
-	triangleObject.AddComponent(meshRenderer)
-	triangleObject.AddComponent(&components.Rotator{})
-	triangleObject.Transform().SetPos(mgl32.Vec3{0, 0, 0})
-	engine.Game().AddObject(triangleObject)
+	meshRenderer := components.NewMeshRenderer(cubeMesh, material)
+	cube := NewGameObject()
+	cube.AddComponent(meshRenderer)
+	cube.AddComponent(&components.Rotator{})
+	cube.Transform().SetPos(mgl32.Vec3{0, 0, 0})
+	engine.Game().AddObject(cube)
 
 	engine.Start()
 	return nil

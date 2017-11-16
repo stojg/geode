@@ -2,16 +2,23 @@ package rendering
 
 import (
 	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/stojg/graphics/lib/rendering/loader"
 )
 
-func NewMesh() *Mesh {
+func NewMesh(name string) (*Mesh, error) {
 	m := &Mesh{}
+
+	data, err := loader.Load(name)
+	if err != nil {
+		return nil, err
+	}
 
 	// Create buffers/arrays
 	gl.GenBuffers(1, &m.vbo)
 	gl.GenVertexArrays(1, &m.vao)
 
-	return m
+	m.SetVertices(convertToVertices(data))
+	return m, nil
 }
 
 type Mesh struct {
@@ -20,7 +27,7 @@ type Mesh struct {
 	numVertices int32
 }
 
-func (m *Mesh) AddVertices(vertices []Vertex) {
+func (m *Mesh) SetVertices(vertices []Vertex) {
 
 	m.numVertices = int32(len(vertices))
 

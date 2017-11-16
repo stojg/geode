@@ -38,7 +38,7 @@ func NewWindow(width, height int, title string) (*Window, error) {
 
 	w.inst.MakeContextCurrent()
 	// disable or enable vertical refresh (vsync)
-	glfw.SwapInterval(0)
+	glfw.SwapInterval(1)
 
 	// this is the actual numVertices we got
 	fbw, fbh := window.GetFramebufferSize()
