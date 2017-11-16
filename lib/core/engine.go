@@ -6,10 +6,6 @@ import (
 	"time"
 )
 
-type Renderable interface {
-	Render()
-}
-
 const maxFps time.Duration = 5000
 
 func Main(log Logger) error {

@@ -5,23 +5,27 @@ import (
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
-func NewGame(s *Shader) *Game {
-	g := &Game{
-		mesh:   NewMesh(),
-		shader: s,
-	}
+type Drawable interface{
+	Draw()
+}
 
+func NewGame(s *Shader) *Game {
+	mesh := NewMesh()
 	vertices := []float32{
 		-0.5, -0.5, 0.0,
 		0.5, -0.5, 0.0,
 		0.0, 0.5, 0.0,
 	}
-	g.mesh.AddVertices(vertices)
-	return g
+	mesh.AddVertices(vertices)
+
+	return &Game{
+		mesh:   mesh,
+		shader: s,
+	}
 }
 
 type Game struct {
-	mesh   *Mesh
+	mesh   Drawable
 	shader *Shader
 }
 

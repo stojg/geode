@@ -26,6 +26,7 @@ func InitGraphics() {
 
 	// @todo depth clamp for later
 
+	gl.Enable(gl.MULTISAMPLE)
 	gl.Enable(gl.FRAMEBUFFER_SRGB)
 }
 
