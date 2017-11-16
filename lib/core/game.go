@@ -37,12 +37,12 @@ func (g *Game) Input(i *Input) {
 
 	if i.ButtonDown(glfw.MouseButton1) {
 		fmt.Println("mouse 1 click")
-		fmt.Println(i.MousePosition())
+		fmt.Println(i.CursorPosition())
 	}
 
 	if i.ButtonUp(glfw.MouseButton1) {
 		fmt.Println("mouse 1 release")
-		fmt.Println(i.MousePosition())
+		fmt.Println(i.CursorPosition())
 	}
 }
 
