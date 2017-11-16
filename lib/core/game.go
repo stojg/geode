@@ -2,27 +2,27 @@ package core
 
 import (
 	"fmt"
-
 	"github.com/go-gl/glfw/v3.2/glfw"
-	"github.com/go-gl/mathgl/mgl32"
 )
 
-func NewGame() *Game {
+func NewGame(s *Shader) *Game {
 	g := &Game{
-		mesh: NewMesh(),
+		mesh:   NewMesh(),
+		shader: s,
 	}
 
-	vertices := []Vertex{
-		NewVertex(mgl32.Vec3{-1, -1, 0}),
-		NewVertex(mgl32.Vec3{0, 1, 0}),
-		NewVertex(mgl32.Vec3{-1, 1, 0}),
+	vertices := []float32{
+		-0.5, -0.5, 0.0,
+		0.5, -0.5, 0.0,
+		0.0, 0.5, 0.0,
 	}
 	g.mesh.AddVertices(vertices)
 	return g
 }
 
 type Game struct {
-	mesh *Mesh
+	mesh   *Mesh
+	shader *Shader
 }
 
 func (g *Game) Input(i *Input) {
@@ -51,5 +51,6 @@ func (g *Game) Update() {
 }
 
 func (g *Game) Render() {
+	g.shader.Bind()
 	g.mesh.Draw()
 }

@@ -10,34 +10,29 @@ const frameCap time.Duration = 5000
 
 func Main(log Logger) error {
 	window := NewWindow(800, 600, "games")
+
 	InitGraphics()
 	input := NewInput()
+
+	s := NewShader("simple")
+
 	game := &Core{
-		game: NewGame(),
+		game:  NewGame(s),
 		input: input,
-		win: window,
+		win:   window,
 	}
+
+	CheckForError("core.Main [before game.Start]")
+
 	game.Start()
-	//if err := win.Open(); err != nil {
-	//	return err
-	//}
-	//defer win.Close()
-	//
-	//if err := gl.Init(); err != nil {
-	//	return err
-	//}
-	//version := gl.GoStr(gl.GetString(gl.VERSION))
-	//log.Printf("OpenGL Version %s\n", version)
-	//
-	//gl.Disable(gl.MULTISAMPLE)
 	return nil
 }
 
 type Core struct {
-	game *Game
-	input *Input
+	game      *Game
+	input     *Input
 	isRunning bool
-	win *Window
+	win       *Window
 }
 
 func (m *Core) Start() {
@@ -95,8 +90,6 @@ func (m *Core) run() {
 			}
 		}
 
-
-
 		if render {
 			m.render()
 			frames++
@@ -108,12 +101,13 @@ func (m *Core) run() {
 }
 
 func (m *Core) render() {
+	CheckForError("Core.render [start]")
 	ClearScreen()
 	m.game.Render()
 	m.win.Render()
+	CheckForError("Core.render [end]")
 }
 
 func (m *Core) cleanup() {
 	m.win.Close()
 }
-

@@ -8,8 +8,8 @@ import (
 func NewInput() *Input {
 	return &Input{
 		currentKeys: make(map[glfw.Key]bool),
-		downKeys: make(map[glfw.Key]bool),
-		upKeys: make(map[glfw.Key]bool),
+		downKeys:    make(map[glfw.Key]bool),
+		upKeys:      make(map[glfw.Key]bool),
 
 		currentButtons: make(map[glfw.MouseButton]bool),
 		downButtons:    make(map[glfw.MouseButton]bool),
@@ -19,8 +19,8 @@ func NewInput() *Input {
 
 type Input struct {
 	currentKeys map[glfw.Key]bool
-	downKeys map[glfw.Key]bool
-	upKeys map[glfw.Key]bool
+	downKeys    map[glfw.Key]bool
+	upKeys      map[glfw.Key]bool
 
 	currentButtons map[glfw.MouseButton]bool
 	downButtons    map[glfw.MouseButton]bool
@@ -57,11 +57,11 @@ func (input *Input) KeyUp(keyCode glfw.Key) bool {
 	return input.upKeys[keyCode]
 }
 
-func (input *Input) Button(button  glfw.MouseButton) bool {
+func (input *Input) Button(button glfw.MouseButton) bool {
 	return mouseButtons[button]
 }
 
-func (input *Input) ButtonDown(button  glfw.MouseButton) bool {
+func (input *Input) ButtonDown(button glfw.MouseButton) bool {
 	return input.downButtons[button]
 }
 

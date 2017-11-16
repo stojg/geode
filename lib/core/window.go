@@ -15,21 +15,21 @@ var cursorPosition mgl32.Vec2
 
 func NewWindow(width, height int, title string) *Window {
 	w := &Window{
-		width: width,
+		width:  width,
 		height: height,
-		title: title,
+		title:  title,
 	}
 	w.Open()
 	return w
 }
 
 type Window struct {
-	inst   *glfw.Window
-	width  int
-	height int
-	title  string
+	inst           *glfw.Window
+	width          int
+	height         int
+	title          string
 	viewPortHeight int32
-	viewPortWidth int32
+	viewPortWidth  int32
 
 	previousFrameSec float64
 	frameCounter     int
@@ -69,7 +69,7 @@ func (w *Window) Open() error {
 			keys[key] = false
 		}
 	})
-	window.SetMouseButtonCallback(func(w *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey){
+	window.SetMouseButtonCallback(func(w *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
 		if action == glfw.Press {
 			mouseButtons[button] = true
 		} else if action == glfw.Release {
@@ -80,12 +80,12 @@ func (w *Window) Open() error {
 	x, y := window.GetCursorPos()
 	cursorPosition[0] = float32(x)
 	cursorPosition[1] = float32(y)
-	window.SetCursorPosCallback(func(w *glfw.Window, xpos float64, ypos float64){
+	window.SetCursorPosCallback(func(w *glfw.Window, xpos float64, ypos float64) {
 		cursorPosition[0] = float32(xpos)
 		cursorPosition[1] = float32(ypos)
 	})
 
-	// this is the actual size we got
+	// this is the actual numVertices we got
 	fbw, fbh := window.GetFramebufferSize()
 	w.viewPortWidth = int32(fbw)
 	w.viewPortHeight = int32(fbh)

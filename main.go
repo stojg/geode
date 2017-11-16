@@ -1,8 +1,8 @@
 package main
 
 import (
-	"os"
 	"math/rand"
+	"os"
 
 	"github.com/stojg/graphics/lib/core"
 )
