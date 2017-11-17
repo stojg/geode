@@ -9,24 +9,32 @@ type Drawable interface {
 	Draw()
 }
 
+type GameObject interface {
+	Input(*Input)
+	Update()
+	Render(*Shader)
+}
+
 func NewGame(s *Shader) *Game {
 	mesh := NewMesh()
 	vertices := []Vertex{
-		{Pos: [3]float32{-0.5, -0.5, 0.0}},
-		{Pos: [3]float32{0.5, -0.5, 0.0}},
-		{Pos: [3]float32{0.0, 0.5, 0.0}},
+		{Pos: [3]float32{-0.5, -0.5, +0.0}},
+		{Pos: [3]float32{+0.5, -0.5, +0.0}},
+		{Pos: [3]float32{+0.0, +0.5, +0.0}},
 	}
 	mesh.AddVertices(vertices)
 
+	meshRenderer := NewMeshRenderer(mesh)
+
 	return &Game{
-		mesh:   mesh,
-		shader: s,
+		gameObjects: []GameObject{meshRenderer},
+		shader:      s,
 	}
 }
 
 type Game struct {
-	mesh   Drawable
-	shader *Shader
+	gameObjects []GameObject
+	shader      *Shader
 }
 
 func (g *Game) Input(i *Input) {
@@ -55,6 +63,7 @@ func (g *Game) Update() {
 }
 
 func (g *Game) Render() {
-	g.shader.Bind()
-	g.mesh.Draw()
+	for _, object := range g.gameObjects {
+		object.Render(g.shader)
+	}
 }
