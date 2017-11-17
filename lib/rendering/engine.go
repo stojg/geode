@@ -31,6 +31,7 @@ func NewEngine() *Engine {
 
 type Engine struct {
 	shader *Shader
+	camera *components.Camera
 }
 
 func (e *Engine) Render(object GameObject) {

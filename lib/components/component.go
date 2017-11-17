@@ -20,6 +20,9 @@ type Component interface {
 type BaseComponent struct {
 	//Transform
 }
+
 func (m *BaseComponent) Render(Bindable, UniformUpdater) {}
 func (m *BaseComponent) Input(float32)  {}
 func (m *BaseComponent) Update(float32) {}
+
+//type Transform struct{}
