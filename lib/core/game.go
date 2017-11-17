@@ -12,9 +12,9 @@ type Drawable interface {
 func NewGame(s *Shader) *Game {
 	mesh := NewMesh()
 	vertices := []Vertex{
-		{[3]float32{-0.5, -0.5, 0.0}},
-		{[3]float32{0.5, -0.5, 0.0}},
-		{[3]float32{0.0, 0.5, 0.0}},
+		{Pos: [3]float32{-0.5, -0.5, 0.0}},
+		{Pos: [3]float32{0.5, -0.5, 0.0}},
+		{Pos: [3]float32{0.0, 0.5, 0.0}},
 	}
 	mesh.AddVertices(vertices)
 

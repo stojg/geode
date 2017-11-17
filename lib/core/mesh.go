@@ -30,11 +30,25 @@ func (m *Mesh) AddVertices(vertices []Vertex) {
 	gl.BindBuffer(gl.ARRAY_BUFFER, m.vbo)
 	gl.BufferData(gl.ARRAY_BUFFER, len(vertices)*int(sizeOfVertex), gl.Ptr(vertices), gl.STATIC_DRAW)
 
+	offset := 0
 	// vertex position
 	gl.EnableVertexAttribArray(0)
-	gl.VertexAttribPointer(0, numVertexPositions, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(0*sizeOfFloat32))
+	gl.VertexAttribPointer(0, numVertexPositions, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
+	offset += numVertexPositions
 
-	// @todo add vertex attribute pointers for normals, texture coordinates and tangents
+	// normals
+	gl.VertexAttribPointer(1, 3, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
+	gl.EnableVertexAttribArray(1)
+	offset += numVertexNormals
+
+	// texture coordinates
+	gl.VertexAttribPointer(2, 2, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
+	gl.EnableVertexAttribArray(2)
+	offset += numVertexTexCoords
+
+	// tangents
+	gl.VertexAttribPointer(3, 3, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
+	gl.EnableVertexAttribArray(3)
 
 	// reset the current bound vertex array so that no one else mistakenly changes the VAO
 	gl.BindVertexArray(0)
