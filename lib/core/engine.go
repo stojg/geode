@@ -5,29 +5,31 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/input"
 	"github.com/stojg/graphics/lib/rendering"
 )
 
 const maxFps time.Duration = 5000
 
-func Main(log Logger) error {
+func NewEngine(width, height int, title string) (*Engine, error) {
 
-	window, err := NewWindow(100, 100, "graphics")
+	window, err := NewWindow(width, height, title)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	input.SetWindow(window.Instance())
-	game := NewGame()
 
 	engine := &Engine{
-		game:            game,
+		game:            NewGame(),
 		window:          window,
 		renderingEngine: rendering.NewEngine(),
 	}
-	engine.Start()
-	return nil
+	engine.game.SetEngine(engine)
+
+	return engine, nil
+
 }
 
 type Engine struct {
@@ -42,6 +44,10 @@ func (m *Engine) Start() {
 		return
 	}
 	m.run()
+}
+
+func (m *Engine) Game() *Game {
+	return m.game
 }
 
 func (m *Engine) Stop() {
@@ -111,4 +117,8 @@ func (m *Engine) render() {
 
 func (m *Engine) cleanup() {
 	m.window.Close()
+}
+
+func (m *Engine) GetRenderingEngine() components.RenderingEngine {
+	return m.renderingEngine
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/input"
 	"github.com/stojg/graphics/lib/rendering"
@@ -13,7 +14,22 @@ type Drawable interface {
 	Draw()
 }
 
-func NewGame() *Game {
+func Main(log Logger) error {
+	width := 800
+	height := 600
+
+	engine, err := NewEngine(width, height, "graphics")
+	if err != nil {
+		return err
+	}
+
+	projection := mgl32.Perspective(mgl32.DegToRad(70), float32(width/height), 0.01, 1000.0)
+	cameraObject := NewGameObject()
+	cameraObject.AddComponent(components.NewCamera(projection))
+	cameraObject.Transform().SetPos(mgl32.Vec3{0, 0, 1})
+	cameraObject.Transform().LookAt(mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
+	engine.Game().AddObject(cameraObject)
+
 	mesh := rendering.NewMesh()
 	vertices := []rendering.Vertex{
 		{Pos: [3]float32{-0.5, -0.5, +0.0}},
@@ -23,20 +39,30 @@ func NewGame() *Game {
 	mesh.AddVertices(vertices)
 
 	meshRenderer := components.NewMeshRenderer(mesh)
+	triangleObject := NewGameObject()
+	triangleObject.AddComponent(meshRenderer)
+	triangleObject.Transform().SetPos(mgl32.Vec3{0, 0, -1})
+	engine.Game().AddObject(triangleObject)
 
+	engine.Start()
+	return nil
+}
+
+func NewGame() *Game {
 	g := &Game{}
-
-	object := NewGameObject()
-	object.AddComponent(meshRenderer)
-	g.RootObject().AddChild(object)
-
 	return g
-
 }
 
 type Game struct {
-	root   *GameObject
-	shader *rendering.Shader
+	root *GameObject
+}
+
+func (g *Game) SetEngine(engine *Engine) {
+	g.RootObject().SetEngine(engine)
+}
+
+func (g *Game) AddObject(object *GameObject) {
+	g.RootObject().AddChild(object)
 }
 
 func (g *Game) Input() {

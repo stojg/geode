@@ -7,15 +7,14 @@ func NewMeshRenderer(mesh Drawable) *MeshRenderer {
 }
 
 type MeshRenderer struct {
-	BaseComponent
+	GameComponent
 
 	mesh Drawable
 	// material *Material
 }
 
-func (m *MeshRenderer) Render(shader Bindable, engine UniformUpdater) {
+func (m *MeshRenderer) Render(shader Shader, engine RenderingEngine) {
 	shader.Bind()
-	//shader.UpdateUniforms(GetTransform(), m_material, renderingEngine);
+	shader.UpdateUniforms(m.Transform(), engine)
 	m.mesh.Draw()
 }
-

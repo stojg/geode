@@ -4,9 +4,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/mathgl/mgl32"
+	"github.com/stojg/graphics/lib/components"
+	"github.com/stojg/graphics/lib/physics"
 )
 
 var loadedShaders = make(map[string]*ShaderResource)
@@ -15,6 +19,7 @@ func NewShader(fileName string) *Shader {
 
 	s := &Shader{
 		filename: fileName,
+		uniforms: make(map[string]int32),
 	}
 
 	if oldResource, ok := loadedShaders[fileName]; ok {
@@ -33,12 +38,9 @@ func NewShader(fileName string) *Shader {
 	fShader := s.addFragmentShader(fragmentShaderText)
 	defer s.cleanUp(fShader)
 
-	// AddAllAttributes(vertexShaderText);
-
 	s.CompileShader()
 
-	//AddAllUniforms(vertexShaderText);
-	//AddAllUniforms(fragmentShaderText);
+	s.AddAllUniforms(vertexShaderText)
 
 	loadedShaders[fileName] = s.resource
 
@@ -48,6 +50,7 @@ func NewShader(fileName string) *Shader {
 type Shader struct {
 	filename string
 	resource *ShaderResource
+	uniforms map[string]int32
 }
 
 func (s *Shader) Bind() {
@@ -74,6 +77,42 @@ func (s *Shader) addFragmentShader(shader string) uint32 {
 	return s.addProgram(shader, gl.FRAGMENT_SHADER)
 }
 
+func (s *Shader) AddAllUniforms(shaderText string) {
+	r := regexp.MustCompile(`uniform\s*(\S*)\s(\S*);`)
+
+	for _, line := range strings.Split(shaderText, "\n") {
+		t := r.FindAllStringSubmatch(line, -1)
+		for _, i := range t {
+			if len(i) == 3 {
+				s.SetUniformLocation(i[1], i[2])
+			}
+		}
+	}
+}
+
+func (s *Shader) SetUniformLocation(glType, name string) {
+	t := gl.GetUniformLocation(s.resource.Program, gl.Str(name+"\x00"))
+	if t < 0 {
+		fmt.Printf("could not find uniform '%s'\n", name)
+	}
+	s.uniforms[name] = t
+}
+
+func (s *Shader) UpdateUniforms(transform *physics.Transform, engine components.RenderingEngine) {
+	worldMatrix := transform.Transformation()
+	mvpMatrix := engine.GetMainCamera().GetViewProjection().Mul4(worldMatrix)
+	s.SetUniformMatrix4fv("MVP", mvpMatrix)
+	//s.SetUniformMatrix4fv("model", worldMatrix)
+}
+
+func (s *Shader) SetUniformMatrix4fv(uniformName string, u mgl32.Mat4) {
+	gl.UniformMatrix4fv(s.GetUniform(uniformName), 1, false, &u[0])
+}
+
+func (s *Shader) GetUniform(name string) int32 {
+	return s.uniforms[name]
+}
+
 func (s *Shader) CompileShader() {
 
 	gl.LinkProgram(s.resource.Program)
@@ -89,8 +128,6 @@ func (s *Shader) CompileShader() {
 
 		panic(fmt.Errorf("failed to link Program[%d]: %v", s.resource.Program, l))
 	}
-
-	//glLogShader(Program, vertex, frag)
 }
 
 func (s *Shader) cleanUp(shader uint32) {
@@ -131,33 +168,4 @@ func printInfoLog(shader uint32, shaderText string) {
 	for i, line := range strings.Split(shaderText, "\n") {
 		fmt.Printf("%d: %s\n", i, line)
 	}
-}
-
-func NewShaderResource() *ShaderResource {
-	s := &ShaderResource{
-		Program:  gl.CreateProgram(),
-		refCount: 1,
-	}
-
-	if s.Program == 0 {
-		fmt.Println("Shader creation failed: Could not find valid memory location in constructor")
-		os.Exit(1)
-	}
-	return s
-}
-
-type ShaderResource struct {
-	Program  uint32
-	refCount int
-	//uniforms map[string]int
-	//uniformNames []string
-	//uniformTypes []string
-}
-
-func (r *ShaderResource) AddReference() {
-	r.refCount++
-}
-
-func (r *ShaderResource) Cleanup() {
-	//gl.DeleteBuffers(r.Program)
 }

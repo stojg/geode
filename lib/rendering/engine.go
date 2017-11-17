@@ -6,7 +6,7 @@ import (
 )
 
 type GameObject interface {
-	RenderAll(*Shader, components.UniformUpdater)
+	RenderAll(*Shader, components.RenderingEngine)
 }
 
 func NewEngine() *Engine {
@@ -30,8 +30,8 @@ func NewEngine() *Engine {
 }
 
 type Engine struct {
-	shader *Shader
-	camera *components.Camera
+	shader     *Shader
+	mainCamera *components.Camera
 }
 
 func (e *Engine) Render(object GameObject) {
@@ -39,4 +39,12 @@ func (e *Engine) Render(object GameObject) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	object.RenderAll(e.shader, e)
 	CheckForError("renderer.Engine.Render [end]")
+}
+
+func (e *Engine) AddCamera(c *components.Camera) {
+	e.mainCamera = c
+}
+
+func (e *Engine) GetMainCamera() *components.Camera {
+	return e.mainCamera
 }
