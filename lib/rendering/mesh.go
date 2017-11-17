@@ -1,4 +1,4 @@
-package core
+package rendering
 
 import (
 	"github.com/go-gl/gl/v4.1-core/gl"
@@ -57,5 +57,4 @@ func (m *Mesh) AddVertices(vertices []Vertex) {
 func (m *Mesh) Draw() {
 	gl.BindVertexArray(m.vao)
 	gl.DrawArrays(gl.TRIANGLES, 0, m.numVertices)
-	CheckForError("Mesh.draw [end]")
 }

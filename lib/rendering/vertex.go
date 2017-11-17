@@ -1,4 +1,4 @@
-package core
+package rendering
 
 import "unsafe"
 
@@ -9,7 +9,6 @@ const numVertexTexCoords = 2
 const numVertexTangents = 2
 
 const sizeOfVertex = unsafe.Sizeof(Vertex{})
-
 const sizeOfFloat32 = int(unsafe.Sizeof(float32(1)))
 
 type Vertex struct {

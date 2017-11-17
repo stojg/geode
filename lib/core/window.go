@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 
 	"fmt"
@@ -44,7 +45,7 @@ func NewWindow(width, height int, title string) (*Window, error) {
 	w.viewPortWidth = int32(fbw)
 	w.viewPortHeight = int32(fbh)
 
-	return w, nil
+	return w, gl.Init()
 }
 
 type Window struct {

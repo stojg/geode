@@ -2,59 +2,61 @@ package core
 
 import (
 	"fmt"
+
 	"github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/stojg/graphics/lib/components"
+	"github.com/stojg/graphics/lib/input"
+	"github.com/stojg/graphics/lib/rendering"
 )
 
 type Drawable interface {
 	Draw()
 }
 
-type GameObject interface {
-	Input(*Input)
-	Update()
-	Render(*Shader)
-}
-
-func NewGame(s *Shader) *Game {
-	mesh := NewMesh()
-	vertices := []Vertex{
+func NewGame() *Game {
+	mesh := rendering.NewMesh()
+	vertices := []rendering.Vertex{
 		{Pos: [3]float32{-0.5, -0.5, +0.0}},
 		{Pos: [3]float32{+0.5, -0.5, +0.0}},
 		{Pos: [3]float32{+0.0, +0.5, +0.0}},
 	}
 	mesh.AddVertices(vertices)
 
-	meshRenderer := NewMeshRenderer(mesh)
+	meshRenderer := components.NewMeshRenderer(mesh)
 
-	return &Game{
-		gameObjects: []GameObject{meshRenderer},
-		shader:      s,
-	}
+	g := &Game{}
+
+	object := NewGameObject()
+	object.AddComponent(meshRenderer)
+	g.RootObject().AddChild(object)
+
+	return g
+
 }
 
 type Game struct {
-	gameObjects []GameObject
-	shader      *Shader
+	root   *GameObject
+	shader *rendering.Shader
 }
 
-func (g *Game) Input(i *Input) {
+func (g *Game) Input() {
 
-	if i.KeyDown(glfw.KeyUp) {
+	if input.KeyDown(glfw.KeyUp) {
 		fmt.Println("up was just pressed")
 	}
 
-	if i.KeyUp(glfw.KeyUp) {
+	if input.KeyUp(glfw.KeyUp) {
 		fmt.Println("up was just relased")
 	}
 
-	if i.ButtonDown(glfw.MouseButton1) {
+	if input.ButtonDown(glfw.MouseButton1) {
 		fmt.Println("mouse 1 click")
-		fmt.Println(i.CursorPosition())
+		fmt.Println(input.CursorPosition())
 	}
 
-	if i.ButtonUp(glfw.MouseButton1) {
+	if input.ButtonUp(glfw.MouseButton1) {
 		fmt.Println("mouse 1 release")
-		fmt.Println(i.CursorPosition())
+		fmt.Println(input.CursorPosition())
 	}
 }
 
@@ -62,8 +64,13 @@ func (g *Game) Update() {
 
 }
 
-func (g *Game) Render() {
-	for _, object := range g.gameObjects {
-		object.Render(g.shader)
+func (g *Game) Render(r *rendering.Engine) {
+	r.Render(g.RootObject())
+}
+
+func (g *Game) RootObject() *GameObject {
+	if g.root == nil {
+		g.root = NewGameObject()
 	}
+	return g.root
 }

@@ -4,6 +4,9 @@ package core
 import (
 	"fmt"
 	"time"
+
+	"github.com/stojg/graphics/lib/input"
+	"github.com/stojg/graphics/lib/rendering"
 )
 
 const maxFps time.Duration = 5000
@@ -15,28 +18,23 @@ func Main(log Logger) error {
 		return err
 	}
 
-	InitGraphics()
-
-	input := NewInput(window.Instance())
-	shader := NewShader("simple")
-	game := NewGame(shader)
+	input.SetWindow(window.Instance())
+	game := NewGame()
 
 	engine := &Engine{
-		game:   game,
-		input:  input,
-		window: window,
+		game:            game,
+		window:          window,
+		renderingEngine: rendering.NewEngine(),
 	}
-
-	CheckForError("engine.Main [before game.Start]")
 	engine.Start()
 	return nil
 }
 
 type Engine struct {
-	window    *Window
-	input     *Input
-	game      *Game
-	isRunning bool
+	window          *Window
+	game            *Game
+	renderingEngine *rendering.Engine
+	isRunning       bool
 }
 
 func (m *Engine) Start() {
@@ -84,9 +82,9 @@ func (m *Engine) run() {
 				m.Stop()
 			}
 
-			m.input.Update()
+			input.Update()
 
-			m.game.Input(m.input)
+			m.game.Input()
 			m.game.Update()
 
 			if frameCount >= time.Second {
@@ -107,11 +105,8 @@ func (m *Engine) run() {
 }
 
 func (m *Engine) render() {
-	CheckForError("Engine.render [start]")
-	ClearScreen()
-	m.game.Render()
+	m.game.Render(m.renderingEngine)
 	m.window.Render()
-	CheckForError("Engine.render [end]")
 }
 
 func (m *Engine) cleanup() {

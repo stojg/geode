@@ -1,11 +1,12 @@
-package core
+package rendering
 
 import (
 	"fmt"
-	"github.com/go-gl/gl/v4.1-core/gl"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
 var loadedShaders = make(map[string]*ShaderResource)

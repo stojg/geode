@@ -1,34 +1,10 @@
-package core
+package rendering
 
 import (
 	"fmt"
+
 	"github.com/go-gl/gl/v4.1-core/gl"
 )
-
-func ClearScreen() {
-	// @todo Stencil buffer
-	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-}
-
-func InitGraphics() {
-
-	if err := gl.Init(); err != nil {
-		panic(err)
-	}
-
-	gl.ClearColor(0.05, 0.06, 0.07, 0)
-
-	gl.FrontFace(gl.CCW)
-	gl.CullFace(gl.BACK)
-	gl.Enable(gl.CULL_FACE)
-	gl.Enable(gl.DEPTH_TEST)
-	gl.DepthFunc(gl.LESS)
-
-	// @todo depth clamp for later
-
-	gl.Enable(gl.MULTISAMPLE)
-	gl.Enable(gl.FRAMEBUFFER_SRGB)
-}
 
 // CheckForError will check for OpenGL errors and panic if an error has been raised
 func CheckForError(name string) {
