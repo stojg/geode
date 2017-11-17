@@ -5,16 +5,16 @@ import (
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
-type Drawable interface{
+type Drawable interface {
 	Draw()
 }
 
 func NewGame(s *Shader) *Game {
 	mesh := NewMesh()
-	vertices := []float32{
-		-0.5, -0.5, 0.0,
-		0.5, -0.5, 0.0,
-		0.0, 0.5, 0.0,
+	vertices := []Vertex{
+		{[3]float32{-0.5, -0.5, 0.0}},
+		{[3]float32{0.5, -0.5, 0.0}},
+		{[3]float32{0.0, 0.5, 0.0}},
 	}
 	mesh.AddVertices(vertices)
 

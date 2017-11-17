@@ -20,21 +20,19 @@ type Mesh struct {
 	numVertices int32
 }
 
-func (m *Mesh) AddVertices(vertices []float32) {
-	const sizeFloat = 4
-	const VertexSize = 3
+func (m *Mesh) AddVertices(vertices []Vertex) {
 
-	m.numVertices = int32(len(vertices) / VertexSize)
+	m.numVertices = int32(len(vertices))
 
 	gl.BindVertexArray(m.vao)
 
 	// load data into vertex buffers
 	gl.BindBuffer(gl.ARRAY_BUFFER, m.vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, len(vertices)*sizeFloat, gl.Ptr(vertices), gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, len(vertices)*int(sizeOfVertex), gl.Ptr(vertices), gl.STATIC_DRAW)
 
 	// vertex position
 	gl.EnableVertexAttribArray(0)
-	gl.VertexAttribPointer(0, VertexSize, gl.FLOAT, false, VertexSize*sizeFloat, gl.PtrOffset(0))
+	gl.VertexAttribPointer(0, numVertexPositions, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(0*sizeOfFloat32))
 
 	// @todo add vertex attribute pointers for normals, texture coordinates and tangents
 

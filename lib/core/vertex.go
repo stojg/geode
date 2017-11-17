@@ -1,13 +1,14 @@
 package core
 
-import "github.com/go-gl/mathgl/mgl32"
+import "unsafe"
 
-func NewVertex(pos mgl32.Vec3) Vertex {
-	return Vertex{
-		Pos: pos,
-	}
-}
+// number of elements in the Vertex.Pos
+const numVertexPositions = 3
+
+const sizeOfVertex = unsafe.Sizeof(Vertex{})
+
+const sizeOfFloat32 = int(unsafe.Sizeof(float32(1)))
 
 type Vertex struct {
-	Pos mgl32.Vec3
+	Pos [3]float32
 }
