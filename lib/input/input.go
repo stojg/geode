@@ -16,11 +16,14 @@ var (
 	// callback variables
 	keys         [glfw.KeyLast]bool
 	mouseButtons [glfw.MouseButtonLast]bool
-	cursor       [2]float64
+	cursor       [2]float32
 )
+
+var inst *glfw.Window
 
 func SetWindow(window *glfw.Window) {
 
+	inst = window
 	currentKeys = make(map[glfw.Key]bool)
 	downKeys = make(map[glfw.Key]bool)
 	upKeys = make(map[glfw.Key]bool)
@@ -38,9 +41,10 @@ func SetWindow(window *glfw.Window) {
 	})
 
 	window.SetInputMode(glfw.CursorMode, glfw.CursorNormal)
-	cursor[0], cursor[1] = window.GetCursorPos()
+	cX, xY := window.GetCursorPos()
+	cursor[0], cursor[1] = float32(cX), float32(xY)
 	window.SetCursorPosCallback(func(w *glfw.Window, xpos float64, ypos float64) {
-		cursor[0], cursor[1] = xpos, ypos
+		cursor[0], cursor[1] = float32(xpos), float32(ypos)
 	})
 
 	window.SetMouseButtonCallback(func(w *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
@@ -70,6 +74,19 @@ func Update() {
 	}
 }
 
+func ShowCursor() {
+	inst.SetInputMode(glfw.CursorMode, glfw.CursorNormal)
+}
+
+func HideCursor() {
+	inst.SetInputMode(glfw.CursorMode, glfw.CursorDisabled)
+}
+
+func SetCursorPosition(x, y float32) {
+	inst.SetCursorPos(float64(x), float64(y))
+	cursor[0], cursor[1] = x, y
+}
+
 func Key(keyCode glfw.Key) bool {
 	return keys[keyCode]
 }
@@ -94,6 +111,6 @@ func ButtonUp(button glfw.MouseButton) bool {
 	return upButtons[button]
 }
 
-func CursorPosition() [2]float64 {
+func CursorPosition() [2]float32 {
 	return cursor
 }
