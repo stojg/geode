@@ -24,22 +24,24 @@ func Main(log Logger) error {
 	projection := mgl32.Perspective(mgl32.DegToRad(70), float32(width/height), 0.01, 1000.0)
 	cameraObject := NewGameObject()
 	cameraObject.AddComponent(components.NewCamera(projection))
-	cameraObject.Transform().SetPos(mgl32.Vec3{0, 0, 1})
-	cameraObject.Transform().LookAt(mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
+	cameraObject.AddComponent(&components.FreeMove{})
+	cameraObject.AddComponent(&components.FreeLook{})
+	cameraObject.Transform().SetPos(mgl32.Vec3{0, 0, 2})
+	cameraObject.Transform().LookAt(mgl32.Vec3{0, 0, -2}, mgl32.Vec3{0, 1, 0})
 	engine.Game().AddObject(cameraObject)
 
 	mesh := rendering.NewMesh()
 	vertices := []rendering.Vertex{
-		{Pos: [3]float32{-0.5, -0.5, +0.0}},
-		{Pos: [3]float32{+0.5, -0.5, +0.0}},
-		{Pos: [3]float32{+0.0, +0.5, +0.0}},
+		{Pos: [3]float32{-1, -1, +0.0}},
+		{Pos: [3]float32{+1, -1, +0.0}},
+		{Pos: [3]float32{+0.0, +1, +0.0}},
 	}
 	mesh.AddVertices(vertices)
 
 	meshRenderer := components.NewMeshRenderer(mesh)
 	triangleObject := NewGameObject()
 	triangleObject.AddComponent(meshRenderer)
-	triangleObject.Transform().SetPos(mgl32.Vec3{0, 0, -1})
+	triangleObject.Transform().SetPos(mgl32.Vec3{0, 0, 0})
 	engine.Game().AddObject(triangleObject)
 
 	engine.Start()

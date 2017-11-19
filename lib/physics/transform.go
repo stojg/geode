@@ -2,14 +2,12 @@ package physics
 
 // https://github.com/BennyQBD/3DGameEngine/blob/225fa8baf6637756ba03ccbc0444bf7751d87dbb/src/com/base/engine/core/Transform.java
 
-import (
-	"github.com/go-gl/mathgl/mgl32"
-)
+import "github.com/go-gl/mathgl/mgl32"
 
 func NewTransform() *Transform {
 	return &Transform{
 		pos:   mgl32.Vec3{0, 0, 0},
-		rot:   mgl32.Quat{W: 1, V: mgl32.Vec3{0, 0, 0}},
+		rot:   mgl32.QuatIdent(),
 		scale: mgl32.Vec3{1, 1, 1},
 
 		parentMatrix: mgl32.Ident4(),
@@ -37,7 +35,7 @@ func (t *Transform) Update() {
 }
 
 func (t *Transform) Rotate(axis mgl32.Vec3, angle float32) {
-	t.rot = t.rot.Mul(mgl32.QuatRotate(angle, axis))
+	t.rot = t.rot.Mul(mgl32.QuatRotate(angle, axis)).Normalize()
 }
 
 func (t *Transform) LookAt(point mgl32.Vec3, up mgl32.Vec3) {
