@@ -93,7 +93,7 @@ func (s *Shader) AddAllUniforms(shaderText string) {
 func (s *Shader) SetUniformLocation(glType, name string) {
 	t := gl.GetUniformLocation(s.resource.Program, gl.Str(name+"\x00"))
 	if t < 0 {
-		fmt.Printf("could not find uniform '%s'\n", name)
+		fmt.Printf("uniform '%s' seems to not be used in script\n", name)
 	}
 	s.uniforms[name] = t
 }
@@ -102,15 +102,15 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, engine components.
 	worldMatrix := transform.Transformation()
 	mvpMatrix := engine.GetMainCamera().GetViewProjection().Mul4(worldMatrix)
 	s.SetUniformMatrix4fv("MVP", mvpMatrix)
-	//s.SetUniformMatrix4fv("model", worldMatrix)
 }
 
 func (s *Shader) SetUniformMatrix4fv(uniformName string, u mgl32.Mat4) {
-	gl.UniformMatrix4fv(s.GetUniform(uniformName), 1, false, &u[0])
-}
-
-func (s *Shader) GetUniform(name string) int32 {
-	return s.uniforms[name]
+	val, ok := s.uniforms[uniformName]
+	if ok {
+		gl.UniformMatrix4fv(val, 1, false, &u[0])
+	} else {
+		fmt.Println("Couldn't find uniform:", uniformName)
+	}
 }
 
 func (s *Shader) CompileShader() {
