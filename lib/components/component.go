@@ -1,6 +1,8 @@
 package components
 
 import (
+	"time"
+
 	"github.com/stojg/graphics/lib/physics"
 )
 
@@ -30,8 +32,8 @@ type Engine interface {
 }
 
 type Component interface {
-	Update(float32)
-	Input(float32)
+	Update(time.Duration)
+	Input(time.Duration)
 	Render(Shader, RenderingEngine)
 	AddToEngine(Engine)
 	SetParent(Transformable)
@@ -53,5 +55,5 @@ func (m *GameComponent) AddToEngine(engine Engine) {
 }
 
 func (m *GameComponent) Render(Shader, RenderingEngine) {}
-func (m *GameComponent) Input(float32)                  {}
-func (m *GameComponent) Update(float32)                 {}
+func (m *GameComponent) Input(time.Duration)            {}
+func (m *GameComponent) Update(time.Duration)           {}

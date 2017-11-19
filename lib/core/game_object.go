@@ -1,6 +1,8 @@
 package core
 
 import (
+	"time"
+
 	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/physics"
 	"github.com/stojg/graphics/lib/rendering"
@@ -30,14 +32,14 @@ func (g *GameObject) AddComponent(component components.Component) {
 	g.components = append(g.components, component)
 }
 
-func (g *GameObject) InputAll(elapsed float32) {
+func (g *GameObject) InputAll(elapsed time.Duration) {
 	g.Input(elapsed)
 	for _, o := range g.children {
 		o.InputAll(elapsed)
 	}
 }
 
-func (g *GameObject) UpdateAll(elapsed float32) {
+func (g *GameObject) UpdateAll(elapsed time.Duration) {
 	g.Update(elapsed)
 	for _, o := range g.children {
 		o.UpdateAll(elapsed)
@@ -51,13 +53,13 @@ func (g *GameObject) RenderAll(shader *rendering.Shader, renderingEngine compone
 	}
 }
 
-func (g *GameObject) Input(elapsed float32) {
+func (g *GameObject) Input(elapsed time.Duration) {
 	for _, c := range g.components {
 		c.Input(elapsed)
 	}
 }
 
-func (g *GameObject) Update(elapsed float32) {
+func (g *GameObject) Update(elapsed time.Duration) {
 	for _, c := range g.components {
 		c.Update(elapsed)
 	}
@@ -74,13 +76,13 @@ func (g *GameObject) Transform() *physics.Transform {
 }
 
 func (g *GameObject) SetEngine(engine *Engine) {
-	//if g.engine != engine {
-	g.engine = engine
-	for _, c := range g.components {
-		c.AddToEngine(engine)
+	if g.engine != engine {
+		g.engine = engine
+		for _, c := range g.components {
+			c.AddToEngine(engine)
+		}
+		for _, c := range g.children {
+			c.SetEngine(engine)
+		}
 	}
-	for _, c := range g.children {
-		c.SetEngine(engine)
-	}
-	//}
 }

@@ -65,25 +65,8 @@ func (g *Game) AddObject(object *GameObject) {
 	g.RootObject().AddChild(object)
 }
 
-func (g *Game) Input() {
-
-	if input.KeyDown(glfw.KeyUp) {
-		fmt.Println("up was just pressed")
-	}
-
-	if input.KeyUp(glfw.KeyUp) {
-		fmt.Println("up was just relased")
-	}
-
-	if input.ButtonDown(glfw.MouseButton1) {
-		fmt.Println("mouse 1 click")
-		fmt.Println(input.CursorPosition())
-	}
-
-	if input.ButtonUp(glfw.MouseButton1) {
-		fmt.Println("mouse 1 release")
-		fmt.Println(input.CursorPosition())
-	}
+func (g *Game) Input(elapsed time.Duration) {
+	g.RootObject().InputAll(elapsed)
 }
 
 func (g *Game) Update() {

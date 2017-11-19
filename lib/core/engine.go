@@ -10,7 +10,7 @@ import (
 	"github.com/stojg/graphics/lib/rendering"
 )
 
-const maxFps time.Duration = 5000
+const maxFps time.Duration = 300
 
 func NewEngine(width, height int, title string) (*Engine, error) {
 
@@ -90,7 +90,7 @@ func (m *Engine) run() {
 
 			input.Update()
 
-			m.game.Input()
+			m.game.Input(frameTime)
 			m.game.Update()
 
 			if frameCount >= time.Second {
