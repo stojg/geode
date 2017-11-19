@@ -37,7 +37,7 @@ func (t *Transform) Update() {
 }
 
 func (t *Transform) Rotate(axis mgl32.Vec3, angle float32) {
-	t.rot = mgl32.QuatRotate(angle, axis)
+	t.rot = t.rot.Mul(mgl32.QuatRotate(angle, axis))
 }
 
 func (t *Transform) LookAt(point mgl32.Vec3, up mgl32.Vec3) {
