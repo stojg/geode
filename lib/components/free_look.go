@@ -8,29 +8,30 @@ import (
 	"github.com/stojg/graphics/lib/input"
 )
 
+func NewFreelook(width, height float32) *FreeLook {
+	return &FreeLook{
+		centerPosition: mgl32.Vec2{width / 2, height / 2},
+	}
+}
+
 type FreeLook struct {
 	GameComponent
 
-	yaw, pitch, roll float32
-	locked           bool
-}
-
-func (c *FreeLook) Update(elapsed time.Duration) {
-
+	centerPosition mgl32.Vec2
+	locked         bool
 }
 
 func (c *FreeLook) Input(elapsed time.Duration) {
 
-	centerPosition := mgl32.Vec2{800 / 2, 600 / 2}
 	if input.ButtonDown(glfw.MouseButton1) {
 		c.locked = true
 		input.HideCursor()
-		input.SetCursorPosition(centerPosition[0], centerPosition[1])
+		c.centerCamera()
 	}
 
 	if input.KeyDown(glfw.KeySpace) {
 		c.locked = false
-		input.SetCursorPosition(centerPosition[0], centerPosition[1])
+		c.centerCamera()
 		input.ShowCursor()
 	}
 
@@ -38,21 +39,22 @@ func (c *FreeLook) Input(elapsed time.Duration) {
 		return
 	}
 
-	delta := mgl32.Vec2(input.CursorPosition()).Sub(centerPosition)
+	delta := mgl32.Vec2(input.CursorPosition()).Sub(c.centerPosition)
 	if delta.Len() == 0 {
 		return
 	}
-	input.SetCursorPosition(centerPosition[0], centerPosition[1])
+	c.centerCamera()
 
 	const sensitivity float32 = 0.5
 
 	yaw := mgl32.DegToRad(-delta[0]) * sensitivity
 	pitch := mgl32.DegToRad(delta[1]) * sensitivity
-	var roll float32 = 0.0
 
-	//temp := mgl32.QuatRotate(1, mgl32.Vec3{pitch, yaw, roll})
-	temp := mgl32.Quat{W: 10, V: mgl32.Vec3{pitch, yaw, roll}}.Normalize()
-	camQUat := temp.Mul(c.Transform().Rot()).Normalize()
-	c.Transform().SetRot(camQUat)
+	rotation := c.Transform().Rot().Mul(mgl32.QuatRotate(pitch, mgl32.Vec3{-1, 0, 0}))
+	rotation = mgl32.QuatRotate(yaw, mgl32.Vec3{0, 1, 0}).Mul(rotation)
+	c.Transform().SetRot(rotation)
+}
 
+func (c *FreeLook) centerCamera() {
+	input.SetCursorPosition(c.centerPosition[0], c.centerPosition[1])
 }

@@ -13,8 +13,8 @@ type Drawable interface {
 }
 
 func Main(log Logger) error {
-	width := 800
-	height := 600
+	width := 400
+	height := 300
 
 	engine, err := NewEngine(width, height, "graphics")
 	if err != nil {
@@ -25,7 +25,7 @@ func Main(log Logger) error {
 	cameraObject := NewGameObject()
 	cameraObject.AddComponent(components.NewCamera(projection))
 	cameraObject.AddComponent(&components.FreeMove{})
-	cameraObject.AddComponent(&components.FreeLook{})
+	cameraObject.AddComponent(components.NewFreelook(float32(width), float32(height)))
 	cameraObject.Transform().SetPos(mgl32.Vec3{0, 0, 2})
 	cameraObject.Transform().LookAt(mgl32.Vec3{0, 0, -2}, mgl32.Vec3{0, 1, 0})
 	engine.Game().AddObject(cameraObject)
