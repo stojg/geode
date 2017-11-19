@@ -1,12 +1,10 @@
 package core
 
 import (
-	"fmt"
+	"time"
 
-	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
-	"github.com/stojg/graphics/lib/input"
 	"github.com/stojg/graphics/lib/rendering"
 )
 
