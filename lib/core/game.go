@@ -69,8 +69,8 @@ func (g *Game) Input(elapsed time.Duration) {
 	g.RootObject().InputAll(elapsed)
 }
 
-func (g *Game) Update() {
-
+func (g *Game) Update(elapsed time.Duration) {
+	g.RootObject().UpdateAll(elapsed)
 }
 
 func (g *Game) Render(r *rendering.Engine) {

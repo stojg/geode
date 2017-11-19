@@ -35,6 +35,9 @@ type Engine struct {
 }
 
 func (e *Engine) Render(object GameObject) {
+	if e.mainCamera == nil {
+		panic("mainCamera not found, the game cannot render")
+	}
 	CheckForError("renderer.Engine.Render [start]")
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	object.RenderAll(e.shader, e)

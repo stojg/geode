@@ -1,6 +1,7 @@
 package core
 
 import (
+	//"fmt"
 	"time"
 
 	"github.com/stojg/graphics/lib/components"
@@ -32,10 +33,23 @@ func (g *GameObject) AddComponent(component components.Component) {
 	g.components = append(g.components, component)
 }
 
+func (g *GameObject) Input(elapsed time.Duration) {
+	for _, c := range g.components {
+		c.Input(elapsed)
+	}
+}
+
 func (g *GameObject) InputAll(elapsed time.Duration) {
 	g.Input(elapsed)
 	for _, o := range g.children {
 		o.InputAll(elapsed)
+	}
+}
+
+func (g *GameObject) Update(elapsed time.Duration) {
+	g.Transform().Update()
+	for _, c := range g.components {
+		c.Update(elapsed)
 	}
 }
 
@@ -46,28 +60,16 @@ func (g *GameObject) UpdateAll(elapsed time.Duration) {
 	}
 }
 
+func (g *GameObject) Render(shader *rendering.Shader, renderingEngine components.RenderingEngine) {
+	for _, c := range g.components {
+		c.Render(shader, renderingEngine)
+	}
+}
+
 func (g *GameObject) RenderAll(shader *rendering.Shader, renderingEngine components.RenderingEngine) {
 	g.Render(shader, renderingEngine)
 	for _, o := range g.children {
 		o.RenderAll(shader, renderingEngine)
-	}
-}
-
-func (g *GameObject) Input(elapsed time.Duration) {
-	for _, c := range g.components {
-		c.Input(elapsed)
-	}
-}
-
-func (g *GameObject) Update(elapsed time.Duration) {
-	for _, c := range g.components {
-		c.Update(elapsed)
-	}
-}
-
-func (g *GameObject) Render(shader *rendering.Shader, renderingEngine components.RenderingEngine) {
-	for _, c := range g.components {
-		c.Render(shader, renderingEngine)
 	}
 }
 

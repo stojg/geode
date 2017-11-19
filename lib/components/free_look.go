@@ -39,20 +39,20 @@ func (c *FreeLook) Input(elapsed time.Duration) {
 	}
 
 	delta := mgl32.Vec2(input.CursorPosition()).Sub(centerPosition)
-
-	if delta[0] == 0 && delta[1] == 0 {
+	if delta.Len() == 0 {
 		return
 	}
+	input.SetCursorPosition(centerPosition[0], centerPosition[1])
 
-	const sensitivity float32 = 0.01
-	c.yaw -= delta[0] * sensitivity
-	c.pitch += delta[1] * sensitivity
+	const sensitivity float32 = 0.5
 
-	kQuat := mgl32.Quat{W: 1, V: mgl32.Vec3{c.pitch, c.yaw, c.roll}}
-	camQUat := kQuat.Mul(c.Transform().Rot())
-	camQUat.Normalize()
+	yaw := mgl32.DegToRad(-delta[0]) * sensitivity
+	pitch := mgl32.DegToRad(delta[1]) * sensitivity
+	var roll float32 = 0.0
+
+	//temp := mgl32.QuatRotate(1, mgl32.Vec3{pitch, yaw, roll})
+	temp := mgl32.Quat{W: 10, V: mgl32.Vec3{pitch, yaw, roll}}.Normalize()
+	camQUat := temp.Mul(c.Transform().Rot()).Normalize()
 	c.Transform().SetRot(camQUat)
 
-	c.pitch, c.yaw, c.roll = 0, 0, 0
-	input.SetCursorPosition(centerPosition[0], centerPosition[1])
 }

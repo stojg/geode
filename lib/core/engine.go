@@ -91,7 +91,7 @@ func (m *Engine) run() {
 			input.Update()
 
 			m.game.Input(frameTime)
-			m.game.Update()
+			m.game.Update(frameTime)
 
 			if frameCount >= time.Second {
 				fmt.Printf("%s, %d fps\n", time.Second/time.Duration(frames), frames)

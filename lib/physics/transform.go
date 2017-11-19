@@ -2,7 +2,11 @@ package physics
 
 // https://github.com/BennyQBD/3DGameEngine/blob/225fa8baf6637756ba03ccbc0444bf7751d87dbb/src/com/base/engine/core/Transform.java
 
-import "github.com/go-gl/mathgl/mgl32"
+import (
+	"fmt"
+
+	"github.com/go-gl/mathgl/mgl32"
+)
 
 func NewTransform() *Transform {
 	return &Transform{
@@ -25,10 +29,14 @@ type Transform struct {
 	oldPos   mgl32.Vec3
 	oldRot   mgl32.Quat
 	oldScale mgl32.Vec3
+
+	hasUpdated bool
 }
 
 func (t *Transform) Update() {
-	// @todo check if this is the first call to Update
+	if !t.hasUpdated {
+		t.hasUpdated = true
+	}
 	t.oldPos = t.pos
 	t.oldRot = t.rot
 	t.oldScale = t.scale
@@ -47,19 +55,23 @@ func (t *Transform) LookAtRotation(point mgl32.Vec3, up mgl32.Vec3) mgl32.Quat {
 }
 
 func (t *Transform) HasChanged() bool {
+	if !t.hasUpdated {
+		fmt.Println("changed")
+		return true
+	}
 	if t.parent != nil && t.parent.HasChanged() {
 		return true
 	}
 
-	if t.pos.ApproxEqual(t.oldPos) {
+	if !t.pos.ApproxEqual(t.oldPos) {
 		return true
 	}
 
-	if t.rot.ApproxEqual(t.rot) {
+	if !t.rot.ApproxEqual(t.rot) {
 		return true
 	}
 
-	if t.scale.ApproxEqual(t.scale) {
+	if !t.scale.ApproxEqual(t.scale) {
 		return true
 	}
 	return false
