@@ -6,7 +6,6 @@ import (
 
 	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/physics"
-	"github.com/stojg/graphics/lib/rendering"
 )
 
 func NewGameObject() *GameObject {
@@ -60,13 +59,13 @@ func (g *GameObject) UpdateAll(elapsed time.Duration) {
 	}
 }
 
-func (g *GameObject) Render(shader *rendering.Shader, renderingEngine components.RenderingEngine) {
+func (g *GameObject) Render(shader components.Shader, renderingEngine components.RenderingEngine) {
 	for _, c := range g.components {
 		c.Render(shader, renderingEngine)
 	}
 }
 
-func (g *GameObject) RenderAll(shader *rendering.Shader, renderingEngine components.RenderingEngine) {
+func (g *GameObject) RenderAll(shader components.Shader, renderingEngine components.RenderingEngine) {
 	g.Render(shader, renderingEngine)
 	for _, o := range g.children {
 		o.RenderAll(shader, renderingEngine)

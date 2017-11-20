@@ -3,11 +3,9 @@ package components
 import (
 	"time"
 
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/physics"
 )
-
-type UniformUpdater interface {
-}
 
 type Drawable interface {
 	Draw()
@@ -22,9 +20,22 @@ type Transformable interface {
 	Transform() *physics.Transform
 }
 
+type Light interface {
+	Component
+	SetShader(shader Shader)
+	Shader() Shader
+	Color() mgl32.Vec3
+	SetColor(color mgl32.Vec3)
+	Intensity() float32
+	SetIntensity(intensity float32)
+	Position() mgl32.Vec3
+}
+
 type RenderingEngine interface {
+	AddLight(light Light)
 	AddCamera(camera *Camera)
 	GetMainCamera() *Camera
+	GetActiveLight() Light
 }
 
 type Engine interface {

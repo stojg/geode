@@ -103,6 +103,7 @@ func (s *Shader) SetUniformLocation(glType, name string) {
 func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Material, engine components.RenderingEngine) {
 	worldMatrix := transform.Transformation()
 	mvpMatrix := engine.GetMainCamera().GetViewProjection().Mul4(worldMatrix)
+	model := transform.Transformation()
 
 	for i, name := range s.resource.uniformNames {
 
@@ -115,9 +116,25 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 		switch name {
 		case "MVP":
 			s.SetUniformMatrix4fv("MVP", mvpMatrix)
+		case "model":
+			s.SetUniformMatrix4fv("model", model)
+		case "lightPos":
+			s.SetUniform3f(name, engine.GetActiveLight().Position())
+		case "lightColor":
+			s.SetUniform3f(name, engine.GetActiveLight().Color())
+		case "viewPos":
+			s.SetUniform3f(name, engine.GetMainCamera().Transform().Pos())
 		default:
 			fmt.Printf("Shader.UpdateUniforms: unknow uniform %s\n", name)
 		}
+	}
+}
+func (s *Shader) SetUniform3f(uniformName string, v mgl32.Vec3) {
+	val, ok := s.resource.uniforms[uniformName]
+	if ok {
+		gl.Uniform3fv(val, 1, &v[0])
+	} else {
+		fmt.Println("Couldn't find uniform:", uniformName)
 	}
 }
 
