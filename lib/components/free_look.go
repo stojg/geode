@@ -23,13 +23,13 @@ type FreeLook struct {
 
 func (c *FreeLook) Input(elapsed time.Duration) {
 
-	if input.ButtonDown(glfw.MouseButton1) {
+	if input.ButtonDown(glfw.MouseButton1) && !c.locked {
 		c.locked = true
 		input.HideCursor()
 		c.centerCamera()
 	}
 
-	if input.KeyDown(glfw.KeySpace) {
+	if input.KeyDown(glfw.KeySpace) && c.locked {
 		c.locked = false
 		c.centerCamera()
 		input.ShowCursor()

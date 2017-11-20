@@ -34,15 +34,16 @@ func NewEngine(width, height int) *Engine {
 }
 
 type Engine struct {
+	mainCamera  *components.Camera
+	lights      []components.Light
+	activeLight components.Light
+
+	screenQuad *ScreenQuad
+
 	ambientShader *Shader
-	mainCamera    *components.Camera
-	lights        []components.Light
-	activeLight   components.Light
 
 	hdrBuffer *framebuffer.FBO
-
-	hdrShader  *Shader
-	screenQuad *ScreenQuad
+	hdrShader *Shader
 }
 
 func (e *Engine) Render(object GameObject) {

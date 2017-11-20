@@ -36,13 +36,15 @@ func Main(log Logger) error {
 	LoadModel(floor, "res/meshes/cube/model.obj", whiteMaterial)
 	engine.Game().AddObject(floor)
 
+	lightShader := rendering.NewShader("forward_point")
+
 	{
 		light := NewGameObject()
 		light.Transform().SetPos(mgl32.Vec3{-3, 3, 2})
 		light.Transform().SetScale(mgl32.Vec3{0.1, 0.1, 0.1})
 		light.AddComponent(components.NewRotator(mgl32.Vec3{1, 1, 1}, 90))
 		dirLight := components.NewBaseLight(mgl32.Vec3{0.4 * 10, 0.9 * 10, 1 * 10}, 1)
-		dirLight.SetShader(rendering.NewShader("forward_point"))
+		dirLight.SetShader(lightShader)
 		light.AddComponent(dirLight)
 		LoadModel(light, "res/meshes/cube/model.obj", whiteMaterial)
 		engine.Game().AddObject(light)
@@ -55,7 +57,7 @@ func Main(log Logger) error {
 		light.AddComponent(components.NewRotator(mgl32.Vec3{1, 1, 1}, 90))
 
 		dirLight := components.NewBaseLight(mgl32.Vec3{1 * 10, 0.9 * 10, 0.4 * 10}, 1)
-		dirLight.SetShader(rendering.NewShader("forward_point"))
+		dirLight.SetShader(lightShader)
 		light.AddComponent(dirLight)
 		LoadModel(light, "res/meshes/cube/model.obj", whiteMaterial)
 		engine.Game().AddObject(light)
