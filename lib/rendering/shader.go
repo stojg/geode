@@ -101,8 +101,8 @@ func (s *Shader) SetUniformLocation(glType, name string) {
 }
 
 func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Material, engine components.RenderingEngine) {
-	worldMatrix := transform.Transformation()
-	mvpMatrix := engine.GetMainCamera().GetViewProjection().Mul4(worldMatrix)
+	projection := engine.GetMainCamera().GetProjection()
+	view := engine.GetMainCamera().GetView()
 	model := transform.Transformation()
 
 	for i, name := range s.resource.uniformNames {
@@ -114,10 +114,12 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 		}
 
 		switch name {
-		case "MVP":
-			s.SetUniformMatrix4fv("MVP", mvpMatrix)
+		case "projection":
+			s.SetUniformMatrix4fv("projection", projection)
 		case "model":
 			s.SetUniformMatrix4fv("model", model)
+		case "view":
+			s.SetUniformMatrix4fv("view", view)
 		case "lightPos":
 			s.SetUniform3f(name, engine.GetActiveLight().Position())
 		case "lightColor":

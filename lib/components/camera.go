@@ -26,3 +26,15 @@ func (c *Camera) GetViewProjection() mgl32.Mat4 {
 	cameraTranslation := mgl32.Translate3D(cameraPos[0], cameraPos[1], cameraPos[2])
 	return c.projection.Mul4(cameraRotation.Mul4(cameraTranslation))
 }
+
+func (c *Camera) GetProjection() mgl32.Mat4 {
+	return c.projection
+}
+
+func (c *Camera) GetView() mgl32.Mat4 {
+	cameraRotation := c.Transform().TransformedRot().Conjugate().Mat4()
+	cameraPos := c.Transform().TransformedPos().Mul(-1)
+	cameraTranslation := mgl32.Translate3D(cameraPos[0], cameraPos[1], cameraPos[2])
+	return cameraRotation.Mul4(cameraTranslation)
+
+}
