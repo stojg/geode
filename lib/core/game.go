@@ -87,9 +87,10 @@ func LoadModel(g *GameObject, obj string, material *rendering.Material) error {
 		fmt.Printf("Model loading failed: %v", err)
 		return err
 	}
-	for _, data := range objData {
+	for i, data := range objData {
 		mesh := rendering.NewMesh()
 		mesh.SetVertices(rendering.ConvertToVertices(data))
+		fmt.Printf("LoadModel: %s.%d has %d vertices\n", obj, i, mesh.NumVertices())
 		g.AddComponent(components.NewMeshRenderer(mesh, material))
 	}
 	return nil

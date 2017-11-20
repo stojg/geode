@@ -23,5 +23,5 @@ type SineMove struct {
 func (s *SineMove) Update(elapsed time.Duration) {
 	s.totalElapsed += elapsed
 	amount := float32(s.f(s.totalElapsed.Seconds())) / 100
-	s.Transform().Move(s.axis.Mul(amount))
+	s.Transform().MoveBy(s.axis.Mul(amount))
 }

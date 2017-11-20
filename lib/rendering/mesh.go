@@ -18,6 +18,10 @@ type Mesh struct {
 	numVertices int32
 }
 
+func (m *Mesh) NumVertices() int32 {
+	return m.numVertices
+}
+
 func (m *Mesh) SetVertices(vertices []Vertex) {
 
 	m.numVertices = int32(len(vertices))
