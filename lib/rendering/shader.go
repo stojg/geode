@@ -40,6 +40,7 @@ func NewShader(fileName string) *Shader {
 	s.CompileShader()
 
 	s.AddAllUniforms(vertexShaderText)
+	s.AddAllUniforms(fragmentShaderText)
 
 	loadedShaders[fileName] = s.resource
 
@@ -99,11 +100,18 @@ func (s *Shader) SetUniformLocation(glType, name string) {
 	s.resource.uniforms[name] = t
 }
 
-func (s *Shader) UpdateUniforms(transform *physics.Transform, engine components.RenderingEngine) {
+func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Material, engine components.RenderingEngine) {
 	worldMatrix := transform.Transformation()
 	mvpMatrix := engine.GetMainCamera().GetViewProjection().Mul4(worldMatrix)
 
-	for _, name := range s.resource.uniformNames {
+	for i, name := range s.resource.uniformNames {
+
+		uniformType := s.resource.uniformTypes[i]
+		if uniformType == "sampler2D" {
+			mat.Texture(name).Bind(0)
+			continue
+		}
+
 		switch name {
 		case "MVP":
 			s.SetUniformMatrix4fv("MVP", mvpMatrix)

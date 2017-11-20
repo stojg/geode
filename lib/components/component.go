@@ -15,7 +15,7 @@ type Drawable interface {
 
 type Shader interface {
 	Bind()
-	UpdateUniforms(*physics.Transform, RenderingEngine)
+	UpdateUniforms(*physics.Transform, Material, RenderingEngine)
 }
 
 type Transformable interface {

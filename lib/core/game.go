@@ -31,13 +31,15 @@ func Main(log Logger) error {
 
 	mesh := rendering.NewMesh()
 	vertices := []rendering.Vertex{
-		{Pos: [3]float32{-0.5, -0.5, 0.0}},
-		{Pos: [3]float32{0.5, -0.5, 0.0}},
-		{Pos: [3]float32{0, 0.5, 0.0}},
+		{Pos: [3]float32{-0.5, -0.5, 0.0}, TexCoords: [2]float32{0, 0}},
+		{Pos: [3]float32{0.5, -0.5, 0.0}, TexCoords: [2]float32{1, 0}},
+		{Pos: [3]float32{0, 0.5, 0.0}, TexCoords: [2]float32{0.5, 1}},
 	}
 	mesh.AddVertices(vertices)
+	material := rendering.NewMaterial()
+	material.AddTexture("diffuse", rendering.NewTexture("res/textures/test.png"))
 
-	meshRenderer := components.NewMeshRenderer(mesh)
+	meshRenderer := components.NewMeshRenderer(mesh, material)
 	triangleObject := NewGameObject()
 	triangleObject.AddComponent(meshRenderer)
 	triangleObject.AddComponent(&components.Rotator{})
