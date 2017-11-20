@@ -2,10 +2,12 @@ package core
 
 import (
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
+	"github.com/stojg/graphics/lib/lights"
 	"github.com/stojg/graphics/lib/rendering"
 	"github.com/stojg/graphics/lib/rendering/loader"
 )
@@ -36,36 +38,42 @@ func Main(log Logger) error {
 	LoadModel(floor, "res/meshes/cube/model.obj", whiteMaterial)
 	engine.Game().AddObject(floor)
 
-	lightShader := rendering.NewShader("forward_point")
-
 	{
-		light := NewGameObject()
-		light.Transform().SetPos(mgl32.Vec3{-3, 3, 2})
-		light.Transform().SetScale(mgl32.Vec3{0.1, 0.1, 0.1})
-		light.AddComponent(components.NewRotator(mgl32.Vec3{1, 1, 1}, 90))
-		dirLight := components.NewBaseLight(mgl32.Vec3{0.4 * 10, 0.9 * 10, 1 * 10}, 1)
-		dirLight.SetShader(lightShader)
-		light.AddComponent(dirLight)
-		LoadModel(light, "res/meshes/cube/model.obj", whiteMaterial)
-		engine.Game().AddObject(light)
+		dirLight := NewGameObject()
+		dirLight.Transform().SetPos(mgl32.Vec3{-3, 3, 2})
+		dirLight.AddComponent(lights.NewDirectional(0.99, 0.98, 0.7, 1))
+		engine.Game().AddObject(dirLight)
 	}
 
 	{
-		light := NewGameObject()
-		light.Transform().SetPos(mgl32.Vec3{3, 3, 2})
-		light.Transform().SetScale(mgl32.Vec3{0.1, 0.1, 0.1})
-		light.AddComponent(components.NewRotator(mgl32.Vec3{1, 1, 1}, 90))
+		pointLight := NewGameObject()
+		pointLight.Transform().SetPos(mgl32.Vec3{1.5, 3, 2})
+		pointLight.Transform().SetScale(mgl32.Vec3{0.1, 0.1, 0.1})
+		pointLight.AddComponent(components.NewRotator(mgl32.Vec3{1, 1, 1}, 90))
+		pointLight.AddComponent(components.NewTimeMove(mgl32.Vec3{-1, 0, 0}, math.Sin))
+		pointLight.AddComponent(components.NewTimeMove(mgl32.Vec3{0, 0, -1}, math.Cos))
+		pointLight.AddComponent(components.NewTimeMove(mgl32.Vec3{0, 0.5, 0}, math.Cos))
+		pointLight.AddComponent(lights.NewPoint(0.4, 0.9, 1, 5))
+		LoadModel(pointLight, "res/meshes/cube/model.obj", whiteMaterial)
+		engine.Game().AddObject(pointLight)
+	}
 
-		dirLight := components.NewBaseLight(mgl32.Vec3{1 * 10, 0.9 * 10, 0.4 * 10}, 1)
-		dirLight.SetShader(lightShader)
-		light.AddComponent(dirLight)
-		LoadModel(light, "res/meshes/cube/model.obj", whiteMaterial)
-		engine.Game().AddObject(light)
+	{
+		pointLight := NewGameObject()
+		pointLight.Transform().SetPos(mgl32.Vec3{-1.5, 3, 2})
+		pointLight.Transform().SetScale(mgl32.Vec3{0.1, 0.1, 0.1})
+		pointLight.AddComponent(components.NewRotator(mgl32.Vec3{1, 1, 1}, 90))
+		pointLight.AddComponent(components.NewTimeMove(mgl32.Vec3{1, 0, 0}, math.Sin))
+		pointLight.AddComponent(components.NewTimeMove(mgl32.Vec3{0, 0, 1}, math.Cos))
+		pointLight.AddComponent(components.NewTimeMove(mgl32.Vec3{0, -0.5, 0}, math.Cos))
+		pointLight.AddComponent(lights.NewPoint(0.4, 1, 0.4, 5))
+		LoadModel(pointLight, "res/meshes/cube/model.obj", whiteMaterial)
+		engine.Game().AddObject(pointLight)
 	}
 
 	bot := NewGameObject()
 	bot.Transform().SetPos(mgl32.Vec3{0, 0, 0})
-	bot.AddComponent(components.NewRotator(mgl32.Vec3{0, 1, 0}, 23))
+	bot.AddComponent(components.NewRotator(mgl32.Vec3{0, -1, 0}, 23))
 	LoadModel(bot, "res/meshes/sphere_bot/model.obj", whiteMaterial)
 	engine.Game().AddObject(bot)
 

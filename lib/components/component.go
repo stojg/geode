@@ -26,8 +26,6 @@ type Light interface {
 	Shader() Shader
 	Color() mgl32.Vec3
 	SetColor(color mgl32.Vec3)
-	Intensity() float32
-	SetIntensity(intensity float32)
 	Position() mgl32.Vec3
 }
 
@@ -56,6 +54,10 @@ type GameComponent struct {
 
 func (m *GameComponent) SetParent(parent Transformable) {
 	m.parent = parent
+}
+
+func (m *GameComponent) Parent() Transformable {
+	return m.parent
 }
 
 func (m *GameComponent) Transform() *physics.Transform {

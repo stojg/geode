@@ -46,6 +46,10 @@ func (t *Transform) Rotate(axis mgl32.Vec3, angle float32) {
 	t.rot = t.rot.Mul(mgl32.QuatRotate(angle, axis)).Normalize()
 }
 
+func (t *Transform) Move(add mgl32.Vec3) {
+	t.pos = t.pos.Add(add)
+}
+
 func (t *Transform) LookAt(point mgl32.Vec3, up mgl32.Vec3) {
 	t.rot = t.LookAtRotation(point, up)
 }

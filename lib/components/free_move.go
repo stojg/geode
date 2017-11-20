@@ -30,5 +30,5 @@ func (c *FreeMove) Input(elapsed time.Duration) {
 }
 
 func (c *FreeMove) Move(dir mgl32.Vec3, amount float32) {
-	c.Transform().SetPos(c.Transform().Pos().Add(dir.Mul(amount)))
+	c.Transform().Move(dir.Mul(amount))
 }
