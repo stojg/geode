@@ -19,7 +19,6 @@ func NewShader(fileName string) *Shader {
 
 	s := &Shader{
 		filename: fileName,
-		uniforms: make(map[string]int32),
 	}
 
 	if oldResource, ok := loadedShaders[fileName]; ok {
@@ -50,7 +49,6 @@ func NewShader(fileName string) *Shader {
 type Shader struct {
 	filename string
 	resource *ShaderResource
-	uniforms map[string]int32
 }
 
 func (s *Shader) Bind() {
@@ -84,6 +82,8 @@ func (s *Shader) AddAllUniforms(shaderText string) {
 		t := r.FindAllStringSubmatch(line, -1)
 		for _, i := range t {
 			if len(i) == 3 {
+				s.resource.AddUniformName(i[2])
+				s.resource.AdduniformType(i[1])
 				s.SetUniformLocation(i[1], i[2])
 			}
 		}
@@ -91,21 +91,30 @@ func (s *Shader) AddAllUniforms(shaderText string) {
 }
 
 func (s *Shader) SetUniformLocation(glType, name string) {
+	// @todo handle structs
 	t := gl.GetUniformLocation(s.resource.Program, gl.Str(name+"\x00"))
 	if t < 0 {
 		fmt.Printf("uniform '%s' seems to not be used in script\n", name)
 	}
-	s.uniforms[name] = t
+	s.resource.uniforms[name] = t
 }
 
 func (s *Shader) UpdateUniforms(transform *physics.Transform, engine components.RenderingEngine) {
 	worldMatrix := transform.Transformation()
 	mvpMatrix := engine.GetMainCamera().GetViewProjection().Mul4(worldMatrix)
-	s.SetUniformMatrix4fv("MVP", mvpMatrix)
+
+	for _, name := range s.resource.uniformNames {
+		switch name {
+		case "MVP":
+			s.SetUniformMatrix4fv("MVP", mvpMatrix)
+		default:
+			fmt.Printf("Shader.UpdateUniforms: unknow uniform %s\n", name)
+		}
+	}
 }
 
 func (s *Shader) SetUniformMatrix4fv(uniformName string, u mgl32.Mat4) {
-	val, ok := s.uniforms[uniformName]
+	val, ok := s.resource.uniforms[uniformName]
 	if ok {
 		gl.UniformMatrix4fv(val, 1, false, &u[0])
 	} else {
