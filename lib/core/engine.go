@@ -24,7 +24,7 @@ func NewEngine(width, height int, title string) (*Engine, error) {
 	engine := &Engine{
 		game:            NewGame(),
 		window:          window,
-		renderingEngine: rendering.NewEngine(),
+		renderingEngine: rendering.NewEngine(width, height),
 	}
 	engine.game.SetEngine(engine)
 
