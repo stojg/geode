@@ -50,8 +50,8 @@ func (c *FreeLook) Input(elapsed time.Duration) {
 	yaw := mgl32.DegToRad(-delta[0]) * sensitivity
 	pitch := mgl32.DegToRad(delta[1]) * sensitivity
 
-	rotation := c.Transform().Rot().Mul(mgl32.QuatRotate(pitch, mgl32.Vec3{-1, 0, 0}))
-	rotation = mgl32.QuatRotate(yaw, mgl32.Vec3{0, 1, 0}).Mul(rotation)
+	rotation := c.Transform().Rot().Mul(mgl32.QuatRotate(pitch, left()))
+	rotation = mgl32.QuatRotate(yaw, up()).Mul(rotation)
 	c.Transform().SetRot(rotation)
 }
 

@@ -17,15 +17,15 @@ func (c *FreeMove) Input(elapsed time.Duration) {
 	amount := float32(elapsed.Seconds()) * speed
 
 	if input.Key(glfw.KeyW) {
-		c.Move(c.Transform().Rot().Rotate(mgl32.Vec3{0, 0, -1}), amount)
+		c.Move(c.Transform().Rot().Rotate(back()), amount)
 	} else if input.Key(glfw.KeyS) {
-		c.Move(c.Transform().Rot().Rotate(mgl32.Vec3{0, 0, 1}), amount)
+		c.Move(c.Transform().Rot().Rotate(forward()), amount)
 	}
 
 	if input.Key(glfw.KeyA) {
-		c.Move(c.Transform().Rot().Rotate(mgl32.Vec3{-1, 0, 0}), amount)
+		c.Move(c.Transform().Rot().Rotate(left()), amount)
 	} else if input.Key(glfw.KeyD) {
-		c.Move(c.Transform().Rot().Rotate(mgl32.Vec3{1, 0, 0}), amount)
+		c.Move(c.Transform().Rot().Rotate(right()), amount)
 	}
 }
 
