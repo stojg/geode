@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-func Load(filename string) ([]float32, error) {
+func Load(filename string) ([][]float32, error) {
 	f, err := os.Open(filename)
 	if err != nil {
 		return nil, err
@@ -22,6 +22,7 @@ func Load(filename string) ([]float32, error) {
 		return nil, fmt.Errorf("error in '%s' at line: %d", filename, num)
 	}
 
+	var result [][]float32
 	for _, object := range obj.Objects {
 		var data []float32
 		// convert the face data into actual data ready for openGL loading
@@ -35,9 +36,9 @@ func Load(filename string) ([]float32, error) {
 				data = add(data, vert.Declarations[i])
 			}
 		}
-		return data, nil
+		result = append(result, data)
 	}
-	return nil, nil
+	return result, nil
 }
 
 func add(data []float32, in *declaration) []float32 {

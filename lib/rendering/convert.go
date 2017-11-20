@@ -2,7 +2,7 @@ package rendering
 
 import "math"
 
-func convertToVertices(meshdata []float32) []Vertex {
+func ConvertToVertices(meshdata []float32) []Vertex {
 	const stride = 8
 
 	if len(meshdata)%stride != 0 {

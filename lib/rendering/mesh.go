@@ -1,24 +1,15 @@
 package rendering
 
-import (
-	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/stojg/graphics/lib/rendering/loader"
-)
+import "github.com/go-gl/gl/v4.1-core/gl"
 
-func NewMesh(name string) (*Mesh, error) {
+func NewMesh() *Mesh {
 	m := &Mesh{}
-
-	data, err := loader.Load(name)
-	if err != nil {
-		return nil, err
-	}
 
 	// Create buffers/arrays
 	gl.GenBuffers(1, &m.vbo)
 	gl.GenVertexArrays(1, &m.vao)
 
-	m.SetVertices(convertToVertices(data))
-	return m, nil
+	return m
 }
 
 type Mesh struct {
