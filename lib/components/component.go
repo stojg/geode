@@ -44,6 +44,7 @@ type RenderingEngine interface {
 	AddCamera(camera *Camera)
 	GetMainCamera() *Camera
 	GetActiveLight() Light
+	GetSamplerSlot(string) uint32
 }
 
 type Engine interface {

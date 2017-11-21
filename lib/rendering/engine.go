@@ -1,6 +1,8 @@
 package rendering
 
 import (
+	"fmt"
+
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/rendering/framebuffer"
@@ -23,7 +25,13 @@ func NewEngine(width, height int) *Engine {
 	gl.Enable(gl.MULTISAMPLE)
 	gl.Disable(gl.FRAMEBUFFER_SRGB)
 
+	samplerMap := make(map[string]uint32)
+	samplerMap["diffuse"] = 0
+	samplerMap["normal"] = 1
+
 	return &Engine{
+		samplerMap: samplerMap,
+
 		screenQuad: NewScreenQuad(),
 
 		ambientShader: NewShader("forward_ambient"),
@@ -37,6 +45,8 @@ type Engine struct {
 	mainCamera  *components.Camera
 	lights      []components.Light
 	activeLight components.Light
+
+	samplerMap map[string]uint32
 
 	screenQuad *ScreenQuad
 
@@ -97,4 +107,12 @@ func (e *Engine) AddCamera(c *components.Camera) {
 
 func (e *Engine) GetMainCamera() *components.Camera {
 	return e.mainCamera
+}
+
+func (e *Engine) GetSamplerSlot(samplerName string) uint32 {
+	slot, exists := e.samplerMap[samplerName]
+	if !exists {
+		fmt.Printf("rendering.Engine tried finding texture slot for %s, failed\n", samplerName)
+	}
+	return slot
 }

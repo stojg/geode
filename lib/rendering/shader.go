@@ -61,48 +61,50 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 
 		uniformType := s.resource.uniformTypes[i]
 		if uniformType == "sampler2D" {
-			mat.Texture(name).Bind(0)
+			samplerSlot := engine.GetSamplerSlot(name)
+			mat.Texture(name).Bind(samplerSlot)
+			s.setUniformi(name, int32(samplerSlot))
 			continue
 		}
 
 		switch name {
 		case "projection":
-			s.SetUniformMatrix4fv("projection", projection)
+			s.setUniformMatrix4fv("projection", projection)
 		case "model":
-			s.SetUniformMatrix4fv("model", model)
+			s.setUniformMatrix4fv("model", model)
 		case "view":
-			s.SetUniformMatrix4fv("view", view)
+			s.setUniformMatrix4fv("view", view)
 		case "pointLight":
-			s.SetUniformPointLight(name, engine.GetActiveLight().(components.PointLight))
+			s.setUniformPointLight(name, engine.GetActiveLight().(components.PointLight))
 		case "spotLight":
-			s.SetUniformSpotLight(name, engine.GetActiveLight().(components.Spotlight))
+			s.setUniformSpotLight(name, engine.GetActiveLight().(components.Spotlight))
 		case "lightPos":
-			s.SetUniform3f(name, engine.GetActiveLight().Position())
+			s.setUniform3f(name, engine.GetActiveLight().Position())
 		case "lightColor":
-			s.SetUniform3f(name, engine.GetActiveLight().Color())
+			s.setUniform3f(name, engine.GetActiveLight().Color())
 		case "viewPos":
-			s.SetUniform3f(name, engine.GetMainCamera().Transform().Pos())
+			s.setUniform3f(name, engine.GetMainCamera().Transform().Pos())
 		default:
 			fmt.Printf("Shader.UpdateUniforms: unknow uniform %s\n", name)
 		}
 	}
 }
 
-func (s *Shader) SetUniform3f(uniformName string, v mgl32.Vec3) {
+func (s *Shader) setUniform3f(uniformName string, v mgl32.Vec3) {
 	val, ok := s.resource.uniforms[uniformName]
 	if ok {
 		gl.Uniform3fv(val, 1, &v[0])
 	} else {
-		fmt.Println("Couldn't find uniform:", uniformName)
+		fmt.Println("Couldn't set uniform:", uniformName)
 	}
 }
 
-func (s *Shader) SetUniformMatrix4fv(uniformName string, u mgl32.Mat4) {
+func (s *Shader) setUniformMatrix4fv(uniformName string, u mgl32.Mat4) {
 	val, ok := s.resource.uniforms[uniformName]
 	if ok {
 		gl.UniformMatrix4fv(val, 1, false, &u[0])
 	} else {
-		fmt.Println("Couldn't find uniform:", uniformName)
+		fmt.Println("Couldn't set uniform:", uniformName)
 	}
 }
 
@@ -111,14 +113,24 @@ func (s *Shader) SetUniformf(uniformName string, u float32) {
 	if ok {
 		gl.Uniform1f(val, u)
 	} else {
-		fmt.Println("Couldn't find uniform:", uniformName)
+		fmt.Println("Couldn't set uniform:", uniformName)
 	}
 }
 
-func (s *Shader) SetUniformPointLight(uniformName string, pointLight components.PointLight) {
+func (s *Shader) setUniformi(uniformName string, i int32) {
+
+	val, ok := s.resource.uniforms[uniformName]
+	if ok {
+		gl.Uniform1i(val, i)
+	} else {
+		fmt.Println("Couldn't set uniform:", uniformName)
+	}
+}
+
+func (s *Shader) setUniformPointLight(uniformName string, pointLight components.PointLight) {
 
 	//SetUniformBaseLight(uniformName + ".base", pointLight);
-	s.SetUniform3f(uniformName+".color", pointLight.Color())
+	s.setUniform3f(uniformName+".color", pointLight.Color())
 	s.SetUniformf(uniformName+".atten.constant", pointLight.Constant())
 	s.SetUniformf(uniformName+".atten.linear", pointLight.Linear())
 	s.SetUniformf(uniformName+".atten.exponent", pointLight.Exponent())
@@ -126,9 +138,9 @@ func (s *Shader) SetUniformPointLight(uniformName string, pointLight components.
 	//SetUniformf(uniformName + ".range", pointLight.GetRange());
 }
 
-func (s *Shader) SetUniformSpotLight(uniformName string, spotLight components.Spotlight) {
-	s.SetUniformPointLight(uniformName+".pointLight", spotLight)
-	s.SetUniform3f(uniformName+".direction", spotLight.Direction())
+func (s *Shader) setUniformSpotLight(uniformName string, spotLight components.Spotlight) {
+	s.setUniformPointLight(uniformName+".pointLight", spotLight)
+	s.setUniform3f(uniformName+".direction", spotLight.Direction())
 	s.SetUniformf(uniformName+".cutoff", spotLight.Cutoff())
 }
 
