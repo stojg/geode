@@ -74,6 +74,8 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 			s.SetUniformMatrix4fv("view", view)
 		case "pointLight":
 			s.SetUniformPointLight(name, engine.GetActiveLight().(components.PointLight))
+		case "spotLight":
+			s.SetUniformSpotLight(name, engine.GetActiveLight().(components.Spotlight))
 		case "lightPos":
 			s.SetUniform3f(name, engine.GetActiveLight().Position())
 		case "lightColor":
@@ -124,10 +126,10 @@ func (s *Shader) SetUniformPointLight(uniformName string, pointLight components.
 	//SetUniformf(uniformName + ".range", pointLight.GetRange());
 }
 
-func (s *Shader) SetUniformSpotLight(uniformName string, spotLight interface{}) {
-	//SetUniformPointLight(uniformName + ".pointLight", spotLight);
-	//SetUniform(uniformName + ".direction", spotLight.GetDirection());
-	//SetUniformf(uniformName + ".cutoff", spotLight.GetCutoff());
+func (s *Shader) SetUniformSpotLight(uniformName string, spotLight components.Spotlight) {
+	s.SetUniformPointLight(uniformName+".pointLight", spotLight)
+	s.SetUniform3f(uniformName+".direction", spotLight.Direction())
+	s.SetUniformf(uniformName+".cutoff", spotLight.Cutoff())
 }
 
 func (s *Shader) Bind() {
