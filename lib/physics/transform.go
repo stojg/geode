@@ -55,7 +55,28 @@ func (t *Transform) LookAt(point mgl32.Vec3, up mgl32.Vec3) {
 }
 
 func (t *Transform) LookAtRotation(point mgl32.Vec3, up mgl32.Vec3) mgl32.Quat {
-	return mgl32.QuatLookAtV(t.pos, point, up)
+	eye := t.pos
+	center := point
+
+	direction := center.Sub(eye).Normalize()
+
+	// Find the rotation between the front of the object (that we assume towards Z-,
+	// but this depends on your model) and the desired direction
+	rotDir := mgl32.QuatBetweenVectors(mgl32.Vec3{0, 0, -1}, direction)
+
+	// Recompute up so that it's perpendicular to the direction
+	// You can skip that part if you really want to force up
+	right := direction.Cross(up)
+	up = right.Cross(direction)
+
+	// Because of the 1rst rotation, the up is probably completely screwed up.
+	// Find the rotation between the "up" of the rotated object, and the desired up
+	upCur := rotDir.Rotate(mgl32.Vec3{0, 1, 0})
+	rotUp := mgl32.QuatBetweenVectors(upCur, up)
+
+	rotTarget := rotUp.Mul(rotDir) // remember, in reverse order.
+
+	return rotTarget // camera rotation should be inversed!
 }
 
 func (t *Transform) HasChanged() bool {
