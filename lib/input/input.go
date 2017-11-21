@@ -1,8 +1,6 @@
 package input
 
-import (
-	"github.com/go-gl/glfw/v3.2/glfw"
-)
+import "github.com/go-gl/glfw/v3.2/glfw"
 
 var (
 	currentKeys map[glfw.Key]bool
@@ -72,6 +70,11 @@ func Update() {
 	for k, v := range mouseButtons {
 		currentButtons[glfw.MouseButton(k)] = v
 	}
+	//for k,v  := range downKeys {
+	//	if v {
+	//		fmt.Println(k)
+	//	}
+	//}
 }
 
 func ShowCursor() {

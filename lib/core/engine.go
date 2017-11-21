@@ -10,7 +10,7 @@ import (
 	"github.com/stojg/graphics/lib/rendering"
 )
 
-const maxFps time.Duration = 300
+const maxFps time.Duration = 60
 
 func NewEngine(width, height int, title string) (*Engine, error) {
 
@@ -60,51 +60,45 @@ func (m *Engine) Stop() {
 func (m *Engine) run() {
 	m.isRunning = true
 
-	var frames int
-	var frameCount time.Duration
-	const frameTime = time.Second / maxFps
+	var renderFrames int
+	var updateFrames int
+	var frameCounter time.Duration
 
-	lastTime := time.Now()
-	var unProcessedTime time.Duration
+	var t time.Duration
+	var dt = time.Millisecond
+
+	currentTime := time.Now()
+	var accumulator time.Duration
 
 	for m.isRunning {
 
-		render := false
+		newTime := time.Now()
+		frameTime := newTime.Sub(currentTime)
+		currentTime = newTime
 
-		startTime := time.Now()
-		elapsed := startTime.Sub(lastTime)
-		lastTime = startTime
+		accumulator += frameTime
 
-		unProcessedTime += elapsed
-		frameCount += elapsed
-
-		for unProcessedTime > frameTime {
-
-			render = true
-
-			unProcessedTime -= frameTime
-
+		for accumulator >= frameTime {
 			if m.window.ShouldClose() {
 				m.Stop()
 			}
-
 			input.Update()
-
-			m.game.Input(frameTime)
-			m.game.Update(frameTime)
-
-			if frameCount >= time.Second {
-				fmt.Printf("%s, %d fps\n", time.Second/time.Duration(frames), frames)
-				frames = 0
-				frameCount = 0
-			}
+			m.game.Input(dt)
+			m.game.Update(dt)
+			accumulator -= dt
+			t += dt
+			frameCounter += dt
+			updateFrames++
 		}
 
-		if render {
-			m.render()
-			frames++
-		} else {
-			time.Sleep(time.Millisecond)
+		m.render()
+		renderFrames++
+
+		if frameCounter >= time.Second {
+			fmt.Printf("%s, %d fps, %d updates\n", time.Second/time.Duration(renderFrames), renderFrames, updateFrames)
+			renderFrames = 0
+			updateFrames = 0
+			frameCounter = 0
 		}
 	}
 	m.cleanup()

@@ -5,8 +5,10 @@ import (
 	"math"
 	"time"
 
+	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
+	"github.com/stojg/graphics/lib/input"
 	"github.com/stojg/graphics/lib/lights"
 	"github.com/stojg/graphics/lib/rendering"
 	"github.com/stojg/graphics/lib/rendering/loader"
@@ -109,12 +111,15 @@ func LoadModel(g *GameObject, obj string, material *rendering.Material) error {
 }
 
 func NewGame() *Game {
-	g := &Game{}
+	g := &Game{
+		vsync: true,
+	}
 	return g
 }
 
 type Game struct {
-	root *GameObject
+	root  *GameObject
+	vsync bool
 }
 
 func (g *Game) SetEngine(engine *Engine) {
@@ -126,6 +131,17 @@ func (g *Game) AddObject(object *GameObject) {
 }
 
 func (g *Game) Input(elapsed time.Duration) {
+	if input.KeyDown(glfw.KeyRightShift) {
+		g.vsync = !g.vsync
+		if g.vsync {
+			glfw.SwapInterval(1)
+			fmt.Println("vsync on")
+		} else {
+			glfw.SwapInterval(0)
+			fmt.Println("vsync off")
+		}
+
+	}
 	g.RootObject().InputAll(elapsed)
 }
 
