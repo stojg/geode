@@ -12,7 +12,11 @@ func NewHDR(width, height int32) *FBO {
 	gl.BindFramebuffer(gl.FRAMEBUFFER, f.fbo)
 	defer gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 
-	f.texture = NewTexture(0, gl.RGBA16F, gl.FLOAT, width, height)
+	f.texture = NewTexture(0, gl.RGBA16F, gl.RGBA, gl.FLOAT, width, height)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+
+	gl.FramebufferTexture2D(gl.FRAMEBUFFER, f.texture.attachment, gl.TEXTURE_2D, f.texture.id, 0)
 
 	gl.GenRenderbuffers(1, &f.rbo)
 	gl.BindRenderbuffer(gl.RENDERBUFFER, f.rbo)

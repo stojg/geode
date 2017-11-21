@@ -17,3 +17,7 @@ func (f *FBO) Bind() {
 func (f *FBO) BindTexture() {
 	f.texture.Bind()
 }
+
+func (f *FBO) Texture() *Texture {
+	return f.texture
+}

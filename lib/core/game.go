@@ -42,7 +42,7 @@ func Main(log Logger) error {
 
 	{
 		dirLight := NewGameObject()
-		dirLight.Transform().SetPos(mgl32.Vec3{-3, 3, 2})
+		dirLight.Transform().SetPos(mgl32.Vec3{2, 6, -1})
 		dirLight.AddComponent(lights.NewDirectional(0.99, 0.98, 0.7, 1))
 		engine.Game().AddObject(dirLight)
 	}
@@ -68,19 +68,6 @@ func Main(log Logger) error {
 		pointLight.AddComponent(components.NewTimeMove(mgl32.Vec3{0, 0, -1}, math.Cos))
 		pointLight.AddComponent(components.NewTimeMove(mgl32.Vec3{0, 0.5, 0}, math.Cos))
 		pointLight.AddComponent(lights.NewPoint(0.4, 0.9, 1, 5))
-		LoadModel(pointLight, "res/meshes/cube/model.obj", whiteMaterial)
-		engine.Game().AddObject(pointLight)
-	}
-
-	{
-		pointLight := NewGameObject()
-		pointLight.Transform().SetPos(mgl32.Vec3{-1.5, 3, 2})
-		pointLight.Transform().SetScale(mgl32.Vec3{0.1, 0.1, 0.1})
-		pointLight.AddComponent(components.NewRotator(mgl32.Vec3{1, 1, 1}, 90))
-		pointLight.AddComponent(components.NewTimeMove(mgl32.Vec3{1, 0, 0}, math.Sin))
-		pointLight.AddComponent(components.NewTimeMove(mgl32.Vec3{0, 0, 1}, math.Cos))
-		pointLight.AddComponent(components.NewTimeMove(mgl32.Vec3{0, -0.5, 0}, math.Cos))
-		pointLight.AddComponent(lights.NewPoint(0.4, 1, 0.4, 5))
 		LoadModel(pointLight, "res/meshes/cube/model.obj", whiteMaterial)
 		engine.Game().AddObject(pointLight)
 	}

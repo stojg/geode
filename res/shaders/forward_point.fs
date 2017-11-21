@@ -43,7 +43,6 @@ void main() {
 
     vec3 viewDir = normalize(-FragPos);
     vec3 halfwayDir = normalize(lightDir + viewDir);
-
     vec3 reflectDir = reflect(-lightDir, norm);
     float spec = pow(max(dot(norm, halfwayDir), 0.0), 128);
     vec3 specular = specularStrength * spec * pointLight.color;

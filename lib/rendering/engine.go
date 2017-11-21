@@ -27,33 +27,44 @@ func NewEngine(width, height int) *Engine {
 
 	samplerMap := make(map[string]uint32)
 	samplerMap["diffuse"] = 0
-	samplerMap["normal"] = 1
+	samplerMap["shadowMap"] = 1
 
 	return &Engine{
+		width:      width,
+		height:     height,
 		samplerMap: samplerMap,
 
-		screenQuad: NewScreenQuad(),
+		screenQuad:   NewScreenQuad(),
+		screenShader: NewShader("screen_shader"),
 
 		ambientShader: NewShader("forward_ambient"),
 
 		hdrBuffer: framebuffer.NewHDR(int32(width), int32(height)),
 		hdrShader: NewShader("screen_hdr"),
+
+		shadowBuffer: framebuffer.NewShadow(1024, 1024),
+		shadowShader: NewShader("shadow"),
 	}
 }
 
 type Engine struct {
-	mainCamera  *components.Camera
-	lights      []components.Light
-	activeLight components.Light
+	width, height int
+	mainCamera    *components.Camera
+	lights        []components.Light
+	activeLight   components.Light
 
 	samplerMap map[string]uint32
 
-	screenQuad *ScreenQuad
+	screenQuad   *ScreenQuad
+	screenShader *Shader
 
 	ambientShader *Shader
 
 	hdrBuffer *framebuffer.FBO
 	hdrShader *Shader
+
+	shadowBuffer *framebuffer.FBO
+	shadowShader *Shader
 }
 
 func (e *Engine) Render(object GameObject) {
@@ -62,18 +73,50 @@ func (e *Engine) Render(object GameObject) {
 	}
 	CheckForError("renderer.Engine.Render [start]")
 
+	// shadow map
+	{
+		gl.Viewport(0, 0, 1024, 1024)
+		e.shadowBuffer.Bind()
+		gl.Enable(gl.DEPTH_TEST)
+		gl.Clear(gl.DEPTH_BUFFER_BIT)
+		object.RenderAll(e.shadowShader, e)
+
+		//// debug
+		//gl.Viewport(0, 0, int32(e.width), int32(e.height))
+		//gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+		//
+		//gl.Disable(gl.DEPTH_TEST)
+		//e.shadowBuffer.BindTexture()
+		//
+		//e.screenShader.Bind()
+		//gl.Clear(gl.COLOR_BUFFER_BIT)
+		//e.screenQuad.Draw()
+		//return
+	}
+
+	// ambient pass
+	gl.Viewport(0, 0, int32(e.width), int32(e.height))
 	e.hdrBuffer.Bind()
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	gl.Enable(gl.DEPTH_TEST)
 
 	object.RenderAll(e.ambientShader, e)
 
+	// light pass
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.ONE, gl.ONE)
 	gl.DepthMask(false)
 	gl.DepthFunc(gl.EQUAL)
 	for _, l := range e.lights {
 		e.activeLight = l
+
+		l.Shader().Bind()
+		//mat.Texture(name).Bind(samplerSlot)
+
+		gl.ActiveTexture(gl.TEXTURE0 + uint32(1))
+		l.Shader().SetUniformi("shadowMap", int32(1))
+		gl.BindTexture(gl.TEXTURE_2D, e.shadowBuffer.Texture().ID())
+
 		object.RenderAll(l.Shader(), e)
 	}
 	gl.DepthFunc(gl.LESS)

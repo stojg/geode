@@ -57,17 +57,38 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 	view := engine.GetMainCamera().GetView()
 	model := transform.Transformation()
 
+	// obvious hack start
+	var nearPlane float32 = 0.1
+	var farPlane float32 = 20
+	lightProjection := mgl32.Ortho(-20, 20, -20, 20, nearPlane, farPlane)
+	lightView := mgl32.LookAt(2, 6, -1, 0, 0, 0, 0, 1, 0)
+	lightSpaceMatrix := lightProjection.Mul4(lightView)
+	// obvious hack end
+
 	for i, name := range s.resource.uniformNames {
 
 		uniformType := s.resource.uniformTypes[i]
+
+		if name == "shadowMap" {
+			//samplerSlot := engine.GetSamplerSlot(name)
+			//mat.Texture(name).Bind(samplerSlot)
+			//s.SetUniformi(name, int32(samplerSlot))
+			//fmt.Println(engine.GetActiveLight())
+			continue
+		}
+
 		if uniformType == "sampler2D" {
 			samplerSlot := engine.GetSamplerSlot(name)
 			mat.Texture(name).Bind(samplerSlot)
-			s.setUniformi(name, int32(samplerSlot))
+			s.SetUniformi(name, int32(samplerSlot))
 			continue
 		}
 
 		switch name {
+		case "shadowMap":
+			fmt.Println("hello!")
+		case "lightSpaceMatrix":
+			s.setUniformMatrix4fv("lightSpaceMatrix", lightSpaceMatrix)
 		case "projection":
 			s.setUniformMatrix4fv("projection", projection)
 		case "model":
@@ -87,6 +108,7 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 		default:
 			fmt.Printf("Shader.UpdateUniforms: unknow uniform %s\n", name)
 		}
+
 	}
 }
 
@@ -117,13 +139,13 @@ func (s *Shader) SetUniformf(uniformName string, u float32) {
 	}
 }
 
-func (s *Shader) setUniformi(uniformName string, i int32) {
+func (s *Shader) SetUniformi(uniformName string, i int32) {
 
 	val, ok := s.resource.uniforms[uniformName]
 	if ok {
 		gl.Uniform1i(val, i)
 	} else {
-		fmt.Println("Couldn't set uniform:", uniformName)
+		//fmt.Println("Couldn't set uniform:", uniformName)
 	}
 }
 

@@ -5,7 +5,7 @@ uniform sampler2D diffuse;
 in vec2 TexCoord;
 out vec4 fragColor;
 
-const float ambientStrength = 0.01;
+const float ambientStrength = 0.1;
 
 void main() {
 

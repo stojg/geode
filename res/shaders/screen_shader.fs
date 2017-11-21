@@ -8,5 +8,6 @@ uniform sampler2D screenTexture;
 
 void main()
 {
-    FragColor = texture(screenTexture, TexCoords);
+    float value = texture(screenTexture, TexCoords).r;
+    FragColor = vec4(vec3(value), 1.0);
 }
