@@ -12,10 +12,6 @@ type BaseLight struct {
 	shader components.Shader
 }
 
-func (b *BaseLight) AddToEngine(e components.Engine) {
-	e.GetRenderingEngine().AddLight(b)
-}
-
 func (b *BaseLight) SetShader(shader components.Shader) {
 	b.shader = shader
 }

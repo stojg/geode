@@ -21,12 +21,22 @@ type Transformable interface {
 }
 
 type Light interface {
-	Component
-	SetShader(shader Shader)
 	Shader() Shader
 	Color() mgl32.Vec3
-	SetColor(color mgl32.Vec3)
 	Position() mgl32.Vec3
+}
+
+type PointLight interface {
+	Light
+	Exponent() float32
+	Linear() float32
+	Constant() float32
+}
+
+type Spotlight interface {
+	PointLight
+	Direction() mgl32.Vec3
+	Cutoff() float32
 }
 
 type RenderingEngine interface {
