@@ -22,8 +22,8 @@ func Main(log Logger) error {
 	}
 
 	cameraObject := NewGameObject()
-	cameraObject.Transform().SetPos(mgl32.Vec3{0, 2, 10})
-	cameraObject.Transform().LookAt(mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
+	cameraObject.Transform().SetPos(mgl32.Vec3{8, 5, 8})
+	cameraObject.Transform().LookAt(mgl32.Vec3{0, 1, 0}, mgl32.Vec3{0, 1, 0})
 	cameraObject.AddComponent(components.NewCamera(70, float32(width), float32(height), 0.01, 100))
 	cameraObject.AddComponent(&components.FreeMove{})
 	cameraObject.AddComponent(components.NewFreelook(float32(width), float32(height)))
@@ -43,6 +43,18 @@ func Main(log Logger) error {
 		dirLight.Transform().SetPos(mgl32.Vec3{-3, 3, 2})
 		dirLight.AddComponent(lights.NewDirectional(0.99, 0.98, 0.7, 1))
 		engine.Game().AddObject(dirLight)
+	}
+
+	{
+		spot := NewGameObject()
+		spot.Transform().SetPos(mgl32.Vec3{1.5, 3, -2})
+		spot.Transform().SetScale(mgl32.Vec3{0.1, 0.1, 0.1})
+		spot.AddComponent(lights.NewSpot(0.7, 0.4, 0.3, 20, 20))
+		spot.AddComponent(components.NewLookAt(mgl32.Vec3{0, 0, 0}))
+		spot.AddComponent(components.NewTimeMove(mgl32.Vec3{1, 0, 1}, math.Sin))
+		spot.AddComponent(components.NewTimeMove(mgl32.Vec3{0, 0, 1}, math.Cos))
+		LoadModel(spot, "res/meshes/cube/model.obj", whiteMaterial)
+		engine.Game().AddObject(spot)
 	}
 
 	{
