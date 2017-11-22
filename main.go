@@ -35,9 +35,9 @@ func run() error {
 	cameraObject := core.NewGameObject()
 	cameraObject.Transform().SetPos(mgl32.Vec3{8, 5, 8})
 	cameraObject.Transform().LookAt(mgl32.Vec3{0, 1, 0}, mgl32.Vec3{0, 1, 0})
-	cameraObject.AddComponent(components.NewCamera(70, float32(width), float32(height), 0.01, 100))
+	cameraObject.AddComponent(components.NewCamera(70, width, height, 0.01, 100))
 	cameraObject.AddComponent(&components.FreeMove{})
-	cameraObject.AddComponent(components.NewFreelook(float32(width), float32(height)))
+	cameraObject.AddComponent(components.NewFreelook(width, height))
 	engine.AddObject(cameraObject)
 
 	whiteMaterial := rendering.NewMaterial()

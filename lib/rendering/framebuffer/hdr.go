@@ -6,7 +6,7 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
-func NewHDR(width, height int32) *FBO {
+func NewHDR(width, height int) *FBO {
 	f := &FBO{}
 	gl.GenFramebuffers(1, &f.fbo)
 	gl.BindFramebuffer(gl.FRAMEBUFFER, f.fbo)
@@ -21,7 +21,7 @@ func NewHDR(width, height int32) *FBO {
 	gl.GenRenderbuffers(1, &f.rbo)
 	gl.BindRenderbuffer(gl.RENDERBUFFER, f.rbo)
 	defer gl.BindRenderbuffer(gl.RENDERBUFFER, 0)
-	gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH24_STENCIL8, width, height)
+	gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH24_STENCIL8, int32(width), int32(height))
 	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, f.rbo)
 
 	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {

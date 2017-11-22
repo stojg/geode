@@ -2,7 +2,7 @@ package components
 
 import "github.com/go-gl/mathgl/mgl32"
 
-func NewCamera(fov, width, height, near, far float32) *Camera {
+func NewCamera(fov float32, width, height int, near, far float32) *Camera {
 
 	return &Camera{
 		projection: mgl32.Perspective(mgl32.DegToRad(fov), float32(width/height), near, far),

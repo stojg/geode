@@ -39,7 +39,7 @@ func NewEngine(width, height int) *Engine {
 
 		ambientShader: NewShader("forward_ambient"),
 
-		hdrBuffer: framebuffer.NewHDR(int32(width), int32(height)),
+		hdrBuffer: framebuffer.NewHDR(width, height),
 		hdrShader: NewShader("screen_hdr"),
 
 		shadowBuffer: framebuffer.NewShadow(1024, 1024),

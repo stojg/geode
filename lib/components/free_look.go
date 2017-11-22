@@ -8,9 +8,9 @@ import (
 	"github.com/stojg/graphics/lib/input"
 )
 
-func NewFreelook(width, height float32) *FreeLook {
+func NewFreelook(width, height int) *FreeLook {
 	return &FreeLook{
-		centerPosition: mgl32.Vec2{width / 2, height / 2},
+		centerPosition: mgl32.Vec2{float32(width) / 2, float32(height) / 2},
 	}
 }
 

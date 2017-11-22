@@ -2,7 +2,7 @@ package framebuffer
 
 import "github.com/go-gl/gl/v4.1-core/gl"
 
-func NewShadow(width, height int32) *FBO {
+func NewShadow(width, height int) *FBO {
 	f := &FBO{}
 	gl.GenFramebuffers(1, &f.fbo)
 	gl.BindFramebuffer(gl.FRAMEBUFFER, f.fbo)
