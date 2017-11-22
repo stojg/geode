@@ -49,12 +49,21 @@ func run() error {
 	core.LoadModel(floor, "res/meshes/cube/model.obj", whiteMaterial)
 	engine.AddObject(floor)
 
-	{
-		dirLight := core.NewGameObject()
-		dirLight.Transform().SetPos(mgl32.Vec3{2, 6, -1})
-		dirLight.AddComponent(lights.NewDirectional(0.99, 0.98, 0.7, 1))
-		engine.AddObject(dirLight)
-	}
+	dirLight := core.NewGameObject()
+	dirLight.Transform().SetPos(mgl32.Vec3{2, 2.3, -1})
+	dirLight.AddComponent(lights.NewDirectional(0.99, 0.98, 0.7, 1))
+	engine.AddObject(dirLight)
+
+	pointLight := core.NewGameObject()
+	pointLight.Transform().SetPos(mgl32.Vec3{0.5, 3, -3})
+	pointLight.AddComponent(lights.NewPoint(1, 0, 0, 1))
+	engine.AddObject(pointLight)
+
+	spot := core.NewGameObject()
+	spot.Transform().SetPos(mgl32.Vec3{-1, 2, 6})
+	spot.Transform().LookAt(mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
+	spot.AddComponent(lights.NewSpot(0, 0, 1, 10, 45))
+	engine.AddObject(spot)
 
 	bot := core.NewGameObject()
 	bot.Transform().SetPos(mgl32.Vec3{0, 0, 0})

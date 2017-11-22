@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/physics"
+	"github.com/stojg/graphics/lib/rendering/framebuffer"
 )
 
 type Drawable interface {
@@ -14,7 +15,7 @@ type Drawable interface {
 type Shader interface {
 	Bind()
 	UpdateUniforms(*physics.Transform, Material, RenderingEngine)
-	SetUniformi(string, int32)
+	SetUniform(string, interface{})
 }
 
 type Transformable interface {
@@ -23,6 +24,11 @@ type Transformable interface {
 
 type Renderable interface {
 	RenderAll(shader Shader, engine RenderingEngine)
+}
+
+type ShadowCaster interface {
+	SetShadowTexture(slot uint32, samplerName string, texture *framebuffer.Texture)
+	BindShadow()
 }
 
 type Light interface {

@@ -57,54 +57,49 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 	view := engine.GetMainCamera().GetView()
 	model := transform.Transformation()
 
-	// obvious hack start
-	var nearPlane float32 = 0.1
-	var farPlane float32 = 20
-	lightProjection := mgl32.Ortho(-20, 20, -20, 20, nearPlane, farPlane)
-	lightView := mgl32.LookAt(2, 6, -1, 0, 0, 0, 0, 1, 0)
-	lightSpaceMatrix := lightProjection.Mul4(lightView)
-	// obvious hack end
-
 	for i, name := range s.resource.uniformNames {
 
 		uniformType := s.resource.uniformTypes[i]
 
-		if name == "shadowMap" {
-			//samplerSlot := engine.GetSamplerSlot(name)
-			//mat.Texture(name).Bind(samplerSlot)
-			//s.SetUniformi(name, int32(samplerSlot))
-			//fmt.Println(engine.GetActiveLight())
+		// x_ signifies that this uniform is not set by the shader directly, ie a hack
+		if strings.Index(name, "x_") == 0 {
 			continue
 		}
 
 		if uniformType == "sampler2D" {
 			samplerSlot := engine.GetSamplerSlot(name)
 			mat.Texture(name).Bind(samplerSlot)
-			s.SetUniformi(name, int32(samplerSlot))
+			s.SetUniform(name, int32(samplerSlot))
 			continue
 		}
 
 		switch name {
-		case "shadowMap":
-			fmt.Println("hello!")
 		case "lightSpaceMatrix":
-			s.setUniformMatrix4fv("lightSpaceMatrix", lightSpaceMatrix)
+			// obvious hack start
+			var nearPlane float32 = 0.1
+			var farPlane float32 = 20
+			lightProjection := mgl32.Ortho(-20, 20, -20, 20, nearPlane, farPlane)
+			lightView := mgl32.LookAt(2, 2, -1, 0, 0, 0, 0, 1, 0)
+			lightSpaceMatrix := lightProjection.Mul4(lightView)
+			s.SetUniform(name, lightSpaceMatrix)
+			// obvious hack end
 		case "projection":
-			s.setUniformMatrix4fv("projection", projection)
+			s.SetUniform(name, projection)
 		case "model":
-			s.setUniformMatrix4fv("model", model)
+			s.SetUniform(name, model)
 		case "view":
-			s.setUniformMatrix4fv("view", view)
+			s.SetUniform(name, view)
+		case "lightPos":
+			s.SetUniform(name, engine.GetActiveLight().Position())
+		case "lightColor":
+			s.SetUniform(name, engine.GetActiveLight().Color())
+		case "viewPos":
+			s.SetUniform(name, engine.GetMainCamera().Transform().Pos())
 		case "pointLight":
 			s.setUniformPointLight(name, engine.GetActiveLight().(components.PointLight))
 		case "spotLight":
 			s.setUniformSpotLight(name, engine.GetActiveLight().(components.Spotlight))
-		case "lightPos":
-			s.setUniform3f(name, engine.GetActiveLight().Position())
-		case "lightColor":
-			s.setUniform3f(name, engine.GetActiveLight().Color())
-		case "viewPos":
-			s.setUniform3f(name, engine.GetMainCamera().Transform().Pos())
+
 		default:
 			fmt.Printf("Shader.UpdateUniforms: unknow uniform %s\n", name)
 		}
@@ -112,58 +107,39 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 	}
 }
 
-func (s *Shader) setUniform3f(uniformName string, v mgl32.Vec3) {
-	val, ok := s.resource.uniforms[uniformName]
-	if ok {
-		gl.Uniform3fv(val, 1, &v[0])
-	} else {
-		fmt.Println("Couldn't set uniform:", uniformName)
+func (s *Shader) SetUniform(uniformName string, value interface{}) {
+	loc, ok := s.resource.uniforms[uniformName]
+	if !ok {
+		panic(fmt.Sprintf("no shader location found for uniform: %s", uniformName))
 	}
-}
+	switch v := value.(type) {
+	case float32:
+		gl.Uniform1f(loc, v)
+	case int32:
+		gl.Uniform1i(loc, v)
+	case mgl32.Mat4:
+		gl.UniformMatrix4fv(loc, 1, false, &v[0])
+	case mgl32.Vec3:
+		gl.Uniform3fv(loc, 1, &v[0])
 
-func (s *Shader) setUniformMatrix4fv(uniformName string, u mgl32.Mat4) {
-	val, ok := s.resource.uniforms[uniformName]
-	if ok {
-		gl.UniformMatrix4fv(val, 1, false, &u[0])
-	} else {
-		fmt.Println("Couldn't set uniform:", uniformName)
-	}
-}
-
-func (s *Shader) SetUniformf(uniformName string, u float32) {
-	val, ok := s.resource.uniforms[uniformName]
-	if ok {
-		gl.Uniform1f(val, u)
-	} else {
-		fmt.Println("Couldn't set uniform:", uniformName)
-	}
-}
-
-func (s *Shader) SetUniformi(uniformName string, i int32) {
-
-	val, ok := s.resource.uniforms[uniformName]
-	if ok {
-		gl.Uniform1i(val, i)
-	} else {
-		//fmt.Println("Couldn't set uniform:", uniformName)
 	}
 }
 
 func (s *Shader) setUniformPointLight(uniformName string, pointLight components.PointLight) {
 
 	//SetUniformBaseLight(uniformName + ".base", pointLight);
-	s.setUniform3f(uniformName+".color", pointLight.Color())
-	s.SetUniformf(uniformName+".atten.constant", pointLight.Constant())
-	s.SetUniformf(uniformName+".atten.linear", pointLight.Linear())
-	s.SetUniformf(uniformName+".atten.exponent", pointLight.Exponent())
+	s.SetUniform(uniformName+".color", pointLight.Color())
+	s.SetUniform(uniformName+".atten.constant", pointLight.Constant())
+	s.SetUniform(uniformName+".atten.linear", pointLight.Linear())
+	s.SetUniform(uniformName+".atten.exponent", pointLight.Exponent())
 	//SetUniform(uniformName + ".position", pointLight.GetTransform().GetTransformedPos());
 	//SetUniformf(uniformName + ".range", pointLight.GetRange());
 }
 
 func (s *Shader) setUniformSpotLight(uniformName string, spotLight components.Spotlight) {
 	s.setUniformPointLight(uniformName+".pointLight", spotLight)
-	s.setUniform3f(uniformName+".direction", spotLight.Direction())
-	s.SetUniformf(uniformName+".cutoff", spotLight.Cutoff())
+	s.SetUniform(uniformName+".direction", spotLight.Direction())
+	s.SetUniform(uniformName+".cutoff", spotLight.Cutoff())
 }
 
 func (s *Shader) Bind() {

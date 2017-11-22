@@ -10,7 +10,7 @@ import (
 
 func NewEngine(width, height int) *Engine {
 
-	gl.ClearColor(0.04, 0.04, 0.04, 0)
+	gl.ClearColor(0.03, 0.04, 0.05, 0)
 
 	gl.FrontFace(gl.CCW)
 	gl.CullFace(gl.BACK)
@@ -23,7 +23,7 @@ func NewEngine(width, height int) *Engine {
 
 	samplerMap := make(map[string]uint32)
 	samplerMap["diffuse"] = 0
-	samplerMap["shadowMap"] = 1
+	samplerMap["x_shadowMap"] = 9
 
 	return &Engine{
 		width:      int32(width),
@@ -70,12 +70,21 @@ func (e *Engine) Render(object components.Renderable) {
 	checkForError("renderer.Engine.Render [start]")
 
 	// shadow map
-	{
+
+	for _, l := range e.lights {
+		caster, ok := l.(components.ShadowCaster)
+		if !ok {
+			continue
+		}
+
 		e.shadowBuffer.Bind()
 		e.shadowBuffer.Texture().SetViewPort()
 		gl.Enable(gl.DEPTH_TEST)
 		gl.Clear(gl.DEPTH_BUFFER_BIT)
 		object.RenderAll(e.shadowShader, e)
+		// store the result
+		slot := e.GetSamplerSlot("x_shadowMap")
+		caster.SetShadowTexture(slot, "x_shadowMap", e.shadowBuffer.Texture())
 
 		//// debug
 		//gl.Viewport(0, 0, int32(e.width), int32(e.height))
@@ -105,14 +114,10 @@ func (e *Engine) Render(object components.Renderable) {
 	gl.DepthFunc(gl.EQUAL)
 	for _, l := range e.lights {
 		e.activeLight = l
-
 		l.Shader().Bind()
-		//mat.Texture(name).Bind(samplerSlot)
-
-		gl.ActiveTexture(gl.TEXTURE0 + uint32(1))
-		l.Shader().SetUniformi("shadowMap", int32(1))
-		gl.BindTexture(gl.TEXTURE_2D, e.shadowBuffer.Texture().ID())
-
+		if caster, ok := l.(components.ShadowCaster); ok {
+			caster.BindShadow()
+		}
 		object.RenderAll(l.Shader(), e)
 	}
 	gl.DepthFunc(gl.LESS)

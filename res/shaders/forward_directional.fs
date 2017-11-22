@@ -14,7 +14,7 @@ float specularStrength = 0.5;
 
 // shadow
 in vec4 FragPosLightSpace;
-uniform sampler2D shadowMap;
+uniform sampler2D x_shadowMap;
 uniform mat4 lightSpaceMatrix;
 uniform mat4 view;
 
@@ -36,11 +36,11 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal)
     float shadow = 0.0;
     float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.001);
 
-    vec2 texelSize = 0.5 / textureSize(shadowMap, 0);
+    vec2 texelSize = 0.5 / textureSize(x_shadowMap, 0);
     // Percentage Closing Filter
     for(int x = -1; x <= 1; ++x) {
         for(int y = -1; y <= 1; ++y) {
-            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
+            float pcfDepth = texture(x_shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
             shadow += projCoords.z - bias > pcfDepth ? 1.0 : 0.0;
         }
     }
