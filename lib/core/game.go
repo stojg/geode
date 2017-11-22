@@ -2,7 +2,6 @@ package core
 
 import (
 	"fmt"
-	"math"
 	"time"
 
 	"github.com/go-gl/glfw/v3.2/glfw"
@@ -45,31 +44,6 @@ func Main(log Logger) error {
 		dirLight.Transform().SetPos(mgl32.Vec3{2, 6, -1})
 		dirLight.AddComponent(lights.NewDirectional(0.99, 0.98, 0.7, 1))
 		engine.Game().AddObject(dirLight)
-	}
-
-	{
-		spot := NewGameObject()
-		spot.Transform().SetPos(mgl32.Vec3{1.5, 3, -2})
-		spot.Transform().SetScale(mgl32.Vec3{0.1, 0.1, 0.1})
-		spot.AddComponent(lights.NewSpot(0.7, 0.4, 0.3, 20, 20))
-		spot.AddComponent(components.NewLookAt(mgl32.Vec3{0, 0, 0}))
-		spot.AddComponent(components.NewTimeMove(mgl32.Vec3{1, 0, 1}, math.Sin))
-		spot.AddComponent(components.NewTimeMove(mgl32.Vec3{0, 0, 1}, math.Cos))
-		LoadModel(spot, "res/meshes/cube/model.obj", whiteMaterial)
-		engine.Game().AddObject(spot)
-	}
-
-	{
-		pointLight := NewGameObject()
-		pointLight.Transform().SetPos(mgl32.Vec3{1.5, 3, 2})
-		pointLight.Transform().SetScale(mgl32.Vec3{0.1, 0.1, 0.1})
-		pointLight.AddComponent(components.NewRotator(mgl32.Vec3{1, 1, 1}, 90))
-		pointLight.AddComponent(components.NewTimeMove(mgl32.Vec3{-1, 0, 0}, math.Sin))
-		pointLight.AddComponent(components.NewTimeMove(mgl32.Vec3{0, 0, -1}, math.Cos))
-		pointLight.AddComponent(components.NewTimeMove(mgl32.Vec3{0, 0.5, 0}, math.Cos))
-		pointLight.AddComponent(lights.NewPoint(0.4, 0.9, 1, 5))
-		LoadModel(pointLight, "res/meshes/cube/model.obj", whiteMaterial)
-		engine.Game().AddObject(pointLight)
 	}
 
 	bot := NewGameObject()
