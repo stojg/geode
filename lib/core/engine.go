@@ -10,8 +10,6 @@ import (
 	"github.com/stojg/graphics/lib/rendering"
 )
 
-const maxFps time.Duration = 60
-
 func NewEngine(width, height int, title string) (*Engine, error) {
 
 	window, err := NewWindow(width, height, title)
@@ -46,8 +44,8 @@ func (m *Engine) Start() {
 	m.run()
 }
 
-func (m *Engine) Game() *Game {
-	return m.game
+func (m *Engine) AddObject(object *GameObject) {
+	m.game.AddObject(object)
 }
 
 func (m *Engine) Stop() {
