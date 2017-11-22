@@ -6,8 +6,8 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
-// CheckForError will check for OpenGL errors and panic if an error has been raised
-func CheckForError(name string) {
+// checkForError will check for OpenGL errors and panic if an error has been raised
+func checkForError(name string) {
 	err := gl.GetError()
 	switch err {
 	case 0:

@@ -22,7 +22,7 @@ type Transformable interface {
 }
 
 type Renderable interface {
-	RenderAll()
+	RenderAll(shader Shader, engine RenderingEngine)
 }
 
 type Light interface {

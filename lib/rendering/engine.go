@@ -8,10 +8,6 @@ import (
 	"github.com/stojg/graphics/lib/rendering/framebuffer"
 )
 
-type GameObject interface {
-	RenderAll(shader components.Shader, engine components.RenderingEngine)
-}
-
 func NewEngine(width, height int) *Engine {
 
 	gl.ClearColor(0.04, 0.04, 0.04, 0)
@@ -67,11 +63,11 @@ type Engine struct {
 	shadowShader *Shader
 }
 
-func (e *Engine) Render(object GameObject) {
+func (e *Engine) Render(object components.Renderable) {
 	if e.mainCamera == nil {
 		panic("mainCamera not found, the game cannot render")
 	}
-	CheckForError("renderer.Engine.Render [start]")
+	checkForError("renderer.Engine.Render [start]")
 
 	// shadow map
 	{
@@ -133,7 +129,7 @@ func (e *Engine) Render(object GameObject) {
 	gl.Clear(gl.COLOR_BUFFER_BIT)
 	e.screenQuad.Draw()
 
-	CheckForError("renderer.Engine.Render [end]")
+	checkForError("renderer.Engine.Render [end]")
 }
 
 func (e *Engine) GetActiveLight() components.Light {
