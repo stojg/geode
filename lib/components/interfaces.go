@@ -21,6 +21,10 @@ type Transformable interface {
 	Transform() *physics.Transform
 }
 
+type Renderable interface {
+	RenderAll()
+}
+
 type Light interface {
 	Shader() Shader
 	Color() mgl32.Vec3
@@ -59,26 +63,3 @@ type Component interface {
 	AddToEngine(Engine)
 	SetParent(Transformable)
 }
-
-type GameComponent struct {
-	parent Transformable
-}
-
-func (m *GameComponent) SetParent(parent Transformable) {
-	m.parent = parent
-}
-
-func (m *GameComponent) Parent() Transformable {
-	return m.parent
-}
-
-func (m *GameComponent) Transform() *physics.Transform {
-	return m.parent.Transform()
-}
-
-func (m *GameComponent) AddToEngine(engine Engine) {
-}
-
-func (m *GameComponent) Render(Shader, RenderingEngine) {}
-func (m *GameComponent) Input(time.Duration)            {}
-func (m *GameComponent) Update(time.Duration)           {}
