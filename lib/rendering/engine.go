@@ -26,8 +26,8 @@ func NewEngine(width, height int) *Engine {
 	samplerMap["shadowMap"] = 1
 
 	return &Engine{
-		width:      width,
-		height:     height,
+		width:      int32(width),
+		height:     int32(height),
 		samplerMap: samplerMap,
 
 		screenQuad:   NewScreenQuad(),
@@ -44,7 +44,7 @@ func NewEngine(width, height int) *Engine {
 }
 
 type Engine struct {
-	width, height int
+	width, height int32
 	mainCamera    *components.Camera
 	lights        []components.Light
 	activeLight   components.Light
@@ -71,8 +71,8 @@ func (e *Engine) Render(object components.Renderable) {
 
 	// shadow map
 	{
-		gl.Viewport(0, 0, 1024, 1024)
 		e.shadowBuffer.Bind()
+		e.shadowBuffer.Texture().SetViewPort()
 		gl.Enable(gl.DEPTH_TEST)
 		gl.Clear(gl.DEPTH_BUFFER_BIT)
 		object.RenderAll(e.shadowShader, e)
@@ -91,8 +91,8 @@ func (e *Engine) Render(object components.Renderable) {
 	}
 
 	// ambient pass
-	gl.Viewport(0, 0, int32(e.width), int32(e.height))
 	e.hdrBuffer.Bind()
+	e.hdrBuffer.Texture().SetViewPort()
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	gl.Enable(gl.DEPTH_TEST)
 
@@ -127,6 +127,7 @@ func (e *Engine) Render(object components.Renderable) {
 	e.hdrBuffer.BindTexture()
 	e.hdrShader.Bind()
 	gl.Clear(gl.COLOR_BUFFER_BIT)
+	gl.Viewport(0, 0, e.width, e.height)
 	e.screenQuad.Draw()
 
 	checkForError("renderer.Engine.Render [end]")
