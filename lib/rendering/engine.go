@@ -37,9 +37,6 @@ func NewEngine(width, height int) *Engine {
 
 		hdrBuffer: framebuffer.NewHDR(width, height),
 		hdrShader: NewShader("screen_hdr"),
-
-		shadowBuffer: framebuffer.NewShadow(1024, 1024),
-		shadowShader: NewShader("shadow"),
 	}
 }
 
@@ -58,9 +55,6 @@ type Engine struct {
 
 	hdrBuffer *framebuffer.FBO
 	hdrShader *Shader
-
-	shadowBuffer *framebuffer.FBO
-	shadowShader *Shader
 }
 
 func (e *Engine) Render(object components.Renderable) {
@@ -70,30 +64,19 @@ func (e *Engine) Render(object components.Renderable) {
 	checkForError("renderer.Engine.Render [start]")
 
 	// shadow map
-
 	for _, l := range e.lights {
 		caster, ok := l.(components.ShadowCaster)
 		if !ok {
 			continue
 		}
-
 		e.activeLight = l
-		e.shadowBuffer.Bind()
-		e.shadowBuffer.Texture().SetViewPort()
-		gl.Enable(gl.DEPTH_TEST)
-		gl.Clear(gl.DEPTH_BUFFER_BIT)
-		object.RenderAll(e.shadowShader, e)
-		// store the result
-		slot := e.GetSamplerSlot("x_shadowMap")
-		caster.SetShadowTexture(slot, "x_shadowMap", e.shadowBuffer.Texture())
-
-		//// debug
+		caster.BindShadowBuffer()
+		object.RenderAll(caster.ShadowShader(), e)
+		// debug
 		//gl.Viewport(0, 0, int32(e.width), int32(e.height))
 		//gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-		//
 		//gl.Disable(gl.DEPTH_TEST)
-		//e.shadowBuffer.BindTexture()
-		//
+		//caster.BindShadow()
 		//e.screenShader.Bind()
 		//gl.Clear(gl.COLOR_BUFFER_BIT)
 		//e.screenQuad.Draw()
@@ -113,11 +96,12 @@ func (e *Engine) Render(object components.Renderable) {
 	gl.BlendFunc(gl.ONE, gl.ONE)
 	gl.DepthMask(false)
 	gl.DepthFunc(gl.EQUAL)
+
 	for _, l := range e.lights {
 		e.activeLight = l
 		l.Shader().Bind()
 		if caster, ok := l.(components.ShadowCaster); ok {
-			caster.BindShadow()
+			caster.BindShadowTexture(e.GetSamplerSlot("x_shadowMap"), "x_shadowMap")
 		}
 		object.RenderAll(l.Shader(), e)
 	}

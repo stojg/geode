@@ -5,7 +5,6 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/physics"
-	"github.com/stojg/graphics/lib/rendering/framebuffer"
 )
 
 type Drawable interface {
@@ -27,8 +26,9 @@ type Renderable interface {
 }
 
 type ShadowCaster interface {
-	SetShadowTexture(slot uint32, samplerName string, texture *framebuffer.Texture)
-	BindShadow()
+	BindShadowBuffer()
+	ShadowShader() Shader
+	BindShadowTexture(samplerSlot uint32, samplerName string)
 }
 
 type Light interface {
