@@ -47,10 +47,8 @@ float specularStrength = 0.5;
 // shadow
 in vec4 FragPosLightSpace;
 uniform sampler2D x_shadowMap;
-uniform mat4 lightSpaceMatrix;
-uniform mat4 view;
 
-float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal)
+float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
 {
     // perform perspective divide
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
@@ -61,9 +59,6 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal)
     if(projCoords.z > 1.0) {
         return 0.0;
     }
-
-    // @todo pass this in?
-    vec3 lightDir = normalize(LightPos);
 
     float shadow = 0.0;
     float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.001);
@@ -96,7 +91,7 @@ void main() {
     vec3 specular = specularStrength * spec * directionalLight.base.color;
 
     // calculate shadow
-    float shadow = ShadowCalculation(FragPosLightSpace, norm);
+    float shadow = ShadowCalculation(FragPosLightSpace, norm, lightDir);
 
     fragColor = texture(diffuse, TexCoord);
     fragColor *= vec4((diffuseLight + specular), 1.0f);
