@@ -40,14 +40,15 @@ uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
 
-// shadow
-uniform mat4 lightSpaceMatrix;
-
 uniform DirectionalLight directionalLight;
+
+// shadow
+uniform mat4 lightViewProjection;
 
 out vec2 TexCoord;
 out vec3 FragPos;
 out vec3 Normal;
+
 out vec3 LightPos;
 
 // shadow
@@ -56,10 +57,10 @@ out vec4 FragPosLightSpace;
 void main() {
     gl_Position = projection * view * model * vec4(position, 1.0);
     FragPos = vec3(view  * model * vec4(position, 1.0));
+
     Normal = mat3(transpose(inverse(view * model))) * normal;
-    LightPos = vec3(view * vec4(directionalLight.direction, 0.0));
     TexCoord = aTexCoord;
 
-    // shadow
-    FragPosLightSpace = lightSpaceMatrix * model * vec4(position, 1.0);
+    LightPos = vec3(view * vec4(directionalLight.direction, 0.0));
+    FragPosLightSpace = lightViewProjection * model * vec4(position, 1.0);
 }

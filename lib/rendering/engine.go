@@ -77,6 +77,7 @@ func (e *Engine) Render(object components.Renderable) {
 			continue
 		}
 
+		e.activeLight = l
 		e.shadowBuffer.Bind()
 		e.shadowBuffer.Texture().SetViewPort()
 		gl.Enable(gl.DEPTH_TEST)

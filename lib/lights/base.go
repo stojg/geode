@@ -38,3 +38,7 @@ func (b *BaseLight) SetShadowTexture(slot uint32, texture *framebuffer.Texture) 
 }
 
 func (b *BaseLight) BindShadow() {}
+
+func (b *BaseLight) ViewProjection() mgl32.Mat4 {
+	return mgl32.Ident4()
+}

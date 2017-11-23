@@ -74,15 +74,8 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 		}
 
 		switch name {
-		case "lightSpaceMatrix":
-			// obvious hack start
-			var nearPlane float32 = 0.1
-			var farPlane float32 = 20
-			lightProjection := mgl32.Ortho(-20, 20, -20, 20, nearPlane, farPlane)
-			lightView := mgl32.LookAt(2, 2, -1, 0, 0, 0, 0, 1, 0)
-			lightSpaceMatrix := lightProjection.Mul4(lightView)
-			s.SetUniform(name, lightSpaceMatrix)
-			// obvious hack end
+		case "lightViewProjection":
+			s.SetUniform(name, engine.GetActiveLight().ViewProjection())
 		case "projection":
 			s.SetUniform(name, projection)
 		case "model":

@@ -35,6 +35,7 @@ type Light interface {
 	Shader() Shader
 	Color() mgl32.Vec3
 	Position() mgl32.Vec3
+	ViewProjection() mgl32.Mat4
 }
 
 type DirectionalLight interface {

@@ -50,7 +50,7 @@ func run() error {
 	engine.AddObject(floor)
 
 	dirLight := core.NewGameObject()
-	dirLight.Transform().SetPos(mgl32.Vec3{2, 2.3, -1})
+	dirLight.Transform().SetPos(mgl32.Vec3{2, 4, 1})
 	dirLight.AddComponent(lights.NewDirectional(0.99, 0.98, 0.7, 1))
 	engine.AddObject(dirLight)
 
