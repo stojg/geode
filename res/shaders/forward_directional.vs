@@ -42,9 +42,6 @@ uniform mat4 model;
 
 uniform DirectionalLight directionalLight;
 
-// shadow
-uniform mat4 lightViewProjection;
-
 out vec2 TexCoord;
 out vec3 FragPos;
 out vec3 Normal;
@@ -52,6 +49,7 @@ out vec3 Normal;
 out vec3 LightPos;
 
 // shadow
+uniform mat4 lightViewProjection;
 out vec4 FragPosLightSpace;
 
 void main() {

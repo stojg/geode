@@ -33,7 +33,7 @@ func run() error {
 	}
 
 	cameraObject := core.NewGameObject()
-	cameraObject.Transform().SetPos(mgl32.Vec3{8, 5, 8})
+	cameraObject.Transform().SetPos(mgl32.Vec3{0, 3, 6})
 	cameraObject.Transform().LookAt(mgl32.Vec3{0, 1, 0}, mgl32.Vec3{0, 1, 0})
 	cameraObject.AddComponent(components.NewCamera(70, width, height, 0.01, 100))
 	cameraObject.AddComponent(&components.FreeMove{})
@@ -54,22 +54,35 @@ func run() error {
 	dirLight.AddComponent(lights.NewDirectional(0.99, 0.98, 0.7, 1))
 	engine.AddObject(dirLight)
 
-	pointLight := core.NewGameObject()
-	pointLight.Transform().SetPos(mgl32.Vec3{0.5, 3, -3})
-	pointLight.AddComponent(lights.NewPoint(1, 0, 0, 5))
-	engine.AddObject(pointLight)
+	//pointLight := core.NewGameObject()
+	//pointLight.Transform().SetPos(mgl32.Vec3{4, 2, 0})
+	//pointLight.AddComponent(lights.NewPoint(1, 0, 0, 5))
+	//engine.AddObject(pointLight)
 
-	spot := core.NewGameObject()
-	spot.Transform().SetPos(mgl32.Vec3{-1, 2, 6})
-	spot.Transform().LookAt(mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
-	spot.AddComponent(lights.NewSpot(0, 0, 1, 10, 45))
-	engine.AddObject(spot)
+	//spot := core.NewGameObject()
+	//spot.Transform().SetPos(mgl32.Vec3{-6, 4, 4})
+	//spot.Transform().LookAt(mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
+	//spot.AddComponent(lights.NewSpot(0.8, 0.9, 1, 2, 22))
+	//engine.AddObject(spot)
+	//
+	//{
+	//	spot := core.NewGameObject()
+	//	spot.Transform().SetPos(mgl32.Vec3{4, 4, -6})
+	//	spot.Transform().LookAt(mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 2, 0})
+	//	spot.AddComponent(lights.NewSpot(0.8, 0.9, 1, 2, 22))
+	//	engine.AddObject(spot)
+	//}
 
 	bot := core.NewGameObject()
 	bot.Transform().SetPos(mgl32.Vec3{0, 0, 0})
 	bot.AddComponent(components.NewRotator(mgl32.Vec3{0, -1, 0}, 23))
 	core.LoadModel(bot, "res/meshes/sphere_bot/model.obj", whiteMaterial)
 	engine.AddObject(bot)
+
+	cube := core.NewGameObject()
+	cube.Transform().SetPos(mgl32.Vec3{4, 1, 0})
+	core.LoadModel(cube, "res/meshes/cube/model.obj", whiteMaterial)
+	engine.AddObject(cube)
 
 	engine.Start()
 

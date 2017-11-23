@@ -41,6 +41,9 @@ uniform mat4 view;
 uniform mat4 model;
 uniform SpotLight spotLight;
 
+// shadow
+uniform mat4 lightViewProjection;
+out vec4 FragPosLightSpace;
 
 out vec2 TexCoord;
 out vec3 FragPos;
@@ -50,7 +53,11 @@ out vec3 LightPos;
 void main() {
     gl_Position = projection * view * model * vec4(position, 1.0);
     FragPos = vec3(view  * model * vec4(position, 1.0));
+
     Normal = mat3(transpose(inverse(view * model))) * normal;
-    LightPos = vec3(view * vec4(spotLight.pointLight.position, 1.0));
     TexCoord = aTexCoord;
+
+    LightPos = vec3(view * vec4(spotLight.pointLight.position, 1.0));
+
+    FragPosLightSpace = lightViewProjection * model * vec4(position, 1.0);
 }

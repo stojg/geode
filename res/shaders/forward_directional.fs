@@ -48,11 +48,49 @@ float specularStrength = 0.5;
 in vec4 FragPosLightSpace;
 uniform sampler2D x_shadowMap;
 
+float sampleShadowMap(sampler2D shadowMap, vec2 coords, float compare, float bias)
+{
+    vec2 samplingCoords = coords;
+    return step(texture(shadowMap, samplingCoords).r, compare - bias);
+}
+
+float sampleShadowMapLinear(sampler2D shadowMap, vec2 coords, float compare, float bias, vec2 texelSize)
+{
+    vec2 pixelPos = coords / texelSize + vec2(0.5);
+    vec2 fractPart = fract(pixelPos);
+    vec2 startTexel = (pixelPos - fractPart) * texelSize;
+
+    float blTexel = sampleShadowMap(shadowMap, startTexel, compare, bias);
+    float brTexel = sampleShadowMap(shadowMap, startTexel + vec2(texelSize.x, 0.0), compare, bias);
+    float tlTexel = sampleShadowMap(shadowMap, startTexel + vec2(0.0, texelSize.y), compare, bias);
+    float trTexel = sampleShadowMap(shadowMap, startTexel + texelSize, compare, bias);
+
+    float mixA = mix(blTexel, tlTexel, fractPart.y);
+    float mixB = mix(brTexel, trTexel, fractPart.y);
+    return mix(mixA, mixB, fractPart.x);
+}
+
+float sampleShadowMapPCF(sampler2D shadowMap, vec2 coords, float compare, float bias, vec2 texelSize)
+{
+    const float NUM_SAMPLES = 3.0;
+    const float SAMPLES_START = (NUM_SAMPLES-1.0)/2.0;
+    const float NUM_SAMPLES_SQUARED = NUM_SAMPLES * NUM_SAMPLES;
+
+    float shadow = 0.0;
+    for(float x = -SAMPLES_START; x <= SAMPLES_START; x += 1.0) {
+        for(float y = -SAMPLES_START; y <= SAMPLES_START; y += 1.0) {
+            vec2 offset = vec2(x,y) * texelSize;
+            shadow += sampleShadowMapLinear(shadowMap, coords + offset , compare, bias, texelSize);
+        }
+    }
+    return shadow /= NUM_SAMPLES_SQUARED;
+}
+
 float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
 {
-    // perform perspective divide
+    // perform perspective divide, since it's not done automatically for us
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-    // transform to [0,1] range
+    // transform from [-0.5,0.5] to [0,1] range so we can use it for sampling
     projCoords = projCoords * 0.5 + 0.5;
 
     // dont shadow things outside the light frustrum far plane
@@ -60,18 +98,12 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
         return 0.0;
     }
 
-    float shadow = 0.0;
-    float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.001);
-
+    float bias = max(0.02 * (1.0 - dot(normal, lightDir)), 0.02);
     vec2 texelSize = 0.5 / textureSize(x_shadowMap, 0);
-    // Percentage Closing Filter
-    for(int x = -1; x <= 1; ++x) {
-        for(int y = -1; y <= 1; ++y) {
-            float pcfDepth = texture(x_shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
-            shadow += projCoords.z - bias > pcfDepth ? 1.0 : 0.0;
-        }
-    }
-    return shadow /= 9.0;
+
+    //return sampleShadowMap(x_shadowMap, projCoords.xy, projCoords.z, bias);
+    //return sampleShadowMapLinear(x_shadowMap, projCoords.xy, projCoords.z, bias, texelSize);
+    return sampleShadowMapPCF(x_shadowMap, projCoords.xy, projCoords.z, bias, texelSize);
 }
 
 void main() {

@@ -8,7 +8,7 @@ func NewShadow(width, height int) *FBO {
 	gl.BindFramebuffer(gl.FRAMEBUFFER, f.fbo)
 	defer gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 
-	f.texture = NewTexture(0, gl.DEPTH_COMPONENT, gl.DEPTH_COMPONENT, gl.FLOAT, width, height)
+	f.texture = NewTexture(0, gl.DEPTH_COMPONENT16, gl.DEPTH_COMPONENT, gl.FLOAT, width, height)
 
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)

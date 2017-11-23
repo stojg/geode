@@ -9,10 +9,15 @@ import (
 )
 
 func NewDirectional(r, g, b, intensity float32) *Directional {
+	const nearPlane float32 = 0.1
+	const farPlane float32 = 10
+
 	return &Directional{
 		BaseLight: BaseLight{
 			color:  mgl32.Vec3{r, g, b}.Mul(intensity),
 			shader: rendering.NewShader("forward_directional"),
+
+			shadowInfo: NewShadowInfo(mgl32.Ortho(-8, 8, -8, 8, nearPlane, farPlane)),
 		},
 		shadowBuffer: framebuffer.NewShadow(1024, 1024),
 		shadowShader: rendering.NewShader("shadow"),
@@ -35,11 +40,8 @@ func (b *Directional) Direction() mgl32.Vec3 {
 }
 
 func (b *Directional) ViewProjection() mgl32.Mat4 {
-	const nearPlane float32 = 0.1
-	const farPlane float32 = 10
-	lightProjection := mgl32.Ortho(-8, 8, -8, 8, nearPlane, farPlane)
 	lightView := mgl32.LookAt(b.Position().X(), b.Position().Y(), b.Position().Z(), 0, 0, 0, 0, 1, 0)
-	return lightProjection.Mul4(lightView)
+	return b.shadowInfo.Projection().Mul4(lightView)
 }
 
 func (b *Directional) BindShadowBuffer() {

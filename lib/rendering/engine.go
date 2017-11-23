@@ -71,7 +71,9 @@ func (e *Engine) Render(object components.Renderable) {
 		}
 		e.activeLight = l
 		caster.BindShadowBuffer()
+		//gl.CullFace(gl.FRONT)
 		object.RenderAll(caster.ShadowShader(), e)
+		//gl.CullFace(gl.BACK)
 		// debug
 		//gl.Viewport(0, 0, int32(e.width), int32(e.height))
 		//gl.BindFramebuffer(gl.FRAMEBUFFER, 0)

@@ -31,8 +31,13 @@ type ShadowCaster interface {
 	BindShadowTexture(samplerSlot uint32, samplerName string)
 }
 
+//type ShaderInfo interface {
+//	Projection().
+//}
+
 type Light interface {
 	Shader() Shader
+	//ShadowInfo() ShaderInfo
 	Color() mgl32.Vec3
 	Position() mgl32.Vec3
 	ViewProjection() mgl32.Mat4
