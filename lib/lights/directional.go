@@ -29,6 +29,10 @@ func (b *Directional) AddToEngine(e components.Engine) {
 	e.GetRenderingEngine().AddLight(b)
 }
 
+func (b *Directional) Direction() mgl32.Vec3 {
+	return b.BaseLight.Position()
+}
+
 func (b *Directional) SetShadowTexture(slot uint32, samplerName string, texture *framebuffer.Texture) {
 	b.samplerName = samplerName
 	b.textureSlot = slot

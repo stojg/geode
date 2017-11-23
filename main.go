@@ -56,7 +56,7 @@ func run() error {
 
 	pointLight := core.NewGameObject()
 	pointLight.Transform().SetPos(mgl32.Vec3{0.5, 3, -3})
-	pointLight.AddComponent(lights.NewPoint(1, 0, 0, 1))
+	pointLight.AddComponent(lights.NewPoint(1, 0, 0, 5))
 	engine.AddObject(pointLight)
 
 	spot := core.NewGameObject()

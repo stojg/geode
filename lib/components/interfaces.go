@@ -37,6 +37,11 @@ type Light interface {
 	Position() mgl32.Vec3
 }
 
+type DirectionalLight interface {
+	Light
+	Direction() mgl32.Vec3
+}
+
 type PointLight interface {
 	Light
 	Exponent() float32

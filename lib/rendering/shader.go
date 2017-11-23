@@ -89,12 +89,10 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 			s.SetUniform(name, model)
 		case "view":
 			s.SetUniform(name, view)
-		case "lightPos":
-			s.SetUniform(name, engine.GetActiveLight().Position())
-		case "lightColor":
-			s.SetUniform(name, engine.GetActiveLight().Color())
 		case "viewPos":
 			s.SetUniform(name, engine.GetMainCamera().Transform().Pos())
+		case "directionalLight":
+			s.setUniformDirectionalLight(name, engine.GetActiveLight().(components.DirectionalLight))
 		case "pointLight":
 			s.setUniformPointLight(name, engine.GetActiveLight().(components.PointLight))
 		case "spotLight":
@@ -125,15 +123,21 @@ func (s *Shader) SetUniform(uniformName string, value interface{}) {
 	}
 }
 
-func (s *Shader) setUniformPointLight(uniformName string, pointLight components.PointLight) {
+func (s *Shader) setUniformBaseLight(uniformName string, baseLight components.Light) {
+	s.SetUniform(uniformName+".color", baseLight.Color())
+}
 
-	//SetUniformBaseLight(uniformName + ".base", pointLight);
-	s.SetUniform(uniformName+".color", pointLight.Color())
+func (s *Shader) setUniformDirectionalLight(uniformName string, directional components.DirectionalLight) {
+	s.setUniformBaseLight(uniformName+".base", directional)
+	s.SetUniform(uniformName+".direction", directional.Direction())
+}
+
+func (s *Shader) setUniformPointLight(uniformName string, pointLight components.PointLight) {
+	s.setUniformBaseLight(uniformName+".base", pointLight)
+	s.SetUniform(uniformName+".position", pointLight.Position())
 	s.SetUniform(uniformName+".atten.constant", pointLight.Constant())
 	s.SetUniform(uniformName+".atten.linear", pointLight.Linear())
 	s.SetUniform(uniformName+".atten.exponent", pointLight.Exponent())
-	//SetUniform(uniformName + ".position", pointLight.GetTransform().GetTransformedPos());
-	//SetUniformf(uniformName + ".range", pointLight.GetRange());
 }
 
 func (s *Shader) setUniformSpotLight(uniformName string, spotLight components.Spotlight) {
