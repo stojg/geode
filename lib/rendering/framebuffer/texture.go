@@ -79,19 +79,27 @@ type Texture struct {
 	rbo uint32
 }
 
+func (t *Texture) Height() int32 {
+	return t.height
+}
+
+func (t *Texture) Width() int32 {
+	return t.width
+}
+
 func (t *Texture) ID() uint32 {
 	return t.id
 }
 
-func (t *Texture) Bind() {
+func (t *Texture) Bind(unit uint32) {
+	gl.ActiveTexture(gl.TEXTURE0 + unit)
 	gl.BindTexture(gl.TEXTURE_2D, t.id)
 }
 
 func (t *Texture) BindAsRenderTarget() {
+	gl.BindTexture(gl.TEXTURE_2D, t.id)
 	gl.BindFramebuffer(gl.FRAMEBUFFER, t.fbo)
-	gl.BindTexture(gl.TEXTURE_2D, 0)
-	//this adds a couple of ms to the render time?
-	//gl.DrawBuffer(t.attachment)
+	gl.Viewport(0, 0, t.width, t.height)
 }
 
 func (t *Texture) SetViewPort() {

@@ -31,9 +31,21 @@ type Texture struct {
 	resource *TextureResource
 }
 
+func (t *Texture) Height() int32 {
+	return t.resource.height
+}
+
+func (t *Texture) Width() int32 {
+	return t.resource.width
+}
+
 func (t *Texture) Bind(slot uint32) {
 	gl.ActiveTexture(gl.TEXTURE0 + slot)
 	gl.BindTexture(gl.TEXTURE_2D, t.resource.ID())
+}
+
+func (t *Texture) BindAsRenderTarget() {
+	panic("Cant write to material textures you mad lad!")
 }
 
 func LoadTexture(filename string) (*TextureResource, error) {
@@ -61,6 +73,8 @@ func LoadTexture(filename string) (*TextureResource, error) {
 	//}
 
 	resource := NewTextureResource()
+	resource.width = int32(rgba.Rect.Size().X)
+	resource.height = int32(rgba.Rect.Size().Y)
 	gl.BindTexture(gl.TEXTURE_2D, resource.ID())
 	gl.ActiveTexture(gl.TEXTURE0)
 
@@ -70,7 +84,7 @@ func LoadTexture(filename string) (*TextureResource, error) {
 	gl.TexParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
 	gl.TexParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
-	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(rgba.Rect.Size().X), int32(rgba.Rect.Size().Y), 0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(rgba.Pix))
+	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, resource.width, resource.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(rgba.Pix))
 
 	return resource, nil
 }

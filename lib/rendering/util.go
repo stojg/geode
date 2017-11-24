@@ -13,12 +13,12 @@ func checkForError(name string) {
 	case 0:
 		return
 	case gl.INVALID_OPERATION:
-		fmt.Printf("GL Error: INVALID_OPERATION 0x0%x\n", err)
+		fmt.Printf("[%s] GL Error: INVALID_OPERATION 0x0%x\n", name, err)
 	case gl.INVALID_ENUM:
-		fmt.Printf("GL Error: INVALID_ENUM 0x0%x\n", err)
+		fmt.Printf("[%s] GL Error: INVALID_ENUM 0x0%x\n", name, err)
 	case gl.INVALID_FRAMEBUFFER_OPERATION:
-		fmt.Printf("GL Error: INVALID_FRAMEBUFFER_OPERATION 0x0%x\n", err)
+		fmt.Printf("[%s] GL Error: INVALID_FRAMEBUFFER_OPERATION 0x0%x\n", name, err)
 	default:
-		fmt.Printf("GL Error: 0x0%x\n", err)
+		fmt.Printf("[%s] GL Error: 0x0%x\n", name, err)
 	}
 }

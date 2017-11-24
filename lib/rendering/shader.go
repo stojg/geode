@@ -53,16 +53,19 @@ type Shader struct {
 }
 
 func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Material, engine components.RenderingEngine) {
-	projection := engine.GetMainCamera().GetProjection()
-	view := engine.GetMainCamera().GetView()
-	model := transform.Transformation()
 
 	for i, name := range s.resource.uniformNames {
-
 		uniformType := s.resource.uniformTypes[i]
 
 		// x_ signifies that this uniform is not set by the shader directly, ie a hack
 		if strings.Index(name, "x_") == 0 {
+			if uniformType == "sampler2D" {
+				samplerSlot := engine.GetSamplerSlot(name)
+				engine.GetTexture(name).Bind(samplerSlot)
+				gl.Uniform1i(s.resource.uniforms[name], int32(samplerSlot))
+			} else {
+				s.SetUniform(name, engine.GetVector3f(name))
+			}
 			continue
 		}
 
@@ -75,13 +78,13 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 
 		switch name {
 		case "lightMVP":
-			s.SetUniform(name, engine.GetActiveLight().ViewProjection().Mul4(model))
+			s.SetUniform(name, engine.GetActiveLight().ViewProjection().Mul4(transform.Transformation()))
 		case "projection":
-			s.SetUniform(name, projection)
+			s.SetUniform(name, engine.GetMainCamera().GetProjection())
 		case "model":
-			s.SetUniform(name, model)
+			s.SetUniform(name, transform.Transformation())
 		case "view":
-			s.SetUniform(name, view)
+			s.SetUniform(name, engine.GetMainCamera().GetView())
 		case "viewPos":
 			s.SetUniform(name, engine.GetMainCamera().Transform().Pos())
 		case "directionalLight":
@@ -101,7 +104,7 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 func (s *Shader) SetUniform(uniformName string, value interface{}) {
 	loc, ok := s.resource.uniforms[uniformName]
 	if !ok {
-		panic(fmt.Sprintf("no shader location found for uniform: %s", uniformName))
+		panic(fmt.Sprintf("no shader location found for uniform: '%s' in shader '%s'", uniformName, s.filename))
 	}
 	switch v := value.(type) {
 	case float32:
@@ -112,7 +115,8 @@ func (s *Shader) SetUniform(uniformName string, value interface{}) {
 		gl.UniformMatrix4fv(loc, 1, false, &v[0])
 	case mgl32.Vec3:
 		gl.Uniform3fv(loc, 1, &v[0])
-
+	default:
+		panic(fmt.Sprintf("unknown uniform type for '%s'", uniformName))
 	}
 }
 
@@ -191,7 +195,7 @@ func (s *Shader) AddUniform(glType, name string, structs map[string][]GLSLStruct
 	}
 	t := gl.GetUniformLocation(s.resource.Program, gl.Str(name+"\x00"))
 	if t < 0 {
-		fmt.Printf("uniform '%s' seems to not be used in script\n", name)
+		fmt.Printf("uniform '%s' seems to not be used for shader '%s'\n", name, s.filename)
 	}
 	s.resource.uniforms[name] = t
 }

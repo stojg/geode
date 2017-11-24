@@ -75,6 +75,10 @@ func (b *Spot) ShadowShader() components.Shader {
 	return b.shadowShader
 }
 
+func (b *Spot) ShadowTexture() components.Texture {
+	return b.shadowTexture
+}
+
 func (b *Spot) BindShadowTexture(samplerSlot uint32, samplerName string) {
 	gl.ActiveTexture(gl.TEXTURE0 + uint32(samplerSlot))
 	b.Shader().SetUniform(samplerName, int32(samplerSlot))

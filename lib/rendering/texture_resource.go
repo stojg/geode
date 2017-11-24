@@ -11,8 +11,9 @@ func NewTextureResource() *TextureResource {
 }
 
 type TextureResource struct {
-	id       uint32
-	refCount int
+	id            uint32
+	refCount      int
+	width, height int32
 }
 
 func (t *TextureResource) ID() uint32 {

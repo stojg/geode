@@ -1,7 +1,10 @@
 package components
 
 type Texture interface {
-	Bind(id uint32)
+	Bind(samplerSlot uint32)
+	BindAsRenderTarget()
+	Width() int32
+	Height() int32
 }
 
 type Material interface {

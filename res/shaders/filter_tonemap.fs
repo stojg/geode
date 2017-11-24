@@ -4,13 +4,13 @@ out vec4 FragColor;
 
 in vec2 TexCoords;
 
-uniform sampler2D hdrBuffer;
+uniform sampler2D x_filterTexture;
 
 void main()
 {
     const float gamma = 2.2;
     const float exposure = 0.5;
-    vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;
+    vec3 hdrColor = texture(x_filterTexture, TexCoords).rgb;
 
     // Exposure tone mapping
     vec3 mapped = vec3(1.0) - exp(-hdrColor * exposure);

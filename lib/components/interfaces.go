@@ -28,12 +28,9 @@ type Renderable interface {
 type ShadowCaster interface {
 	BindAsRenderTarget()
 	ShadowShader() Shader
+	ShadowTexture() Texture
 	BindShadowTexture(samplerSlot uint32, samplerName string)
 }
-
-//type ShaderInfo interface {
-//	Projection().
-//}
 
 type Light interface {
 	Shader() Shader
@@ -67,6 +64,11 @@ type RenderingEngine interface {
 	GetMainCamera() *Camera
 	GetActiveLight() Light
 	GetSamplerSlot(string) uint32
+	GetTexture(string) Texture
+	SetTexture(string, Texture)
+
+	GetVector3f(string) mgl32.Vec3
+	SetVector3f(string, mgl32.Vec3)
 }
 
 type Engine interface {
