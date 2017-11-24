@@ -13,11 +13,14 @@ import (
 func NewSpot(r, g, b, intensity, angle float32) *Spot {
 
 	radians := float32(math.Cos(float64(mgl32.DegToRad(angle))))
+	const nearPlane float32 = 0.1
+	const farPlane float32 = 20
 
 	return &Spot{
 		BaseLight: BaseLight{
-			color:  mgl32.Vec3{r, g, b}.Mul(intensity),
-			shader: rendering.NewShader("forward_spot"),
+			color:      mgl32.Vec3{r, g, b}.Mul(intensity),
+			shader:     rendering.NewShader("forward_spot"),
+			shadowInfo: NewShadowInfo(mgl32.Ortho(-8, 8, -8, 8, nearPlane, farPlane)),
 		},
 		PointLight: PointLight{
 			constant: 1,
@@ -27,8 +30,8 @@ func NewSpot(r, g, b, intensity, angle float32) *Spot {
 		direction: mgl32.Vec3{0, 0, 0},
 		cutoff:    radians,
 
-		shadowBuffer: framebuffer.NewShadow(1024, 1024),
-		shadowShader: rendering.NewShader("shadow"),
+		shadowTexture: framebuffer.NewTexture(0, 512*2, 512*2, gl.RG32F, gl.RGBA, gl.FLOAT, gl.LINEAR, true),
+		shadowShader:  rendering.NewShader("shadow"),
 	}
 }
 
@@ -40,8 +43,8 @@ type Spot struct {
 	// radians
 	cutoff float32
 
-	shadowBuffer *framebuffer.FBO
-	shadowShader components.Shader
+	shadowTexture *framebuffer.Texture
+	shadowShader  components.Shader
 }
 
 func (c *Spot) Direction() mgl32.Vec3 {
@@ -58,21 +61,14 @@ func (b *Spot) Cutoff() float32 {
 func (b *Spot) AddToEngine(e components.Engine) {
 	e.GetRenderingEngine().AddLight(b)
 }
-
 func (b *Spot) ViewProjection() mgl32.Mat4 {
-	const nearPlane float32 = 0.1
-	const farPlane float32 = 30
-	lightProjection := mgl32.Ortho(-8, 8, -8, 8, nearPlane, farPlane)
-	//lightProjection := mgl32.Perspective(1.2, float32(1024/1024), nearPlane, farPlane)
 	lightView := mgl32.LookAt(b.Position().X(), b.Position().Y(), b.Position().Z(), 0, 0, 0, 0, 1, 0)
-	return lightProjection.Mul4(lightView)
+	return b.shadowInfo.Projection().Mul4(lightView)
 }
 
-func (b *Spot) BindShadowBuffer() {
-	b.shadowBuffer.Bind()
-	b.shadowBuffer.Texture().SetViewPort()
-	gl.Enable(gl.DEPTH_TEST)
-	gl.Clear(gl.DEPTH_BUFFER_BIT)
+func (b *Spot) BindAsRenderTarget() {
+	b.shadowTexture.BindAsRenderTarget()
+	b.shadowTexture.SetViewPort()
 }
 
 func (b *Spot) ShadowShader() components.Shader {
@@ -82,5 +78,5 @@ func (b *Spot) ShadowShader() components.Shader {
 func (b *Spot) BindShadowTexture(samplerSlot uint32, samplerName string) {
 	gl.ActiveTexture(gl.TEXTURE0 + uint32(samplerSlot))
 	b.Shader().SetUniform(samplerName, int32(samplerSlot))
-	gl.BindTexture(gl.TEXTURE_2D, b.shadowBuffer.Texture().ID())
+	gl.BindTexture(gl.TEXTURE_2D, b.shadowTexture.ID())
 }

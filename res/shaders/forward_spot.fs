@@ -32,65 +32,55 @@ struct SpotLight
     float cutoff;
 };
 
-uniform sampler2D diffuse;
-uniform mat4 view;
-
 in vec2 TexCoord;
 in vec3 LightPos;
 in vec3 Normal;
 in vec3 FragPos;
-
-uniform SpotLight spotLight;
+in vec3 ViewDirection;
 
 out vec4 fragColor;
 
-float specularStrength = 0.5;
+const float specularStrength = 0.5;
+
+uniform sampler2D diffuse;
+uniform SpotLight spotLight;
+uniform mat4 view;
 
 // shadow
 in vec4 FragPosLightSpace;
 uniform sampler2D x_shadowMap;
 
-const float near_plane = 0.1;
-const float far_plane = 30.0;
-float LinearizeDepth(float depth)
+float sampleVarianceShadowMap(sampler2D shadowMap, vec2 coords, float compare)
 {
-    float z = depth * 2.0 - 1.0; // Back to NDC
-    return (2.0 * near_plane * far_plane) / (far_plane + near_plane - z * (far_plane - near_plane)) ;
+    vec2 moments = texture(shadowMap, coords).xy;
+    float p = step(moments.x, compare);
+    float variance = max(moments.y - moments.x * moments.x, 0.0000007);
+    float d = compare - moments.x;
+    float pMax = variance / (variance + d*d);
+    // try to prevent light bleeding
+    pMax = clamp((pMax-0.4)/(1-0.2), 0, 1);
+    return min(max(p, pMax), 1.0);
 }
 
 float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
 {
-    // perform perspective divide
+    // perform perspective divide, since it's not done automatically for us
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-    // transform to [0,1] range
+    // transform from [-0.5,0.5] to [0,1] range so we can use it for sampling
     projCoords = projCoords * 0.5 + 0.5;
 
     // dont shadow things outside the light frustrum far plane
     if(projCoords.z > 1.0) {
         return 0.0;
     }
-
-    float shadow = 0.0;
-    float bias = max(0.01 * (1.0 - dot(normal, lightDir)), 0.01);
-
-    vec2 texelSize = 0.5 / textureSize(x_shadowMap, 0);
-    // Percentage Closing Filter
-    for(int x = -1; x <= 1; ++x) {
-        for(int y = -1; y <= 1; ++y) {
-            //if ( texture( shadowMap, (ShadowCoord.xy/ShadowCoord.w) ).z  <  (ShadowCoord.z-bias)/ShadowCoord.w )
-            float pcfDepth = texture(x_shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
-            shadow += projCoords.z - bias > pcfDepth ? 1.0 : 0.0;
-        }
-    }
-    return shadow /= 9.0;
+    return sampleVarianceShadowMap(x_shadowMap, projCoords.xy, projCoords.z);
 }
 
 void main() {
 
-    vec3 norm = normalize(Normal);
+    vec3 norm = Normal;
 
     vec3 lightDiff = LightPos - FragPos;
-
     float lightDistance = length(lightDiff);
     vec3 lightDir = normalize(lightDiff);
 
@@ -107,9 +97,7 @@ void main() {
 
     vec3 diffuseLight = diff * spotLight.pointLight.base.color;
 
-    vec3 viewDir = normalize(-FragPos);
-    vec3 halfwayDir = normalize(lightDir + viewDir);
-
+    vec3 halfwayDir = normalize(lightDir + ViewDirection);
     vec3 reflectDir = reflect(-lightDir, norm);
     float spec = pow(max(dot(norm, halfwayDir), 0.0), 128);
     vec3 specular = specularStrength * spec * spotLight.pointLight.base.color;
@@ -120,6 +108,5 @@ void main() {
     fragColor = texture(diffuse, TexCoord);
     fragColor *= vec4((diffuseLight + specular), 1.0f);
     fragColor *= (1-shadow);
-
-    //fragColor = texture(diffuse, TexCoord) * vec4(diffuseLight + specular, 1.0f) * attenuation;
+    fragColor *= attenuation;
 }

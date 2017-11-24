@@ -74,8 +74,8 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 		}
 
 		switch name {
-		case "lightViewProjection":
-			s.SetUniform(name, engine.GetActiveLight().ViewProjection())
+		case "lightMVP":
+			s.SetUniform(name, engine.GetActiveLight().ViewProjection().Mul4(model))
 		case "projection":
 			s.SetUniform(name, projection)
 		case "model":

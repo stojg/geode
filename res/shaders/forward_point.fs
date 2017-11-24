@@ -38,6 +38,7 @@ in vec2 TexCoord;
 in vec3 LightPos;
 in vec3 Normal;
 in vec3 FragPos;
+in vec3 ViewDirection;
 
 uniform PointLight pointLight;
 
@@ -47,7 +48,7 @@ float specularStrength = 0.5;
 
 void main() {
 
-    vec3 norm = normalize(Normal);
+    vec3 norm = Normal;
 
     vec3 lightDiff = LightPos - FragPos;
     float lightDistance = length(lightDiff);
@@ -59,11 +60,12 @@ void main() {
 
     vec3 diffuseLight = diff * pointLight.base.color;
 
-    vec3 viewDir = normalize(-FragPos);
-    vec3 halfwayDir = normalize(lightDir + viewDir);
+    vec3 halfwayDir = normalize(lightDir + ViewDirection);
     vec3 reflectDir = reflect(-lightDir, norm);
     float spec = pow(max(dot(norm, halfwayDir), 0.0), 128);
     vec3 specular = specularStrength * spec * pointLight.base.color;
 
-    fragColor = texture(diffuse, TexCoord) * vec4(diffuseLight + specular, 1.0f) * attenuation;
+    fragColor = texture(diffuse, TexCoord);
+    fragColor *= vec4((diffuseLight + specular), 1.0f);
+    fragColor *= attenuation;
 }

@@ -1,16 +1,71 @@
 package framebuffer
 
-import "github.com/go-gl/gl/v4.1-core/gl"
+import (
+	"fmt"
 
-func NewTexture(attachment uint32, internalformat int32, format, xtype uint32, width int, height int) *Texture {
+	"github.com/go-gl/gl/v4.1-core/gl"
+)
+
+func NewTexture(att uint32, width int, height int, internalFormat int32, format, xtype uint32, filter int32, clamp bool) *Texture {
 	texture := &Texture{
-		attachment: gl.COLOR_ATTACHMENT0 + attachment,
+		attachment: gl.COLOR_ATTACHMENT0 + att,
 		width:      int32(width),
 		height:     int32(height),
 	}
 	gl.GenTextures(1, &texture.id)
 	gl.BindTexture(gl.TEXTURE_2D, texture.id)
-	gl.TexImage2D(gl.TEXTURE_2D, 0, internalformat, texture.width, texture.height, 0, format, xtype, nil)
+
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter)
+
+	if clamp {
+		borderColor := [4]float32{1.0, 1.0, 1.0, 1.0}
+		//borderColor := [4]float32{0, 0, 0, 0}
+		gl.TexParameterfv(gl.TEXTURE_2D, gl.TEXTURE_BORDER_COLOR, &borderColor[0])
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_BORDER)
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_BORDER)
+	}
+
+	// @todo, check for mipmap or set the below
+	if filter == gl.NEAREST_MIPMAP_NEAREST ||
+		filter == gl.NEAREST_MIPMAP_LINEAR ||
+		filter == gl.LINEAR_MIPMAP_NEAREST ||
+		filter == gl.LINEAR_MIPMAP_LINEAR {
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_BASE_LEVEL, 0)
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 4)
+		gl.GenerateMipmap(gl.TEXTURE_2D)
+
+	} else {
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_BASE_LEVEL, 0)
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0)
+	}
+
+	gl.TexImage2D(gl.TEXTURE_2D, 0, internalFormat, texture.width, texture.height, 0, format, xtype, nil)
+
+	// create fbo
+	gl.GenFramebuffers(1, &texture.fbo)
+	gl.BindFramebuffer(gl.FRAMEBUFFER, texture.fbo)
+
+	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture.id, 0)
+
+	hasDepth := true
+
+	if hasDepth {
+		gl.GenRenderbuffers(1, &texture.rbo)
+		gl.BindRenderbuffer(gl.RENDERBUFFER, texture.rbo)
+		gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT, int32(width), int32(height))
+		gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, texture.rbo)
+	}
+
+	var attachments = [1]uint32{gl.COLOR_ATTACHMENT0}
+	gl.DrawBuffers(int32(len(attachments)), &attachments[0])
+
+	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
+		fmt.Println("Shadow Framebuffer creation failed")
+	}
+
+	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+
 	return texture
 }
 
@@ -19,6 +74,9 @@ type Texture struct {
 	attachment uint32
 	width      int32
 	height     int32
+
+	fbo uint32
+	rbo uint32
 }
 
 func (t *Texture) ID() uint32 {
@@ -29,8 +87,11 @@ func (t *Texture) Bind() {
 	gl.BindTexture(gl.TEXTURE_2D, t.id)
 }
 
-func (t *Texture) DrawInto() {
-	gl.DrawBuffer(t.attachment)
+func (t *Texture) BindAsRenderTarget() {
+	gl.BindFramebuffer(gl.FRAMEBUFFER, t.fbo)
+	gl.BindTexture(gl.TEXTURE_2D, 0)
+	//this adds a couple of ms to the render time?
+	//gl.DrawBuffer(t.attachment)
 }
 
 func (t *Texture) SetViewPort() {

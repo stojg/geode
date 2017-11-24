@@ -1,6 +1,14 @@
 #version 410 core
 
+out vec4 fragColor;
+
 void main()
 {
-    // gl_FragDepth = gl_FragCoord.z;
+    float depth = gl_FragCoord.z;
+    // Adjusting moments (this is sort of bias per pixel) using partial derivative
+    float dx = dFdx(depth);
+    float dy = dFdx(depth);
+    float moment2 = depth * depth + 0.25 * (dx * dx + dy * dy);
+
+    fragColor = vec4(depth, moment2, 0, 0);
 }

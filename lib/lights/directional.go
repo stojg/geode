@@ -10,25 +10,25 @@ import (
 
 func NewDirectional(r, g, b, intensity float32) *Directional {
 	const nearPlane float32 = 0.1
-	const farPlane float32 = 10
+	const farPlane float32 = 20
 
 	return &Directional{
 		BaseLight: BaseLight{
-			color:  mgl32.Vec3{r, g, b}.Mul(intensity),
-			shader: rendering.NewShader("forward_directional"),
-
+			color:      mgl32.Vec3{r, g, b}.Mul(intensity),
+			shader:     rendering.NewShader("forward_directional"),
 			shadowInfo: NewShadowInfo(mgl32.Ortho(-8, 8, -8, 8, nearPlane, farPlane)),
 		},
-		shadowBuffer: framebuffer.NewShadow(1024, 1024),
-		shadowShader: rendering.NewShader("shadow"),
+		shadowTexture: framebuffer.NewTexture(0, 512*2, 512*2, gl.RG32F, gl.RGB, gl.FLOAT, gl.LINEAR, true),
+		shadowShader:  rendering.NewShader("shadow"),
 	}
 }
 
 type Directional struct {
 	BaseLight
 
-	shadowBuffer *framebuffer.FBO
-	shadowShader components.Shader
+	shadowTexture *framebuffer.Texture
+	shadowShader  components.Shader
+	view          mgl32.Mat4
 }
 
 func (b *Directional) AddToEngine(e components.Engine) {
@@ -44,11 +44,9 @@ func (b *Directional) ViewProjection() mgl32.Mat4 {
 	return b.shadowInfo.Projection().Mul4(lightView)
 }
 
-func (b *Directional) BindShadowBuffer() {
-	b.shadowBuffer.Bind()
-	b.shadowBuffer.Texture().SetViewPort()
-	gl.Enable(gl.DEPTH_TEST)
-	gl.Clear(gl.DEPTH_BUFFER_BIT)
+func (b *Directional) BindAsRenderTarget() {
+	b.shadowTexture.BindAsRenderTarget()
+	b.shadowTexture.SetViewPort()
 }
 
 func (b *Directional) ShadowShader() components.Shader {
@@ -58,5 +56,5 @@ func (b *Directional) ShadowShader() components.Shader {
 func (b *Directional) BindShadowTexture(samplerSlot uint32, samplerName string) {
 	gl.ActiveTexture(gl.TEXTURE0 + uint32(samplerSlot))
 	b.Shader().SetUniform(samplerName, int32(samplerSlot))
-	gl.BindTexture(gl.TEXTURE_2D, b.shadowBuffer.Texture().ID())
+	gl.BindTexture(gl.TEXTURE_2D, b.shadowTexture.ID())
 }

@@ -59,7 +59,6 @@ func (m *Engine) run() {
 	m.isRunning = true
 
 	var renderFrames int
-	var updateFrames int
 	var frameCounter time.Duration
 
 	var t time.Duration
@@ -86,16 +85,14 @@ func (m *Engine) run() {
 			accumulator -= dt
 			t += dt
 			frameCounter += dt
-			updateFrames++
 		}
 
 		m.render()
 		renderFrames++
 
-		if frameCounter >= time.Second {
-			fmt.Printf("%s, %d fps, %d updates\n", time.Second/time.Duration(renderFrames), renderFrames, updateFrames)
+		if frameCounter >= time.Second*5 {
+			fmt.Printf("%s, %d fps\n", time.Second*5/time.Duration(renderFrames), renderFrames/5)
 			renderFrames = 0
-			updateFrames = 0
 			frameCounter = 0
 		}
 	}

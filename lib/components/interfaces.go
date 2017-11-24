@@ -26,7 +26,7 @@ type Renderable interface {
 }
 
 type ShadowCaster interface {
-	BindShadowBuffer()
+	BindAsRenderTarget()
 	ShadowShader() Shader
 	BindShadowTexture(samplerSlot uint32, samplerName string)
 }

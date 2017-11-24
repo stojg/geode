@@ -10,7 +10,7 @@ import (
 
 func NewEngine(width, height int) *Engine {
 
-	gl.ClearColor(0.03, 0.04, 0.05, 0)
+	gl.ClearColor(0.00, 0.00, 0.00, 1)
 
 	gl.FrontFace(gl.CCW)
 	gl.CullFace(gl.BACK)
@@ -18,7 +18,7 @@ func NewEngine(width, height int) *Engine {
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LESS)
 
-	gl.Enable(gl.MULTISAMPLE)
+	gl.Disable(gl.MULTISAMPLE)
 	gl.Disable(gl.FRAMEBUFFER_SRGB)
 
 	samplerMap := make(map[string]uint32)
@@ -35,8 +35,8 @@ func NewEngine(width, height int) *Engine {
 
 		ambientShader: NewShader("forward_ambient"),
 
-		hdrBuffer: framebuffer.NewHDR(width, height),
-		hdrShader: NewShader("screen_hdr"),
+		hdrTexture: framebuffer.NewTexture(0, width, height, gl.RGBA32F, gl.RGBA, gl.FLOAT, gl.LINEAR, false),
+		hdrShader:  NewShader("screen_hdr"),
 	}
 }
 
@@ -53,8 +53,8 @@ type Engine struct {
 
 	ambientShader *Shader
 
-	hdrBuffer *framebuffer.FBO
-	hdrShader *Shader
+	hdrTexture *framebuffer.Texture
+	hdrShader  *Shader
 }
 
 func (e *Engine) Render(object components.Renderable) {
@@ -64,18 +64,19 @@ func (e *Engine) Render(object components.Renderable) {
 	checkForError("renderer.Engine.Render [start]")
 
 	// shadow map
+	gl.Enable(gl.DEPTH_TEST)
+	gl.CullFace(gl.FRONT)
 	for _, l := range e.lights {
 		caster, ok := l.(components.ShadowCaster)
 		if !ok {
 			continue
 		}
 		e.activeLight = l
-		caster.BindShadowBuffer()
-		//gl.CullFace(gl.FRONT)
+		caster.BindAsRenderTarget()
+		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 		object.RenderAll(caster.ShadowShader(), e)
-		//gl.CullFace(gl.BACK)
 		// debug
-		//gl.Viewport(0, 0, int32(e.width), int32(e.height))
+		//gl.Viewport(0, 0, e.width, e.height)
 		//gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 		//gl.Disable(gl.DEPTH_TEST)
 		//caster.BindShadow()
@@ -84,13 +85,13 @@ func (e *Engine) Render(object components.Renderable) {
 		//e.screenQuad.Draw()
 		//return
 	}
+	gl.CullFace(gl.BACK)
+
+	e.hdrTexture.BindAsRenderTarget()
+	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+	e.hdrTexture.SetViewPort()
 
 	// ambient pass
-	e.hdrBuffer.Bind()
-	e.hdrBuffer.Texture().SetViewPort()
-	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-	gl.Enable(gl.DEPTH_TEST)
-
 	object.RenderAll(e.ambientShader, e)
 
 	// light pass
@@ -113,13 +114,12 @@ func (e *Engine) Render(object components.Renderable) {
 
 	// move to default framebuffer buffer
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-
+	gl.Viewport(0, 0, e.width, e.height)
 	// disable depth test so screen-space quad isn't discarded due to depth test
 	gl.Disable(gl.DEPTH_TEST)
-	e.hdrBuffer.BindTexture()
+	e.hdrTexture.Bind()
 	e.hdrShader.Bind()
 	gl.Clear(gl.COLOR_BUFFER_BIT)
-	gl.Viewport(0, 0, e.width, e.height)
 	e.screenQuad.Draw()
 
 	checkForError("renderer.Engine.Render [end]")
