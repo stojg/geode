@@ -114,7 +114,6 @@ func (e *Engine) Render(object components.Renderable) {
 		gl.Clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
 		object.RenderAll(e.shadowShader, e)
 
-		//gl.Clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
 		e.blurShadowMap(e.shadowTextures[i], 2)
 	}
 

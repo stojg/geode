@@ -12,8 +12,11 @@ func ConvertToVertices(meshdata []float32) []Vertex {
 
 	for i := 0; i < len(meshdata); i += stride {
 		var vertex Vertex
+		// position
 		copy(vertex.Pos[:], meshdata[i:i+3])
+		// normals
 		copy(vertex.Normal[:], meshdata[i+3:i+6])
+		// uv
 		copy(vertex.TexCoords[:], meshdata[i+6:i+8])
 		vertices = append(vertices, vertex)
 	}

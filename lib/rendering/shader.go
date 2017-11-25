@@ -29,8 +29,8 @@ func NewShader(fileName string) *Shader {
 		s.resource = NewShaderResource()
 	}
 
-	vertexShaderText := s.loadShader(fileName + ".vs")
-	fragmentShaderText := s.loadShader(fileName + ".fs")
+	vertexShaderText := s.loadShader(fileName + ".vert")
+	fragmentShaderText := s.loadShader(fileName + ".frag")
 
 	vShader := s.addVertexShader(vertexShaderText)
 	defer s.cleanUp(vShader)
