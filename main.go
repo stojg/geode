@@ -56,14 +56,14 @@ func run() error {
 	dirLight := core.NewGameObject()
 	dirLight.Transform().SetPos(mgl32.Vec3{8, 9, 1})
 	dirLight.Transform().SetScale(mgl32.Vec3{0.5, 0.1, 0.5})
-	dirLight.AddComponent(lights.NewDirectional(0.98, 0.98, 0.98, 1))
+	dirLight.AddComponent(lights.NewDirectional(0.9, 0.9, 0.9, 1))
 	//core.LoadModel(dirLight, "res/meshes/cube/model.obj", tealMaterial)
 	engine.AddObject(dirLight)
 
 	pointLight := core.NewGameObject()
 	pointLight.Transform().SetPos(mgl32.Vec3{-3, 1, 0})
 	pointLight.Transform().SetScale(mgl32.Vec3{0.05, 0.05, 0.05})
-	pointLight.AddComponent(lights.NewPoint(1, 0, 0, 5))
+	pointLight.AddComponent(lights.NewPoint(1, 0, 0, 1))
 	//core.LoadModel(pointLight, "res/meshes/cube/model.obj", tealMaterial)
 	engine.AddObject(pointLight)
 
@@ -100,7 +100,7 @@ func run() error {
 		cube := core.NewGameObject()
 		cube.Transform().SetPos(mgl32.Vec3{4, 3.5, 0})
 		cube.Transform().SetScale(mgl32.Vec3{0.5, 0.5, 0.5})
-		core.LoadModel(cube, "res/meshes/cube/model.obj", whiteMaterial)
+		core.LoadModel(cube, "res/meshes/cube/model.obj", tealMaterial)
 		engine.AddObject(cube)
 	}
 

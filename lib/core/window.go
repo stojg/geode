@@ -27,7 +27,6 @@ func NewWindow(width, height int, title string) (*Window, error) {
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
-	glfw.WindowHint(glfw.Samples, 4)
 	glfw.WindowHint(glfw.SRGBCapable, glfw.True)
 
 	// request a window
@@ -39,7 +38,7 @@ func NewWindow(width, height int, title string) (*Window, error) {
 
 	w.inst.MakeContextCurrent()
 	// disable or enable vertical refresh (vsync)
-	glfw.SwapInterval(0)
+	glfw.SwapInterval(1)
 
 	// this is the actual numVertices we got
 	fbw, fbh := window.GetFramebufferSize()

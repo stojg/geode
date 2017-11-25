@@ -21,7 +21,7 @@ func NewEngine(width, height int) *Engine {
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LESS)
 
-	gl.Enable(gl.MULTISAMPLE)
+	gl.Disable(gl.MULTISAMPLE)
 	gl.Disable(gl.FRAMEBUFFER_SRGB)
 
 	samplerMap := make(map[string]uint32)
@@ -40,11 +40,12 @@ func NewEngine(width, height int) *Engine {
 		screenQuad: NewScreenQuad(),
 
 		nullShader:    NewShader("filter_null"),
+		fxaaShader:    NewShader("filter_fxaa"),
 		gaussShader:   NewShader("filter_gauss"),
 		ambientShader: NewShader("forward_ambient"),
 		shadowShader:  NewShader("shadow_vsm"),
 
-		hdrTexture:    framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA32F, gl.RGBA, gl.FLOAT, gl.NEAREST, false),
+		screenTexture: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA32F, gl.RGBA, gl.FLOAT, gl.NEAREST, false),
 		toneMapShader: NewShader("filter_tonemap"),
 
 		fullScreenTemp: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA32F, gl.RGBA, gl.FLOAT, gl.NEAREST, false),
@@ -78,8 +79,9 @@ type Engine struct {
 	ambientShader *Shader
 	toneMapShader *Shader
 	shadowShader  *Shader
+	fxaaShader    *Shader
 
-	hdrTexture *framebuffer.Texture
+	screenTexture *framebuffer.Texture
 
 	shadowTextures    [maxShadowMaps]components.Texture
 	tempShadowTexture components.Texture
@@ -114,13 +116,13 @@ func (e *Engine) Render(object components.Renderable) {
 		gl.Clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
 		object.RenderAll(e.shadowShader, e)
 
-		e.blurShadowMap(e.shadowTextures[i], 2)
+		e.blurShadowMap(e.shadowTextures[i], 1)
 	}
 
 	//gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-	e.hdrTexture.BindAsRenderTarget()
-	e.hdrTexture.SetViewPort()
-	gl.ClearColor(0.03, 0.03, 0.03, 1)
+	e.screenTexture.BindAsRenderTarget()
+	e.screenTexture.SetViewPort()
+	gl.ClearColor(0.541, 0.616, 0.671, 1)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 	// ambient pass
@@ -143,7 +145,8 @@ func (e *Engine) Render(object components.Renderable) {
 	gl.DepthMask(true)
 	gl.Disable(gl.BLEND)
 
-	e.applyFilter(e.toneMapShader, e.hdrTexture, nil)
+	e.applyFilter(e.toneMapShader, e.screenTexture, e.fullScreenTemp)
+	e.applyFilter(e.fxaaShader, e.fullScreenTemp, nil)
 
 	checkForError("renderer.Engine.Render [end]")
 }
