@@ -8,6 +8,5 @@ uniform sampler2D x_filterTexture;
 
 void main()
 {
-    vec3 color = texture(x_filterTexture, TexCoords).rgb;
-    FragColor = vec4(vec3(1), 1.0);
+    FragColor = vec4(texture(x_filterTexture, TexCoords).rgb, 1.0);
 }
