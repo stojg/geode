@@ -14,6 +14,7 @@ import (
 )
 
 var loadedShaders = make(map[string]*ShaderResource)
+var shaderInUse uint32 = 2 ^ 32 - 1
 
 func NewShader(fileName string) *Shader {
 
@@ -144,7 +145,10 @@ func (s *Shader) setUniformSpotLight(uniformName string, spotLight components.Sp
 }
 
 func (s *Shader) Bind() {
-	gl.UseProgram(s.resource.Program)
+	if shaderInUse != s.resource.Program {
+		shaderInUse = s.resource.Program
+		gl.UseProgram(s.resource.Program)
+	}
 }
 
 func (s *Shader) loadShader(filepath string) string {

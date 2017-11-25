@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math"
 	"math/rand"
 	"os"
 
@@ -35,7 +36,7 @@ func run() error {
 	cameraObject := core.NewGameObject()
 	cameraObject.Transform().SetPos(mgl32.Vec3{0, 3, 6})
 	cameraObject.Transform().LookAt(mgl32.Vec3{0, 1, 0}, mgl32.Vec3{0, 1, 0})
-	cameraObject.AddComponent(components.NewCamera(70, width, height, 0.01, 100))
+	cameraObject.AddComponent(components.NewCamera(70, width, height, 0.01, 1000))
 	cameraObject.AddComponent(&components.FreeMove{})
 	cameraObject.AddComponent(components.NewFreelook(width, height))
 	engine.AddObject(cameraObject)
@@ -53,26 +54,26 @@ func run() error {
 	engine.AddObject(floor)
 
 	dirLight := core.NewGameObject()
-	dirLight.Transform().SetPos(mgl32.Vec3{2, 10, 1})
+	dirLight.Transform().SetPos(mgl32.Vec3{8, 10, 1})
 	dirLight.Transform().SetScale(mgl32.Vec3{0.5, 0.1, 0.5})
-	dirLight.AddComponent(lights.NewDirectional(0.98, 0.98, 0.98, 1))
+	dirLight.AddComponent(lights.NewDirectional(0.98, 0.98, 0.98, 0.4))
 	//core.LoadModel(dirLight, "res/meshes/cube/model.obj", tealMaterial)
 	engine.AddObject(dirLight)
 
-	//pointLight := core.NewGameObject()
-	//pointLight.Transform().SetPos(mgl32.Vec3{2, 0.5, 0})
-	//pointLight.Transform().SetScale(mgl32.Vec3{0.05, 0.05, 0.05})
-	//pointLight.AddComponent(lights.NewPoint(1, 0, 0, 5))
+	pointLight := core.NewGameObject()
+	pointLight.Transform().SetPos(mgl32.Vec3{-3, 1, 0})
+	pointLight.Transform().SetScale(mgl32.Vec3{0.05, 0.05, 0.05})
+	pointLight.AddComponent(lights.NewPoint(1, 0, 0, 5))
 	//core.LoadModel(pointLight, "res/meshes/cube/model.obj", tealMaterial)
-	//engine.AddObject(pointLight)
-	//
-	//spot := core.NewGameObject()
-	//spot.Transform().SetPos(mgl32.Vec3{-6, 4, 4})
-	//spot.Transform().SetScale(mgl32.Vec3{0.05, 0.05, 0.3})
-	//spot.Transform().LookAt(mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
-	//spot.AddComponent(lights.NewSpot(0.8, 0.9, 1, 5, 22))
+	engine.AddObject(pointLight)
+
+	spot := core.NewGameObject()
+	spot.Transform().SetPos(mgl32.Vec3{-5, 2, 5})
+	spot.Transform().SetScale(mgl32.Vec3{0.05, 0.05, 0.3})
+	spot.Transform().LookAt(mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
+	spot.AddComponent(lights.NewSpot(0.9, 0.4, 0.1, 20, 22))
 	//core.LoadModel(spot, "res/meshes/cube/model.obj", tealMaterial)
-	//engine.AddObject(spot)
+	engine.AddObject(spot)
 
 	bot := core.NewGameObject()
 	bot.Transform().SetPos(mgl32.Vec3{0, 0, 0})
@@ -81,13 +82,23 @@ func run() error {
 	engine.AddObject(bot)
 
 	cube := core.NewGameObject()
+	cube.Transform().SetScale(mgl32.Vec3{1, 2, 8})
 	cube.Transform().SetPos(mgl32.Vec3{4, 1, 0})
 	core.LoadModel(cube, "res/meshes/cube/model.obj", whiteMaterial)
 	engine.AddObject(cube)
 
 	{
 		cube := core.NewGameObject()
-		cube.Transform().SetPos(mgl32.Vec3{4, 3, 0})
+		cube.Transform().SetScale(mgl32.Vec3{1, 2, 8})
+		cube.Transform().SetPos(mgl32.Vec3{-5, 1, -7})
+		cube.Transform().SetRot(mgl32.QuatRotate(math.Pi/2, mgl32.Vec3{0, 1, 0}))
+		core.LoadModel(cube, "res/meshes/cube/model.obj", whiteMaterial)
+		engine.AddObject(cube)
+	}
+
+	{
+		cube := core.NewGameObject()
+		cube.Transform().SetPos(mgl32.Vec3{4, 3.5, 0})
 		cube.Transform().SetScale(mgl32.Vec3{0.5, 0.5, 0.5})
 		core.LoadModel(cube, "res/meshes/cube/model.obj", whiteMaterial)
 		engine.AddObject(cube)

@@ -25,19 +25,17 @@ type Renderable interface {
 	RenderAll(shader Shader, engine RenderingEngine)
 }
 
-type ShadowCaster interface {
-	BindAsRenderTarget()
-	ShadowShader() Shader
-	ShadowTexture() Texture
-	BindShadowTexture(samplerSlot uint32, samplerName string)
+type ShadowInfo interface {
+	Projection() mgl32.Mat4
 }
 
 type Light interface {
 	Shader() Shader
-	//ShadowInfo() ShaderInfo
 	Color() mgl32.Vec3
 	Position() mgl32.Vec3
 	ViewProjection() mgl32.Mat4
+	ShadowInfo() ShadowInfo
+	ShadowCaster() bool
 }
 
 type DirectionalLight interface {

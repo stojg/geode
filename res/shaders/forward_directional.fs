@@ -53,11 +53,12 @@ float sampleVarianceShadowMap(sampler2D shadowMap, vec2 coords, float compare)
 {
     vec2 moments = texture(shadowMap, coords).xy;
     float p = step(moments.x, compare);
-    float variance = max(moments.y - moments.x * moments.x, 0.0000007);
+
+    float variance = max(moments.y - moments.x * moments.x, 0.000001);
     float d = compare - moments.x;
     float pMax = variance / (variance + d*d);
-    // try to prevent light bleeding
-    pMax = clamp((pMax-0.4)/(1-0.2), 0, 1);
+    // try to prevent light bleeding with linstep
+    //pMax = clamp((pMax-0.4)/(1-0.2), 0, 1);
     return min(max(p, pMax), 1.0);
 }
 
@@ -72,7 +73,7 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
     if(projCoords.z > 1.0) {
         return 0.0;
     }
-    return sampleVarianceShadowMap(x_shadowMap, projCoords.xy, projCoords.z);
+    return sampleVarianceShadowMap(x_shadowMap, projCoords.xy, projCoords.z - 0.02);
 }
 
 void main() {

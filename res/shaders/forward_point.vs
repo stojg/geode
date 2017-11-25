@@ -48,8 +48,8 @@ out vec3 LightPos;
 
 // shadow & light
 uniform PointLight pointLight;
-// uniform mat4 lightMVP; // @todo - implement
-// out vec4 FragPosLightSpace;  @todo - implement
+uniform mat4 lightMVP;
+out vec4 FragPosLightSpace;
 
 void main() {
     gl_Position = projection * view * model * vec4(aPosition, 1.0);
@@ -60,5 +60,5 @@ void main() {
     TexCoord = aTexCoord;
 
     LightPos = vec3(view * vec4(pointLight.position, 1.0));
-    // FragPosLightSpace = lightMVP * vec4(aPosition, 1.0);
+    FragPosLightSpace = lightMVP * vec4(aPosition, 1.0);
 }

@@ -28,22 +28,12 @@ type BaseLight struct {
 	shader     components.Shader
 }
 
-func (b *BaseLight) ShadowInfo() *ShadowInfo {
+func (b *BaseLight) ShadowInfo() components.ShadowInfo {
 	return b.shadowInfo
 }
 
 func (b *BaseLight) setShadowInfo(shadowInfo *ShadowInfo) {
-	//if b.shadowInfo != nil {
-	//	b.shadowInfo.Delete()
-	//}
 	b.shadowInfo = shadowInfo
-}
-
-func (b *BaseLight) SetShader(shader components.Shader) {
-	//if b.shadowInfo != nil {
-	//	b.shadowInfo.Delete()
-	//}
-	b.shader = shader
 }
 
 func (b *BaseLight) Shader() components.Shader {
@@ -60,6 +50,10 @@ func (b *BaseLight) SetColor(color mgl32.Vec3) {
 
 func (b *BaseLight) Position() mgl32.Vec3 {
 	return b.Parent().Transform().Pos()
+}
+
+func (b *BaseLight) ShadowCaster() bool {
+	return b.shadowInfo != nil
 }
 
 func (b *BaseLight) SetShadowTexture(slot uint32, texture *framebuffer.Texture) {}

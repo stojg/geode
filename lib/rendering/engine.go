@@ -9,6 +9,8 @@ import (
 	"github.com/stojg/graphics/lib/rendering/framebuffer"
 )
 
+const maxShadowMaps = 5
+
 func NewEngine(width, height int) *Engine {
 
 	gl.ClearColor(0.00, 0.00, 0.00, 1)
@@ -19,7 +21,7 @@ func NewEngine(width, height int) *Engine {
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LESS)
 
-	gl.Disable(gl.MULTISAMPLE)
+	gl.Enable(gl.MULTISAMPLE)
 	gl.Disable(gl.FRAMEBUFFER_SRGB)
 
 	samplerMap := make(map[string]uint32)
@@ -34,20 +36,24 @@ func NewEngine(width, height int) *Engine {
 		textures:   make(map[string]components.Texture),
 		uniforms:   make(map[string]mgl32.Vec3),
 
-		screenQuad:  NewScreenQuad(),
-		nullShader:  NewShader("filter_null"),
-		gaussShader: NewShader("filter_gauss"),
+		screenQuad: NewScreenQuad(),
 
+		nullShader:    NewShader("filter_null"),
+		gaussShader:   NewShader("filter_gauss"),
 		ambientShader: NewShader("forward_ambient"),
+		shadowShader:  NewShader("shadow"),
 
 		hdrTexture:    framebuffer.NewTexture(0, width, height, gl.RGBA32F, gl.RGBA, gl.FLOAT, gl.LINEAR, false),
 		toneMapShader: NewShader("filter_tonemap"),
 
-		shadowMapTemp:  framebuffer.NewTexture(0, 512*2, 512*2, gl.RG32F, gl.RGB, gl.FLOAT, gl.LINEAR, true),
 		fullscreenTemp: framebuffer.NewTexture(0, width, height, gl.RGBA32F, gl.RGBA, gl.FLOAT, gl.LINEAR, false),
 	}
 
-	e.SetTexture("x_shadowMap", e.shadowMapTemp)
+	shadowW, shadowH := 1024, 1024
+	for i := 0; i < maxShadowMaps; i++ {
+		e.shadowTextures[i] = framebuffer.NewTexture(0, shadowW, shadowH, gl.RG32F, gl.RGB, gl.FLOAT, gl.LINEAR, true)
+		e.tempShadowTextures[i] = framebuffer.NewTexture(0, shadowW, shadowH, gl.RG32F, gl.RGB, gl.FLOAT, gl.LINEAR, true)
+	}
 
 	return e
 }
@@ -67,10 +73,13 @@ type Engine struct {
 	gaussShader   *Shader
 	ambientShader *Shader
 	toneMapShader *Shader
+	shadowShader  *Shader
 
 	hdrTexture *framebuffer.Texture
 
-	shadowMapTemp  *framebuffer.Texture
+	shadowTextures     [maxShadowMaps]components.Texture
+	tempShadowTextures [maxShadowMaps]components.Texture
+
 	fullscreenTemp *framebuffer.Texture
 }
 
@@ -80,35 +89,21 @@ func (e *Engine) Render(object components.Renderable) {
 	}
 	checkForError("renderer.Engine.Render [start]")
 
-	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	// shadow map
-
 	gl.Enable(gl.DEPTH_TEST)
-	for _, l := range e.lights {
-		caster, ok := l.(components.ShadowCaster)
-		if !ok {
+	for i, l := range e.lights {
+		e.activeLight = l
+		if !l.ShadowCaster() {
 			continue
 		}
-		e.activeLight = l
-		e.SetTexture("x_shadowMap", caster.ShadowTexture())
-		caster.ShadowTexture().BindAsRenderTarget()
 
-		gl.CullFace(gl.FRONT)
-		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-		object.RenderAll(caster.ShadowShader(), e)
-		gl.CullFace(gl.BACK)
-		//
-		e.blurShadowMap(caster.ShadowTexture(), 1)
-		//
-		//	// debug
-		//	//gl.Viewport(0, 0, e.width, e.height)
-		//	//gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-		//	//gl.Disable(gl.DEPTH_TEST)
-		//	//caster.BindShadow()
-		//	//e.screenShader.Bind()
-		//	//gl.Clear(gl.COLOR_BUFFER_BIT)
-		//	//e.screenQuad.Draw()
-		//	//return
+		e.SetTexture("x_shadowMap", e.shadowTextures[i])
+		e.shadowTextures[i].BindAsRenderTarget()
+
+		gl.Clear(gl.DEPTH_BUFFER_BIT)
+		object.RenderAll(e.shadowShader, e)
+
+		e.blurShadowMap(e.shadowTextures[i], 1)
 	}
 
 	e.hdrTexture.BindAsRenderTarget()
@@ -124,11 +119,10 @@ func (e *Engine) Render(object components.Renderable) {
 	gl.DepthMask(false)
 	gl.DepthFunc(gl.EQUAL)
 
-	for _, l := range e.lights {
+	for i, l := range e.lights {
 		e.activeLight = l
-		//l.Shader().Bind()
-		if caster, ok := l.(components.ShadowCaster); ok {
-			e.SetTexture("x_shadowMap", caster.ShadowTexture())
+		if l.ShadowCaster() {
+			e.SetTexture("x_shadowMap", e.shadowTextures[i])
 		}
 		object.RenderAll(l.Shader(), e)
 	}
@@ -138,18 +132,7 @@ func (e *Engine) Render(object components.Renderable) {
 
 	e.applyFilter(e.toneMapShader, e.hdrTexture, nil)
 
-	// move to default framebuffer buffer
-	//gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-	//gl.Viewport(0, 0, e.width, e.height)
-	// disable depth test so screen-space quad isn't discarded due to depth test
-	//gl.Disable(gl.DEPTH_TEST)
-	//e.toneMapShader.Bind()
-	//e.hdrTexture.Bind(e.GetSamplerSlot("x_filterTexture"))
-	//gl.Clear(gl.COLOR_BUFFER_BIT)
-	//e.screenQuad.Draw()
-
 	checkForError("renderer.Engine.Render [end]")
-	//os.Exit(0)
 }
 
 func (e *Engine) GetActiveLight() components.Light {
@@ -163,9 +146,9 @@ func (e *Engine) AddLight(l components.Light) {
 func (e *Engine) blurShadowMap(shadowMap components.Texture, blurAmount float32) {
 
 	e.SetVector3f("x_blurScale", mgl32.Vec3{1 / float32(shadowMap.Width()) * blurAmount, 0, 0})
-	e.applyFilter(e.gaussShader, shadowMap, e.shadowMapTemp)
+	e.applyFilter(e.gaussShader, shadowMap, e.tempShadowTextures[0])
 	e.SetVector3f("x_blurScale", mgl32.Vec3{0, 1 / float32(shadowMap.Height()) * blurAmount, 0})
-	e.applyFilter(e.gaussShader, e.shadowMapTemp, shadowMap)
+	e.applyFilter(e.gaussShader, e.tempShadowTextures[0], shadowMap)
 }
 
 func (e *Engine) applyFilter(filter *Shader, in, out components.Texture) {
@@ -178,32 +161,12 @@ func (e *Engine) applyFilter(filter *Shader, in, out components.Texture) {
 	} else {
 		out.BindAsRenderTarget()
 	}
-
 	e.SetTexture("x_filterTexture", in)
-	// m_altCamera.SetProjection(Matrix4f().InitIdentity());
-	// m_altCamera.GetTransform()->SetPos(Vector3f(0,0,0));
-	// m_altCamera.GetTransform()->SetRot(Quaternion(Vector3f(0,1,0),ToRadians(180.0f)));
-
 	gl.Clear(gl.DEPTH_BUFFER_BIT)
-
-	//id := e.GetSamplerSlot("x_filterTexture")
-	//in.Bind(id)
 	filter.Bind()
 	filter.UpdateUniforms(nil, nil, e)
-
 	e.screenQuad.Draw()
-	//e.SetTexture("x_filterTexture", nil)
 }
-
-/*
-	inline void SetVector3f(const std::string& name, const Vector3f& value) { m_vector3fMap[name] = value; }
-	inline void SetFloat(const std::string& name, float value)              { m_floatMap[name] = value; }
-	inline void SetTexture(const std::string& name, const Texture& value)   { m_textureMap[name] = value; }
-
-	const Vector3f& GetVector3f(const std::string& name) const;
-	float GetFloat(const std::string& name)              const;
-	const Texture& GetTexture(const std::string& name)   const;
-*/
 
 func (e *Engine) SetTexture(name string, texture components.Texture) {
 	e.textures[name] = texture
