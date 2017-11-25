@@ -50,16 +50,25 @@ uniform mat4 view;
 in vec4 FragPosLightSpace;
 uniform sampler2D x_shadowMap;
 
+float linstep(float low, float high, float v)
+{
+	return clamp((v-low)/(high-low), 0.0, 1.0);
+}
+
 float sampleVarianceShadowMap(sampler2D shadowMap, vec2 coords, float compare)
 {
     vec2 moments = texture(shadowMap, coords).xy;
-    float p = step(moments.x, compare);
-    float variance = max(moments.y - moments.x * moments.x, 0.000001);
-    float d = compare - moments.x;
-    float pMax = variance / (variance + d*d);
-    // try to prevent light bleeding
-    //pMax = clamp((pMax-0.4)/(1-0.2), 0, 1);
-    return min(max(p, pMax), 1.0);
+	float p = step(compare, moments.x);
+
+    const float varianceMin = 0.00002;
+	float variance = max(moments.y - moments.x * moments.x, varianceMin);
+
+	float d = compare - moments.x;
+    const float lightBleedReductionAmount = 0.2;
+	float pMax = linstep(lightBleedReductionAmount, 1.0, variance / (variance + d*d));
+
+	return min(max(p, pMax), 1.0);
+	//return step(compare, texture(shadowMap, coords.xy).r);
 }
 
 float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
@@ -73,7 +82,8 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
     if(projCoords.z > 1.0) {
         return 0.0;
     }
-    return sampleVarianceShadowMap(x_shadowMap, projCoords.xy, projCoords.z - 0.001);
+
+    return sampleVarianceShadowMap(x_shadowMap, projCoords.xy, projCoords.z);
 }
 
 void main() {
@@ -107,6 +117,6 @@ void main() {
 
     fragColor = texture(diffuse, TexCoord);
     fragColor *= vec4((diffuseLight + specular), 1.0f);
-    fragColor *= (1-shadow);
+    fragColor *= (shadow);
     fragColor *= attenuation;
 }

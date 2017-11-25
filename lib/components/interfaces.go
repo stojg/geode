@@ -67,6 +67,9 @@ type RenderingEngine interface {
 
 	GetVector3f(string) mgl32.Vec3
 	SetVector3f(string, mgl32.Vec3)
+
+	GetInteger(string) int32
+	SetInteger(string, int32)
 }
 
 type Engine interface {

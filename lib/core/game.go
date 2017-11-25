@@ -56,7 +56,6 @@ func (g *Game) Input(elapsed time.Duration) {
 			glfw.SwapInterval(0)
 			fmt.Println("vsync off")
 		}
-
 	}
 	g.RootObject().InputAll(elapsed)
 }

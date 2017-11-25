@@ -8,13 +8,13 @@ import (
 
 func NewDirectional(r, g, b, intensity float32) *Directional {
 	const nearPlane float32 = 0.1
-	const farPlane float32 = 20
+	const farPlane float32 = 25
 
 	return &Directional{
 		BaseLight: BaseLight{
 			color:      mgl32.Vec3{r, g, b}.Mul(intensity),
 			shader:     rendering.NewShader("forward_directional"),
-			shadowInfo: NewShadowInfo(mgl32.Ortho(-8, 8, -8, 8, nearPlane, farPlane)),
+			shadowInfo: NewShadowInfo(mgl32.Ortho(-9, 9, -5, 18, nearPlane, farPlane)),
 		},
 	}
 }

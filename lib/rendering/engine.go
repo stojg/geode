@@ -9,7 +9,7 @@ import (
 	"github.com/stojg/graphics/lib/rendering/framebuffer"
 )
 
-const maxShadowMaps = 5
+const maxShadowMaps = 3
 
 func NewEngine(width, height int) *Engine {
 
@@ -34,27 +34,30 @@ func NewEngine(width, height int) *Engine {
 		height:     int32(height),
 		samplerMap: samplerMap,
 		textures:   make(map[string]components.Texture),
-		uniforms:   make(map[string]mgl32.Vec3),
+		uniforms3f: make(map[string]mgl32.Vec3),
+		uniformsi:  make(map[string]int32),
 
 		screenQuad: NewScreenQuad(),
 
 		nullShader:    NewShader("filter_null"),
 		gaussShader:   NewShader("filter_gauss"),
 		ambientShader: NewShader("forward_ambient"),
-		shadowShader:  NewShader("shadow"),
+		shadowShader:  NewShader("shadow_vsm"),
 
-		hdrTexture:    framebuffer.NewTexture(0, width, height, gl.RGBA32F, gl.RGBA, gl.FLOAT, gl.LINEAR, false),
+		hdrTexture:    framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA32F, gl.RGBA, gl.FLOAT, gl.NEAREST, false),
 		toneMapShader: NewShader("filter_tonemap"),
 
-		fullscreenTemp: framebuffer.NewTexture(0, width, height, gl.RGBA32F, gl.RGBA, gl.FLOAT, gl.LINEAR, false),
+		fullScreenTemp: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA32F, gl.RGBA, gl.FLOAT, gl.NEAREST, false),
+
+		capabilities: make(map[string]bool),
 	}
 
 	shadowW, shadowH := 1024, 1024
+	checkForError("rendering.NewEngine end")
 	for i := 0; i < maxShadowMaps; i++ {
-		e.shadowTextures[i] = framebuffer.NewTexture(0, shadowW, shadowH, gl.RG32F, gl.RGB, gl.FLOAT, gl.LINEAR, true)
-		e.tempShadowTextures[i] = framebuffer.NewTexture(0, shadowW, shadowH, gl.RG32F, gl.RGB, gl.FLOAT, gl.LINEAR, true)
+		e.shadowTextures[i] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, shadowW, shadowH, gl.RG32F, gl.RGB, gl.FLOAT, gl.LINEAR, true)
 	}
-
+	e.tempShadowTexture = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, shadowW, shadowH, gl.RG32F, gl.RGB, gl.FLOAT, gl.LINEAR, true)
 	return e
 }
 
@@ -66,7 +69,8 @@ type Engine struct {
 
 	samplerMap map[string]uint32
 	textures   map[string]components.Texture
-	uniforms   map[string]mgl32.Vec3
+	uniforms3f map[string]mgl32.Vec3
+	uniformsi  map[string]int32
 
 	screenQuad    *ScreenQuad
 	nullShader    *Shader
@@ -77,12 +81,21 @@ type Engine struct {
 
 	hdrTexture *framebuffer.Texture
 
-	shadowTextures     [maxShadowMaps]components.Texture
-	tempShadowTextures [maxShadowMaps]components.Texture
+	shadowTextures    [maxShadowMaps]components.Texture
+	tempShadowTexture components.Texture
 
-	fullscreenTemp *framebuffer.Texture
+	fullScreenTemp *framebuffer.Texture
+
+	capabilities map[string]bool
 }
 
+func (e *Engine) Enable(cap string) {
+	e.capabilities[cap] = true
+}
+
+func (e *Engine) Disable(cap string) {
+	e.capabilities[cap] = false
+}
 func (e *Engine) Render(object components.Renderable) {
 	if e.mainCamera == nil {
 		panic("mainCamera not found, the game cannot render")
@@ -91,24 +104,25 @@ func (e *Engine) Render(object components.Renderable) {
 
 	// shadow map
 	gl.Enable(gl.DEPTH_TEST)
+	gl.ClearColor(1, 1, 1, 1)
 	for i, l := range e.lights {
 		e.activeLight = l
 		if !l.ShadowCaster() {
 			continue
 		}
-
-		e.SetTexture("x_shadowMap", e.shadowTextures[i])
 		e.shadowTextures[i].BindAsRenderTarget()
-
-		gl.Clear(gl.DEPTH_BUFFER_BIT)
+		gl.Clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
 		object.RenderAll(e.shadowShader, e)
 
-		e.blurShadowMap(e.shadowTextures[i], 1)
+		//gl.Clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
+		e.blurShadowMap(e.shadowTextures[i], 2)
 	}
 
+	//gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 	e.hdrTexture.BindAsRenderTarget()
-	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	e.hdrTexture.SetViewPort()
+	gl.ClearColor(0.03, 0.03, 0.03, 1)
+	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 	// ambient pass
 	object.RenderAll(e.ambientShader, e)
@@ -144,11 +158,10 @@ func (e *Engine) AddLight(l components.Light) {
 }
 
 func (e *Engine) blurShadowMap(shadowMap components.Texture, blurAmount float32) {
-
 	e.SetVector3f("x_blurScale", mgl32.Vec3{1 / float32(shadowMap.Width()) * blurAmount, 0, 0})
-	e.applyFilter(e.gaussShader, shadowMap, e.tempShadowTextures[0])
+	e.applyFilter(e.gaussShader, shadowMap, e.tempShadowTexture)
 	e.SetVector3f("x_blurScale", mgl32.Vec3{0, 1 / float32(shadowMap.Height()) * blurAmount, 0})
-	e.applyFilter(e.gaussShader, e.tempShadowTextures[0], shadowMap)
+	e.applyFilter(e.gaussShader, e.tempShadowTexture, shadowMap)
 }
 
 func (e *Engine) applyFilter(filter *Shader, in, out components.Texture) {
@@ -181,14 +194,26 @@ func (e *Engine) GetTexture(name string) components.Texture {
 	return v
 }
 
+func (e *Engine) SetInteger(name string, v int32) {
+	e.uniformsi[name] = v
+}
+
+func (e *Engine) GetInteger(name string) int32 {
+	v, ok := e.uniformsi[name]
+	if !ok {
+		panic(fmt.Sprintf("GetInteger, no value found for uniform '%s'", name))
+	}
+	return v
+}
+
 func (e *Engine) SetVector3f(name string, v mgl32.Vec3) {
-	e.uniforms[name] = v
+	e.uniforms3f[name] = v
 }
 
 func (e *Engine) GetVector3f(name string) mgl32.Vec3 {
-	v, ok := e.uniforms[name]
+	v, ok := e.uniforms3f[name]
 	if !ok {
-		panic(fmt.Sprintf("no value found for uniform '%s'", name))
+		panic(fmt.Sprintf("GetVector3f, no value found for uniform '%s'", name))
 	}
 	return v
 }

@@ -54,9 +54,9 @@ func run() error {
 	engine.AddObject(floor)
 
 	dirLight := core.NewGameObject()
-	dirLight.Transform().SetPos(mgl32.Vec3{8, 10, 1})
+	dirLight.Transform().SetPos(mgl32.Vec3{8, 9, 1})
 	dirLight.Transform().SetScale(mgl32.Vec3{0.5, 0.1, 0.5})
-	dirLight.AddComponent(lights.NewDirectional(0.98, 0.98, 0.98, 0.4))
+	dirLight.AddComponent(lights.NewDirectional(0.98, 0.98, 0.98, 1))
 	//core.LoadModel(dirLight, "res/meshes/cube/model.obj", tealMaterial)
 	engine.AddObject(dirLight)
 

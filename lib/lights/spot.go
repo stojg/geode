@@ -13,13 +13,14 @@ func NewSpot(r, g, b, intensity, angle float32) *Spot {
 	fov := mgl32.DegToRad(angle)
 	radians := float32(math.Cos(float64(fov)))
 	const nearPlane float32 = 0.01
-	const farPlane float32 = 30
+	const farPlane float32 = 20
 
 	return &Spot{
 		BaseLight: BaseLight{
 			color:      mgl32.Vec3{r, g, b}.Mul(intensity),
 			shader:     rendering.NewShader("forward_spot"),
-			shadowInfo: NewShadowInfo(mgl32.Perspective(fov*2, float32(800/600), nearPlane, farPlane)),
+			shadowInfo: NewShadowInfo(mgl32.Ortho(-9, 9, -5, 18, nearPlane, farPlane)),
+			//shadowInfo: NewShadowInfo(mgl32.Perspective(fov*2, float32(1024/1024), nearPlane, farPlane)),
 		},
 		PointLight: PointLight{
 			constant: 1,

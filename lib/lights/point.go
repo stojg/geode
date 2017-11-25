@@ -18,6 +18,12 @@ func NewPoint(r, g, b, intensity float32) *PointLight {
 	}
 }
 
+/*
+float a = m_attenuation.GetExponent();
+float b = m_attenuation.GetLinear();
+float c = m_attenuation.GetConstant() - COLOR_DEPTH * intensity * color.Max();
+m_range = (-b + sqrtf(b*b - 4*a*c))/(2*a);
+*/
 type PointLight struct {
 	BaseLight
 

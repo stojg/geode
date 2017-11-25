@@ -4,17 +4,16 @@ import "github.com/go-gl/gl/v4.1-core/gl"
 
 const textType = gl.TEXTURE_2D
 
-//const textType = gl.TEXTURE_2D_MULTISAMPLE
-
-func NewTexture(att uint32, width int, height int, internalFormat int32, format, xtype uint32, filter int32, clamp bool) *Texture {
+func NewTexture(attachment uint32, width int, height int, internalFormat int32, format, xtype uint32, filter int32, clamp bool) *Texture {
 	texture := &Texture{
-		attachment: gl.COLOR_ATTACHMENT0 + att,
+		attachment: attachment,
 		width:      int32(width),
 		height:     int32(height),
 	}
 	gl.GenTextures(1, &texture.id)
 	gl.BindTexture(textType, texture.id)
 
+	checkForError("Shadowbuffer end")
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
@@ -26,7 +25,6 @@ func NewTexture(att uint32, width int, height int, internalFormat int32, format,
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_BORDER)
 	}
 
-	// @todo, check for mipmap or set the below
 	if filter == gl.NEAREST_MIPMAP_NEAREST || filter == gl.NEAREST_MIPMAP_LINEAR || filter == gl.LINEAR_MIPMAP_NEAREST || filter == gl.LINEAR_MIPMAP_LINEAR {
 		gl.GenerateMipmap(gl.TEXTURE_2D)
 	} else {
@@ -45,11 +43,9 @@ func NewTexture(att uint32, width int, height int, internalFormat int32, format,
 	gl.GenFramebuffers(1, &texture.fbo)
 	gl.BindFramebuffer(gl.FRAMEBUFFER, texture.fbo)
 
-	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, textType, texture.id, 0)
+	gl.FramebufferTexture2D(gl.FRAMEBUFFER, attachment, textType, texture.id, 0)
 
-	hasDepth := true
-
-	if hasDepth {
+	if attachment != gl.DEPTH_ATTACHMENT {
 		gl.GenRenderbuffers(1, &texture.rbo)
 		gl.BindRenderbuffer(gl.RENDERBUFFER, texture.rbo)
 
@@ -62,13 +58,10 @@ func NewTexture(att uint32, width int, height int, internalFormat int32, format,
 		gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, texture.rbo)
 	}
 
-	if checkForError("something bad happened") {
-		panic("asdasd")
-	}
-
 	var attachments = [1]uint32{gl.COLOR_ATTACHMENT0}
 	gl.DrawBuffers(int32(len(attachments)), &attachments[0])
 
+	checkForError("framebuffer.Texture end")
 	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
 		panic("Shadow Framebuffer creation failed, FBO isn't complete.")
 	}

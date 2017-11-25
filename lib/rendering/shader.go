@@ -65,7 +65,14 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 				engine.GetTexture(name).Bind(samplerSlot)
 				gl.Uniform1i(s.resource.uniforms[name], int32(samplerSlot))
 			} else {
-				s.SetUniform(name, engine.GetVector3f(name))
+				switch uniformType {
+				case "bool":
+					s.SetUniform(name, engine.GetInteger(name))
+				case "vec3":
+					s.SetUniform(name, engine.GetVector3f(name))
+				default:
+					panic(uniformType)
+				}
 			}
 			continue
 		}
