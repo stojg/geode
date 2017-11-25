@@ -56,6 +56,7 @@ float linstep(float low, float high, float v)
 
 float sampleVarianceShadowMap(sampler2D shadowMap, vec2 coords, float compare)
 {
+    // return step(compare, texture(shadowMap, coords.xy).r);
     vec2 moments = texture(shadowMap, coords).xy;
 	float p = step(compare, moments.x);
 
@@ -67,7 +68,6 @@ float sampleVarianceShadowMap(sampler2D shadowMap, vec2 coords, float compare)
 	float pMax = linstep(lightBleedReductionAmount, 1.0, variance / (variance + d*d));
 
 	return min(max(p, pMax), 1.0);
-	//return step(compare, texture(shadowMap, coords.xy).r);
 }
 
 float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)

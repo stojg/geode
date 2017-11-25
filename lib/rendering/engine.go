@@ -56,7 +56,7 @@ func NewEngine(width, height int) *Engine {
 	shadowW, shadowH := 1024, 1024
 	checkForError("rendering.NewEngine end")
 	for i := 0; i < maxShadowMaps; i++ {
-		e.shadowTextures[i] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, shadowW, shadowH, gl.RG32F, gl.RGB, gl.FLOAT, gl.LINEAR, true)
+		e.shadowTextures[i] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, shadowW, shadowH, gl.RG32F, gl.RGBA, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
 	}
 	e.tempShadowTexture = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, shadowW, shadowH, gl.RG32F, gl.RGB, gl.FLOAT, gl.LINEAR, true)
 	return e
@@ -115,8 +115,10 @@ func (e *Engine) Render(object components.Renderable) {
 		e.shadowTextures[i].BindAsRenderTarget()
 		gl.Clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
 		object.RenderAll(e.shadowShader, e)
+		gl.GenerateMipmap(gl.TEXTURE_2D)
 
 		e.blurShadowMap(e.shadowTextures[i], 1)
+		gl.GenerateMipmap(gl.TEXTURE_2D)
 	}
 
 	//gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
