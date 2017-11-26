@@ -39,6 +39,7 @@ func run() error {
 	cameraObject.AddComponent(components.NewCamera(70, width, height, 0.01, 1000))
 	cameraObject.AddComponent(&components.FreeMove{})
 	cameraObject.AddComponent(components.NewFreelook(width, height))
+	cameraObject.AddComponent(&components.HeadHeight{})
 	engine.AddObject(cameraObject)
 
 	whiteMaterial := rendering.NewMaterial()
@@ -56,7 +57,7 @@ func run() error {
 	dirLight := core.NewGameObject()
 	dirLight.Transform().SetPos(mgl32.Vec3{8, 8, 0})
 	dirLight.Transform().SetScale(mgl32.Vec3{0.5, 0.1, 0.5})
-	dirLight.AddComponent(lights.NewDirectional(0.9, 0.9, 0.9, 5))
+	dirLight.AddComponent(lights.NewDirectional(0.9, 0.9, 0.9, 1))
 	//core.LoadModel(dirLight, "res/meshes/cube/model.obj", tealMaterial)
 	engine.AddObject(dirLight)
 

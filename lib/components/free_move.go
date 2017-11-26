@@ -13,7 +13,7 @@ type FreeMove struct {
 }
 
 func (c *FreeMove) Input(elapsed time.Duration) {
-	const speed float32 = 8
+	const speed float32 = 5
 	amount := float32(elapsed.Seconds()) * speed
 
 	if input.Key(glfw.KeyW) {
