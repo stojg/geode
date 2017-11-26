@@ -46,6 +46,8 @@ func NewEngine(width, height int) *Engine {
 		ambientShader: NewShader("forward_ambient"),
 		shadowShader:  NewShader("shadow_vsm"),
 
+		debugShadowShader: NewShader("debug_shadow"),
+
 		screenTexture: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA32F, gl.RGBA, gl.FLOAT, gl.NEAREST, false),
 		toneMapShader: NewShader("filter_tonemap"),
 
@@ -82,6 +84,8 @@ type Engine struct {
 	toneMapShader *Shader
 	shadowShader  *Shader
 	fxaaShader    *Shader
+
+	debugShadowShader *Shader
 
 	screenTexture *framebuffer.Texture
 
@@ -129,8 +133,13 @@ func (e *Engine) Render(object components.Renderable) {
 
 		gl.GenerateMipmap(gl.TEXTURE_2D)
 
-		//e.blurShadowMap(e.shadowTextures[i], 1)
-		//gl.GenerateMipmap(gl.TEXTURE_2D)
+		//gl.Disable(gl.DEPTH_TEST)
+		//e.shadowTextures[i].SetViewPort()
+		//e.applyFilter(e.debugShadowShader, e.shadowTextures[i], nil)
+		//return
+		//
+		////e.blurShadowMap(e.shadowTextures[i], 1)
+		////gl.GenerateMipmap(gl.TEXTURE_2D)
 	}
 
 	//gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
