@@ -44,6 +44,9 @@ func (t *Texture) Bind(slot uint32) {
 	gl.BindTexture(gl.TEXTURE_2D, t.resource.ID())
 }
 
+func (t *Texture) SetViewPort() {
+	gl.Viewport(0, 0, t.Width(), t.Height())
+}
 func (t *Texture) BindAsRenderTarget() {
 	panic("Cant write to material textures you mad lad!")
 }
@@ -85,7 +88,7 @@ func LoadTexture(filename string) (*TextureResource, error) {
 	gl.TexParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
 	gl.TexParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
-	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, resource.width, resource.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(rgba.Pix))
+	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, resource.width, resource.height, 0, gl.RGBA, gl.UNSIGNED_INT_8_8_8_8_REV, gl.Ptr(rgba.Pix))
 
 	gl.GenerateMipmap(gl.TEXTURE_2D)
 
@@ -94,20 +97,17 @@ func LoadTexture(filename string) (*TextureResource, error) {
 
 // flip the image upside down so that OpenGL can use it as a texture properly
 func flip(src *image.RGBA) *image.RGBA {
-	srcW := src.Bounds().Max.X
-	srcH := src.Bounds().Max.Y
-	dstW := srcW
-	dstH := srcH
+	maxX := src.Bounds().Max.X
+	maxY := src.Bounds().Max.Y
 
 	dst := image.NewRGBA(src.Bounds())
 
-	for dstY := 0; dstY < dstH; dstY++ {
-		for dstX := 0; dstX < dstW; dstX++ {
-			srcX := dstX
-			srcY := dstH - dstY - 1
-			srcOff := srcY*src.Stride + srcX*4
-			dstOff := dstY*dst.Stride + dstX*4
-			copy(dst.Pix[dstOff:dstOff+4], src.Pix[srcOff:srcOff+4])
+	for y := 0; y < maxY; y++ {
+		for x := 0; x < maxX; x++ {
+			srcY := maxY - y - 1
+			srcRow := srcY*src.Stride + x*4
+			destRow := y*src.Stride + x*4
+			copy(dst.Pix[destRow:destRow+4], src.Pix[srcRow:srcRow+4])
 		}
 	}
 

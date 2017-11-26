@@ -28,7 +28,7 @@ func LoadModel(g *GameObject, obj string, material *rendering.Material) error {
 
 func NewGame() *Game {
 	g := &Game{
-		vsync: false,
+		vsync: true,
 	}
 	return g
 }

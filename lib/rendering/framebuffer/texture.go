@@ -101,7 +101,6 @@ func (t *Texture) Bind(unit uint32) {
 func (t *Texture) BindAsRenderTarget() {
 	gl.BindTexture(textType, t.id)
 	gl.BindFramebuffer(gl.FRAMEBUFFER, t.fbo)
-	gl.Viewport(0, 0, t.width, t.height)
 }
 
 func (t *Texture) SetViewPort() {

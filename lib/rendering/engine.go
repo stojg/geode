@@ -103,16 +103,16 @@ func (e *Engine) Render(object components.Renderable) {
 		panic("mainCamera not found, the game cannot render")
 	}
 	checkForError("renderer.Engine.Render [start]")
+	gl.Enable(gl.DEPTH_TEST)
 
 	// shadow map
-	gl.Enable(gl.DEPTH_TEST)
-	gl.ClearColor(1, 1, 1, 1)
 	for i, l := range e.lights {
 		e.activeLight = l
 		if !l.ShadowCaster() {
 			continue
 		}
 		e.shadowTextures[i].BindAsRenderTarget()
+		e.shadowTextures[i].SetViewPort()
 		gl.Clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
 		object.RenderAll(e.shadowShader, e)
 		gl.GenerateMipmap(gl.TEXTURE_2D)
@@ -147,6 +147,7 @@ func (e *Engine) Render(object components.Renderable) {
 	gl.DepthMask(true)
 	gl.Disable(gl.BLEND)
 
+	gl.Disable(gl.DEPTH_TEST)
 	e.applyFilter(e.toneMapShader, e.screenTexture, e.fullScreenTemp)
 	e.applyFilter(e.fxaaShader, e.fullScreenTemp, nil)
 
@@ -179,7 +180,6 @@ func (e *Engine) applyFilter(filter *Shader, in, out components.Texture) {
 		out.BindAsRenderTarget()
 	}
 	e.SetTexture("x_filterTexture", in)
-	gl.Clear(gl.DEPTH_BUFFER_BIT)
 	filter.Bind()
 	filter.UpdateUniforms(nil, nil, e)
 	e.screenQuad.Draw()
