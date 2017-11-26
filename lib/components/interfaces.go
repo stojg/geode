@@ -25,6 +25,12 @@ type Renderable interface {
 	RenderAll(shader Shader, engine RenderingEngine)
 }
 
+type Viewable interface {
+	GetView() mgl32.Mat4
+	GetProjection() mgl32.Mat4
+	Pos() mgl32.Vec3
+}
+
 type ShadowInfo interface {
 	Projection() mgl32.Mat4
 	FlipFaces() bool
@@ -33,6 +39,7 @@ type ShadowInfo interface {
 }
 
 type Light interface {
+	Viewable
 	Shader() Shader
 	Color() mgl32.Vec3
 	Position() mgl32.Vec3
@@ -61,8 +68,8 @@ type Spotlight interface {
 
 type RenderingEngine interface {
 	AddLight(light Light)
-	AddCamera(camera *Camera)
-	GetMainCamera() *Camera
+	AddCamera(camera Viewable)
+	GetMainCamera() Viewable
 	GetActiveLight() Light
 	GetSamplerSlot(string) uint32
 	GetTexture(string) Texture

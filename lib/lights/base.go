@@ -49,3 +49,20 @@ func (b *BaseLight) BindShadow() {}
 func (b *BaseLight) ViewProjection() mgl32.Mat4 {
 	return mgl32.Ident4()
 }
+
+func (b *BaseLight) GetProjection() mgl32.Mat4 {
+	return b.shadowInfo.projection
+}
+
+func (b *BaseLight) GetView() mgl32.Mat4 {
+	//This comes from the conjugate rotation because the world should appear to rotate opposite to the camera's rotation.
+	cameraRotation := b.Transform().TransformedRot().Conjugate().Mat4()
+	//Similarly, the translation is inverted because the world appears to move opposite to the camera's movement.
+	cameraPos := b.Transform().TransformedPos().Mul(-1)
+	cameraTranslation := mgl32.Translate3D(cameraPos[0], cameraPos[1], cameraPos[2])
+	return cameraRotation.Mul4(cameraTranslation)
+}
+
+func (b *BaseLight) Pos() mgl32.Vec3 {
+	return b.Transform().Pos()
+}

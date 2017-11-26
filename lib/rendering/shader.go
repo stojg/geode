@@ -96,7 +96,7 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 		case "view":
 			s.SetUniform(name, engine.GetMainCamera().GetView())
 		case "viewPos":
-			s.SetUniform(name, engine.GetMainCamera().Transform().Pos())
+			s.SetUniform(name, engine.GetMainCamera().Pos())
 		case "directionalLight":
 			s.setUniformDirectionalLight(name, engine.GetActiveLight().(components.DirectionalLight))
 		case "pointLight":
@@ -276,19 +276,19 @@ func (s *Shader) addProgram(text string, shaderType uint32) uint32 {
 	var status int32
 	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &status)
 	if status == gl.FALSE {
-		printInfoLog(shader, text)
+		printInfoLog(shader, s.filename, text)
 		os.Exit(1)
 	}
 	gl.AttachShader(s.resource.Program, shader)
 	return shader
 }
 
-func printInfoLog(shader uint32, shaderText string) {
+func printInfoLog(shader uint32, filename, shaderText string) {
 	var logLength int32
 	gl.GetShaderiv(shader, gl.INFO_LOG_LENGTH, &logLength)
 	infoLog := strings.Repeat("\x00", int(logLength+1))
 	gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(infoLog))
-	fmt.Printf("Shader compilation failed:\n%s------------\n", infoLog)
+	fmt.Printf("Shader compilation failed (%s):\n%s------------\n", filename, infoLog)
 	for i, line := range strings.Split(shaderText, "\n") {
 		fmt.Printf("%d: %s\n", i, line)
 	}

@@ -67,7 +67,7 @@ func NewEngine(width, height int) *Engine {
 
 type Engine struct {
 	width, height int32
-	mainCamera    *components.Camera
+	mainCamera    components.Viewable
 	lights        []components.Light
 	activeLight   components.Light
 
@@ -254,11 +254,11 @@ func (e *Engine) GetVector3f(name string) mgl32.Vec3 {
 	return v
 }
 
-func (e *Engine) AddCamera(c *components.Camera) {
+func (e *Engine) AddCamera(c components.Viewable) {
 	e.mainCamera = c
 }
 
-func (e *Engine) GetMainCamera() *components.Camera {
+func (e *Engine) GetMainCamera() components.Viewable {
 	return e.mainCamera
 }
 
