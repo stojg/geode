@@ -6,20 +6,6 @@ import (
 	"github.com/stojg/graphics/lib/rendering/framebuffer"
 )
 
-func NewShadowInfo(projection mgl32.Mat4) *ShadowInfo {
-	return &ShadowInfo{
-		projection: projection,
-	}
-}
-
-type ShadowInfo struct {
-	projection mgl32.Mat4
-}
-
-func (s *ShadowInfo) Projection() mgl32.Mat4 {
-	return s.projection
-}
-
 type BaseLight struct {
 	components.GameComponent
 

@@ -10,13 +10,19 @@ func NewDirectional(r, g, b, intensity float32) *Directional {
 	const nearPlane float32 = 0.1
 	const farPlane float32 = 25
 
-	return &Directional{
+	projection := mgl32.Ortho(-9, 9, -5, 18, nearPlane, farPlane)
+
+	light := &Directional{
 		BaseLight: BaseLight{
 			color:      mgl32.Vec3{r, g, b}.Mul(intensity),
 			shader:     rendering.NewShader("forward_directional"),
-			shadowInfo: NewShadowInfo(mgl32.Ortho(-9, 9, -5, 18, nearPlane, farPlane)),
+			shadowInfo: NewShadowInfo(projection, false),
 		},
 	}
+
+	light.shadowInfo.shadowVarianceMin = 0.00002
+	light.shadowInfo.lightBleedReduction = 0.8
+	return light
 }
 
 type Directional struct {

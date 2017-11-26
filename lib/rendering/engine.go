@@ -30,12 +30,13 @@ func NewEngine(width, height int) *Engine {
 	samplerMap["x_filterTexture"] = 10
 
 	e := &Engine{
-		width:      int32(width),
-		height:     int32(height),
-		samplerMap: samplerMap,
-		textures:   make(map[string]components.Texture),
-		uniforms3f: make(map[string]mgl32.Vec3),
-		uniformsi:  make(map[string]int32),
+		width:         int32(width),
+		height:        int32(height),
+		samplerMap:    samplerMap,
+		textures:      make(map[string]components.Texture),
+		uniforms3f:    make(map[string]mgl32.Vec3),
+		uniformsI:     make(map[string]int32),
+		uniformsFloat: make(map[string]float32),
 
 		screenQuad: NewScreenQuad(),
 
@@ -68,10 +69,11 @@ type Engine struct {
 	lights        []components.Light
 	activeLight   components.Light
 
-	samplerMap map[string]uint32
-	textures   map[string]components.Texture
-	uniforms3f map[string]mgl32.Vec3
-	uniformsi  map[string]int32
+	samplerMap    map[string]uint32
+	textures      map[string]components.Texture
+	uniforms3f    map[string]mgl32.Vec3
+	uniformsI     map[string]int32
+	uniformsFloat map[string]float32
 
 	screenQuad    *ScreenQuad
 	nullShader    *Shader
@@ -111,14 +113,24 @@ func (e *Engine) Render(object components.Renderable) {
 		if !l.ShadowCaster() {
 			continue
 		}
+		info := l.ShadowInfo()
+		e.SetFloat("x_varianceMin", info.ShadowVarianceMin())
+		e.SetFloat("x_lightBleedReductionAmount", info.LightBleedReduction())
 		e.shadowTextures[i].BindAsRenderTarget()
 		e.shadowTextures[i].SetViewPort()
 		gl.Clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
+		if info.FlipFaces() {
+			gl.CullFace(gl.FRONT)
+		}
 		object.RenderAll(e.shadowShader, e)
+		if info.FlipFaces() {
+			gl.CullFace(gl.BACK)
+		}
+
 		gl.GenerateMipmap(gl.TEXTURE_2D)
 
-		e.blurShadowMap(e.shadowTextures[i], 1)
-		gl.GenerateMipmap(gl.TEXTURE_2D)
+		//e.blurShadowMap(e.shadowTextures[i], 1)
+		//gl.GenerateMipmap(gl.TEXTURE_2D)
 	}
 
 	//gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
@@ -164,9 +176,9 @@ func (e *Engine) AddLight(l components.Light) {
 
 func (e *Engine) blurShadowMap(shadowMap components.Texture, blurAmount float32) {
 	e.SetVector3f("x_blurScale", mgl32.Vec3{1 / float32(shadowMap.Width()) * blurAmount, 0, 0})
-	e.applyFilter(e.gaussShader, shadowMap, e.tempShadowTexture)
+	e.applyFilter(e.nullShader, shadowMap, e.tempShadowTexture)
 	e.SetVector3f("x_blurScale", mgl32.Vec3{0, 1 / float32(shadowMap.Height()) * blurAmount, 0})
-	e.applyFilter(e.gaussShader, e.tempShadowTexture, shadowMap)
+	e.applyFilter(e.nullShader, e.tempShadowTexture, shadowMap)
 }
 
 func (e *Engine) applyFilter(filter *Shader, in, out components.Texture) {
@@ -192,20 +204,31 @@ func (e *Engine) SetTexture(name string, texture components.Texture) {
 func (e *Engine) GetTexture(name string) components.Texture {
 	v, ok := e.textures[name]
 	if !ok {
-		fmt.Printf("Could not find texture '%s'\n", name)
-		panic("")
+		panic(fmt.Sprintf("GetTexture, Could not find texture '%s'\n", name))
 	}
 	return v
 }
 
 func (e *Engine) SetInteger(name string, v int32) {
-	e.uniformsi[name] = v
+	e.uniformsI[name] = v
 }
 
 func (e *Engine) GetInteger(name string) int32 {
-	v, ok := e.uniformsi[name]
+	v, ok := e.uniformsI[name]
 	if !ok {
 		panic(fmt.Sprintf("GetInteger, no value found for uniform '%s'", name))
+	}
+	return v
+}
+
+func (e *Engine) SetFloat(name string, v float32) {
+	e.uniformsFloat[name] = v
+}
+
+func (e *Engine) GetFloat(name string) float32 {
+	v, ok := e.uniformsFloat[name]
+	if !ok {
+		panic(fmt.Sprintf("GetFloat, no value found for uniform '%s'", name))
 	}
 	return v
 }

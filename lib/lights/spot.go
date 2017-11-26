@@ -15,12 +15,13 @@ func NewSpot(r, g, b, intensity, angle float32) *Spot {
 	const nearPlane float32 = 0.01
 	const farPlane float32 = 20
 
-	return &Spot{
+	projection := mgl32.Ortho(-9, 9, -5, 18, nearPlane, farPlane)
+
+	light := &Spot{
 		BaseLight: BaseLight{
 			color:      mgl32.Vec3{r, g, b}.Mul(intensity),
 			shader:     rendering.NewShader("forward_spot"),
-			shadowInfo: NewShadowInfo(mgl32.Ortho(-9, 9, -5, 18, nearPlane, farPlane)),
-			//shadowInfo: NewShadowInfo(mgl32.Perspective(fov*2, float32(1024/1024), nearPlane, farPlane)),
+			shadowInfo: NewShadowInfo(projection, false),
 		},
 		PointLight: PointLight{
 			constant: 1,
@@ -30,6 +31,9 @@ func NewSpot(r, g, b, intensity, angle float32) *Spot {
 		direction: mgl32.Vec3{0, 0, 0},
 		cutoff:    radians,
 	}
+	light.shadowInfo.shadowVarianceMin = 0.00002
+	light.shadowInfo.lightBleedReduction = 0.8
+	return light
 }
 
 type Spot struct {

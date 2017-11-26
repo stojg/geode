@@ -70,6 +70,8 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 					s.SetUniform(name, engine.GetInteger(name))
 				case "vec3":
 					s.SetUniform(name, engine.GetVector3f(name))
+				case "float":
+					s.SetUniform(name, engine.GetFloat(name))
 				default:
 					panic(uniformType)
 				}

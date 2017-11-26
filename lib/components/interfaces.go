@@ -27,6 +27,9 @@ type Renderable interface {
 
 type ShadowInfo interface {
 	Projection() mgl32.Mat4
+	FlipFaces() bool
+	LightBleedReduction() float32
+	ShadowVarianceMin() float32
 }
 
 type Light interface {
@@ -70,6 +73,9 @@ type RenderingEngine interface {
 
 	GetInteger(string) int32
 	SetInteger(string, int32)
+
+	GetFloat(string) float32
+	SetFloat(string, float32)
 }
 
 type Engine interface {
