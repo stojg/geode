@@ -35,8 +35,7 @@ struct SpotLight
 in vec2 TexCoord;
 in vec3 LightPos;
 in vec3 Normal;
-in vec3 FragPos;
-in vec3 ViewDirection;
+in vec3 ModelViewPos;
 
 out vec4 fragColor;
 
@@ -88,22 +87,26 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir, floa
 void main() {
 
     vec3 norm = Normal;
+    vec3 color = directionalLight.base.color;
 
     vec3 lightDir = LightPos;
 
+    float attenuation = 1.0;
+
     float diff = max(dot(norm, lightDir), 0.0);
 
-    vec3 diffuseLight = diff * directionalLight.base.color;
+    vec3 diffuseLight = diff * color;
 
-    vec3 halfwayDir = normalize(lightDir + ViewDirection);
+    vec3 halfwayDir = normalize(lightDir - ModelViewPos);
     vec3 reflectDir = reflect(-lightDir, norm);
     float spec = pow(max(dot(norm, halfwayDir), 0.0), 128);
-    vec3 specular = specularStrength * spec * directionalLight.base.color;
+    vec3 specular = specularStrength * spec * color;
 
     // calculate shadow
     float shadow = ShadowCalculation(FragPosLightSpace, norm, lightDir, x_varianceMin, x_lightBleedReductionAmount);
 
     fragColor = texture(diffuse, TexCoord);
     fragColor *= vec4((diffuseLight + specular), 1.0f);
-    fragColor *= (shadow);
+    fragColor *= attenuation;
+    fragColor *= shadow;
 }

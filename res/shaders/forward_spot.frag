@@ -35,8 +35,7 @@ struct SpotLight
 in vec2 TexCoord;
 in vec3 LightPos;
 in vec3 Normal;
-in vec3 FragPos;
-in vec3 ViewDirection;
+in vec3 ModelViewPos;
 
 out vec4 fragColor;
 
@@ -44,6 +43,9 @@ const float specularStrength = 0.5;
 
 uniform sampler2D diffuse;
 uniform SpotLight spotLight;
+uniform float x_varianceMin;
+uniform float x_lightBleedReductionAmount;
+
 uniform mat4 view;
 
 // shadow
@@ -55,23 +57,21 @@ float linstep(float low, float high, float v)
 	return clamp((v-low)/(high-low), 0.0, 1.0);
 }
 
-float sampleVarianceShadowMap(sampler2D shadowMap, vec2 coords, float compare)
+float sampleVarianceShadowMap(sampler2D shadowMap, vec2 coords, float compare, float varianceMin, float lightBleedReductionAmount)
 {
     // return step(compare, texture(shadowMap, coords.xy).r);
     vec2 moments = texture(shadowMap, coords).xy;
 	float p = step(compare, moments.x);
 
-    const float varianceMin = 0.00002;
 	float variance = max(moments.y - moments.x * moments.x, varianceMin);
 
 	float d = compare - moments.x;
-    const float lightBleedReductionAmount = 0.2;
 	float pMax = linstep(lightBleedReductionAmount, 1.0, variance / (variance + d*d));
 
 	return min(max(p, pMax), 1.0);
 }
 
-float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
+float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir, float varianceMin, float lightBleedReductionAmount)
 {
     // perform perspective divide, since it's not done automatically for us
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
@@ -83,14 +83,15 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
         return 1.0;
     }
 
-    return sampleVarianceShadowMap(x_shadowMap, projCoords.xy, projCoords.z);
+    return sampleVarianceShadowMap(x_shadowMap, projCoords.xy, projCoords.z, varianceMin, lightBleedReductionAmount);
 }
 
 void main() {
 
     vec3 norm = Normal;
+    vec3 color = spotLight.pointLight.base.color;
 
-    vec3 lightDiff = LightPos - FragPos;
+    vec3 lightDiff = LightPos - ModelViewPos;
     float lightDistance = length(lightDiff);
     vec3 lightDir = normalize(lightDiff);
 
@@ -105,18 +106,17 @@ void main() {
 
     float diff = max(dot(norm, lightDir), 0.0);
 
-    vec3 diffuseLight = diff * spotLight.pointLight.base.color;
+    vec3 diffuseLight = diff * color;
 
-    vec3 halfwayDir = normalize(lightDir + ViewDirection);
+    vec3 halfwayDir = normalize(lightDir - ModelViewPos);
     vec3 reflectDir = reflect(-lightDir, norm);
     float spec = pow(max(dot(norm, halfwayDir), 0.0), 128);
-    vec3 specular = specularStrength * spec * spotLight.pointLight.base.color;
+    vec3 specular = specularStrength * spec * color;
 
-    // calculate shadow
-    float shadow = ShadowCalculation(FragPosLightSpace, norm, lightDir);
+    float shadow = ShadowCalculation(FragPosLightSpace, norm, lightDir, x_varianceMin, x_lightBleedReductionAmount);
 
     fragColor = texture(diffuse, TexCoord);
     fragColor *= vec4((diffuseLight + specular), 1.0f);
-    fragColor *= (shadow);
     fragColor *= attenuation;
+    fragColor *= shadow;
 }
