@@ -32,7 +32,9 @@ func (c *Camera) GetProjection() mgl32.Mat4 {
 }
 
 func (c *Camera) GetView() mgl32.Mat4 {
+	//This comes from the conjugate rotation because the world should appear to rotate opposite to the camera's rotation.
 	cameraRotation := c.Transform().TransformedRot().Conjugate().Mat4()
+	//Similarly, the translation is inverted because the world appears to move opposite to the camera's movement.
 	cameraPos := c.Transform().TransformedPos().Mul(-1)
 	cameraTranslation := mgl32.Translate3D(cameraPos[0], cameraPos[1], cameraPos[2])
 	return cameraRotation.Mul4(cameraTranslation)
