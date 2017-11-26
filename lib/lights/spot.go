@@ -8,14 +8,15 @@ import (
 	"github.com/stojg/graphics/lib/rendering"
 )
 
-func NewSpot(r, g, b, intensity, angle float32) *Spot {
+func NewSpot(r, g, b, intensity, viewAngle float32) *Spot {
 
-	fov := mgl32.DegToRad(angle)
-	radians := float32(math.Cos(float64(fov)))
-	const nearPlane float32 = 0.01
-	const farPlane float32 = 20
+	fov := mgl32.DegToRad(viewAngle)
+	cutoff := float32(math.Cos(float64(fov / 2)))
+	const nearPlane float32 = 0.2
+	const farPlane float32 = 15
 
-	projection := mgl32.Ortho(-9, 9, -5, 18, nearPlane, farPlane)
+	//projection := mgl32.Ortho(-9, 9, -5, 18, nearPlane, farPlane)
+	projection := mgl32.Perspective(fov, float32(1024/1024), nearPlane, farPlane)
 
 	light := &Spot{
 		BaseLight: BaseLight{
@@ -28,8 +29,7 @@ func NewSpot(r, g, b, intensity, angle float32) *Spot {
 			linear:   0.22,
 			exponent: 0.20,
 		},
-		direction: mgl32.Vec3{0, 0, 0},
-		cutoff:    radians,
+		cutoff: cutoff,
 	}
 	light.shadowInfo.shadowVarianceMin = 0.00002
 	light.shadowInfo.lightBleedReduction = 0.8
@@ -40,7 +40,6 @@ type Spot struct {
 	BaseLight
 	PointLight
 
-	direction mgl32.Vec3
 	// radians
 	cutoff float32
 }
@@ -60,6 +59,6 @@ func (b *Spot) AddToEngine(e components.Engine) {
 	e.GetRenderingEngine().AddLight(b)
 }
 func (b *Spot) ViewProjection() mgl32.Mat4 {
-	lightView := mgl32.LookAt(b.Position().X(), b.Position().Y(), b.Position().Z(), 0, 0, 0, 0, 1, 0)
-	return b.shadowInfo.Projection().Mul4(lightView)
+
+	return b.GetProjection().Mul4(b.GetView())
 }

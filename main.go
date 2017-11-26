@@ -71,7 +71,7 @@ func run() error {
 	spot.Transform().SetPos(mgl32.Vec3{-5, 2, 5})
 	spot.Transform().SetScale(mgl32.Vec3{0.05, 0.05, 0.3})
 	spot.Transform().LookAt(mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
-	spot.AddComponent(lights.NewSpot(0.9, 0.4, 0.1, 20, 22))
+	spot.AddComponent(lights.NewSpot(0.9, 0.4, 0.1, 20, 45))
 	//core.LoadModel(spot, "res/meshes/cube/model.obj", tealMaterial)
 	engine.AddObject(spot)
 
@@ -100,6 +100,38 @@ func run() error {
 		cube := core.NewGameObject()
 		cube.Transform().SetPos(mgl32.Vec3{4, 3.5, 0})
 		cube.Transform().SetScale(mgl32.Vec3{0.5, 0.5, 0.5})
+		core.LoadModel(cube, "res/meshes/cube/model.obj", tealMaterial)
+		engine.AddObject(cube)
+	}
+
+	{
+		cube := core.NewGameObject()
+		cube.Transform().SetPos(mgl32.Vec3{-8, 0.5, 5})
+		cube.Transform().SetScale(mgl32.Vec3{0.5, 0.5, 0.5})
+		core.LoadModel(cube, "res/meshes/cube/model.obj", tealMaterial)
+		engine.AddObject(cube)
+	}
+
+	{
+		cube := core.NewGameObject()
+		cube.Transform().SetPos(mgl32.Vec3{-5, 0.5, 8})
+		cube.Transform().SetScale(mgl32.Vec3{0.5, 0.5, 0.5})
+		core.LoadModel(cube, "res/meshes/cube/model.obj", tealMaterial)
+		engine.AddObject(cube)
+	}
+
+	{
+		cube := core.NewGameObject()
+		cube.Transform().SetPos(mgl32.Vec3{-5, 0.5, -0})
+		cube.Transform().SetScale(mgl32.Vec3{0.5, 0.5, 0.5})
+		core.LoadModel(cube, "res/meshes/cube/model.obj", tealMaterial)
+		engine.AddObject(cube)
+	}
+
+	{
+		cube := core.NewGameObject()
+		cube.Transform().SetPos(mgl32.Vec3{2.4, 0, 0})
+		cube.Transform().SetScale(mgl32.Vec3{0.1, 0.5, 0.5})
 		core.LoadModel(cube, "res/meshes/cube/model.obj", tealMaterial)
 		engine.AddObject(cube)
 	}
