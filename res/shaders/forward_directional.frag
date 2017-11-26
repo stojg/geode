@@ -79,7 +79,7 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
 
     // dont shadow things outside the light frustrum far plane
     if(projCoords.z > 1.0) {
-        return 0.0;
+        return 1.0;
     }
 
     return sampleVarianceShadowMap(x_shadowMap, projCoords.xy, projCoords.z);
