@@ -84,8 +84,10 @@ vec3 FxaaPixelShader(vec2 posPos, sampler2D tex, vec2 rcpFrame)
     float rcpDirMin = 1.0/(min(abs(dir.x), abs(dir.y)) + dirReduce);
     dir = min(FxaaFloat2( FXAA_SPAN_MAX,  FXAA_SPAN_MAX), max(FxaaFloat2(-FXAA_SPAN_MAX, -FXAA_SPAN_MAX), dir * rcpDirMin)) * rcpFrame.xy;
 
-    vec3 rgbA = (1.0/2.0) * (FxaaTexLod0(tex, posPos.xy + dir * (1.0/3.0 - 0.5)).xyz + FxaaTexLod0(tex, posPos.xy + dir * (2.0/3.0 - 0.5)).xyz);
-    vec3 rgbB = rgbA * (1.0/2.0) + (1.0/4.0) * (FxaaTexLod0(tex, posPos.xy + dir * (0.0/3.0 - 0.5)).xyz + FxaaTexLod0(tex, posPos.xy + dir * (3.0/3.0 - 0.5)).xyz);
+    vec3 a = FxaaTexLod0(tex, posPos.xy + dir * (1.0/3.0 - 0.5)).xyz + FxaaTexLod0(tex, posPos.xy + dir * (2.0/3.0 - 0.5)).xyz;
+    vec3 rgbA = (1.0/2.0) * a;
+    vec3 b = (FxaaTexLod0(tex, posPos.xy + dir * (0.0/3.0 - 0.5)).xyz + FxaaTexLod0(tex, posPos.xy + dir * (3.0/3.0 - 0.5)).xyz);
+    vec3 rgbB = rgbA * (1.0/2.0) + (1.0/4.0) * b;
 
     float lumaB = dot(rgbB, luma);
 
