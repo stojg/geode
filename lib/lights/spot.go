@@ -12,10 +12,9 @@ func NewSpot(r, g, b, intensity, viewAngle float32) *Spot {
 
 	fov := mgl32.DegToRad(viewAngle)
 	cutoff := float32(math.Cos(float64(fov / 2)))
-	const nearPlane float32 = 0.2
+	const nearPlane float32 = 2
 	const farPlane float32 = 15
 
-	//projection := mgl32.Ortho(-9, 9, -5, 18, nearPlane, farPlane)
 	projection := mgl32.Perspective(fov, float32(1024/1024), nearPlane, farPlane)
 
 	light := &Spot{

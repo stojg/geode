@@ -134,12 +134,11 @@ func (e *Engine) Render(object components.Renderable) {
 		gl.GenerateMipmap(gl.TEXTURE_2D)
 
 		//gl.Disable(gl.DEPTH_TEST)
-		//e.shadowTextures[i].SetViewPort()
+		//gl.Viewport(0, 0, e.width, e.height)
 		//e.applyFilter(e.debugShadowShader, e.shadowTextures[i], nil)
 		//return
-		//
-		////e.blurShadowMap(e.shadowTextures[i], 1)
-		////gl.GenerateMipmap(gl.TEXTURE_2D)
+
+		e.blurShadowMap(e.shadowTextures[i], 1)
 	}
 
 	//gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
@@ -171,6 +170,7 @@ func (e *Engine) Render(object components.Renderable) {
 	gl.Disable(gl.DEPTH_TEST)
 	e.applyFilter(e.toneMapShader, e.screenTexture, e.fullScreenTemp)
 	e.applyFilter(e.fxaaShader, e.fullScreenTemp, nil)
+	gl.Enable(gl.DEPTH_TEST)
 
 	checkForError("renderer.Engine.Render [end]")
 }
@@ -184,10 +184,13 @@ func (e *Engine) AddLight(l components.Light) {
 }
 
 func (e *Engine) blurShadowMap(shadowMap components.Texture, blurAmount float32) {
+	gl.Disable(gl.DEPTH_TEST)
 	e.SetVector3f("x_blurScale", mgl32.Vec3{1 / float32(shadowMap.Width()) * blurAmount, 0, 0})
-	e.applyFilter(e.nullShader, shadowMap, e.tempShadowTexture)
+	e.applyFilter(e.gaussShader, shadowMap, e.tempShadowTexture)
 	e.SetVector3f("x_blurScale", mgl32.Vec3{0, 1 / float32(shadowMap.Height()) * blurAmount, 0})
-	e.applyFilter(e.nullShader, e.tempShadowTexture, shadowMap)
+	e.applyFilter(e.gaussShader, e.tempShadowTexture, shadowMap)
+	gl.GenerateMipmap(gl.TEXTURE_2D)
+	gl.Enable(gl.DEPTH_TEST)
 }
 
 func (e *Engine) applyFilter(filter *Shader, in, out components.Texture) {
