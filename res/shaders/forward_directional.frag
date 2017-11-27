@@ -15,7 +15,11 @@ void main() {
     vec3 specular = specularCalc(Normal, lightDir, color, specularStrength);
 
     // calculate shadow
-    float shadow = ShadowCalculation(FragPosLightSpace, Normal, lightDir, x_varianceMin, x_lightBleedReductionAmount);
+    float shadow = 1.0;
+
+    if (x_varianceMin != 0.0) {
+        shadow = ShadowCalculation(FragPosLightSpace, Normal, lightDir, x_varianceMin, x_lightBleedReductionAmount);
+    }
 
     fragColor = texture(diffuse, TexCoord);
     fragColor *= vec4((diffuseLight + specular), 1.0f);

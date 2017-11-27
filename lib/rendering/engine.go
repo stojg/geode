@@ -57,11 +57,17 @@ func NewEngine(width, height int) *Engine {
 	}
 
 	shadowW, shadowH := 1024, 1024
-	checkForError("rendering.NewEngine end")
 	for i := 0; i < maxShadowMaps; i++ {
 		e.shadowTextures[i] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, shadowW, shadowH, gl.RG32F, gl.RGBA, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
 	}
 	e.tempShadowTexture = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, shadowW, shadowH, gl.RG32F, gl.RGB, gl.FLOAT, gl.LINEAR, true)
+
+	// set defaults
+	e.SetFloat("x_varianceMin", 0.0)
+	e.SetFloat("x_lightBleedReductionAmount", 0.0)
+	e.SetTexture("x_shadowMap", e.shadowTextures[0])
+
+	checkForError("rendering.NewEngine end")
 	return e
 }
 

@@ -8,20 +8,17 @@ import (
 	"github.com/stojg/graphics/lib/rendering"
 )
 
-func NewSpot(r, g, b, intensity, viewAngle float32) *Spot {
+func NewSpot(shadowCaster bool, r, g, b, intensity, viewAngle float32) *Spot {
 
 	fov := mgl32.DegToRad(viewAngle)
 	cutoff := float32(math.Cos(float64(fov / 2)))
 	const nearPlane float32 = 2
 	const farPlane float32 = 15
 
-	projection := mgl32.Perspective(fov, float32(1), nearPlane, farPlane)
-
 	light := &Spot{
 		BaseLight: BaseLight{
-			color:      mgl32.Vec3{r, g, b}.Mul(intensity),
-			shader:     rendering.NewShader("forward_spot"),
-			shadowInfo: NewShadowInfo(projection, false),
+			color:  mgl32.Vec3{r, g, b}.Mul(intensity),
+			shader: rendering.NewShader("forward_spot"),
 		},
 		PointLight: PointLight{
 			constant: 1,
@@ -30,14 +27,19 @@ func NewSpot(r, g, b, intensity, viewAngle float32) *Spot {
 		},
 		cutoff: cutoff,
 	}
-	light.shadowInfo.shadowVarianceMin = 0.00002
-	light.shadowInfo.lightBleedReduction = 0.8
+	if shadowCaster {
+		projection := mgl32.Perspective(fov, float32(1), nearPlane, farPlane)
+		light.shadowInfo = NewShadowInfo(projection, false)
+		light.shadowInfo.shadowVarianceMin = 0.00002
+		light.shadowInfo.lightBleedReduction = 0.8
+	}
 	return light
 }
 
 type Spot struct {
 	BaseLight
 	PointLight
+
 	cutoff float32 // radians
 }
 
