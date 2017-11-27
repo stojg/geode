@@ -1,37 +1,6 @@
 #version 410 core
 
-struct Attenuation
-{
-    float constant;
-    float linear;
-    float exponent;
-};
-
-struct BaseLight
-{
-    vec3 color;
-};
-
-struct DirectionalLight
-{
-    BaseLight base;
-    vec3 direction;
-};
-
-struct PointLight
-{
-    BaseLight base;
-    Attenuation atten;
-    vec3 position;
-};
-
-struct SpotLight
-{
-    PointLight pointLight;
-    vec3 direction;
-    float cutoff;
-};
-
+#include "light.glh"
 
 in vec2 TexCoord;
 in vec3 LightPos;

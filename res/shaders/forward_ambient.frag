@@ -8,6 +8,5 @@ out vec4 fragColor;
 const float ambientStrength = 0.1;
 
 void main() {
-
     fragColor = texture(diffuse, TexCoord) * ambientStrength;
 }

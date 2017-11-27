@@ -1,36 +1,6 @@
 #version 410 core
 
-struct Attenuation
-{
-    float constant;
-    float linear;
-    float exponent;
-};
-
-struct BaseLight
-{
-    vec3 color;
-};
-
-struct DirectionalLight
-{
-    BaseLight base;
-    vec3 direction;
-};
-
-struct PointLight
-{
-    BaseLight base;
-    Attenuation atten;
-    vec3 position;
-};
-
-struct SpotLight
-{
-    PointLight pointLight;
-    vec3 direction;
-    float cutoff;
-};
+#include "light.glh"
 
 in vec2 TexCoord;
 in vec3 LightPos;
@@ -39,12 +9,13 @@ in vec3 ModelViewPos;
 
 out vec4 fragColor;
 
-const float specularStrength = 0.5;
 
 uniform sampler2D diffuse;
 uniform DirectionalLight directionalLight;
 uniform float x_varianceMin;
 uniform float x_lightBleedReductionAmount;
+
+const float specularStrength = 0.5;
 
 // shadow
 in vec4 FragPosLightSpace;

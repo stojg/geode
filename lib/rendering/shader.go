@@ -1,6 +1,7 @@
 package rendering
 
 import (
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -29,8 +30,16 @@ func NewShader(fileName string) *Shader {
 		s.resource = NewShaderResource()
 	}
 
-	vertexShaderText := s.loadShader(fileName + ".vert")
-	fragmentShaderText := s.loadShader(fileName + ".frag")
+	vertexShaderText, err := s.loadShader(fileName + ".vert")
+	if err != nil {
+		fmt.Printf("error loading shader '%s': %v\n", fileName+".vert", err)
+		os.Exit(1)
+	}
+	fragmentShaderText, err := s.loadShader(fileName + ".frag")
+	if err != nil {
+		fmt.Printf("error loading shader '%s': %v\n", fileName+".frag", err)
+		os.Exit(1)
+	}
 
 	vShader := s.addVertexShader(vertexShaderText)
 	defer s.cleanUp(vShader)
@@ -38,10 +47,10 @@ func NewShader(fileName string) *Shader {
 	fShader := s.addFragmentShader(fragmentShaderText)
 	defer s.cleanUp(fShader)
 
-	s.CompileShader()
+	s.compile()
 
-	s.AddAllUniforms(vertexShaderText)
-	s.AddAllUniforms(fragmentShaderText)
+	s.addAllUniforms(vertexShaderText)
+	s.addAllUniforms(fragmentShaderText)
 
 	loadedShaders[fileName] = s.resource
 
@@ -51,6 +60,13 @@ func NewShader(fileName string) *Shader {
 type Shader struct {
 	filename string
 	resource *ShaderResource
+}
+
+func (s *Shader) Bind() {
+	if shaderInUse != s.resource.Program {
+		shaderInUse = s.resource.Program
+		gl.UseProgram(s.resource.Program)
+	}
 }
 
 func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Material, engine components.RenderingEngine) {
@@ -67,11 +83,11 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 			} else {
 				switch uniformType {
 				case "bool":
-					s.SetUniform(name, engine.GetInteger(name))
+					s.setUniform(name, engine.GetInteger(name))
 				case "vec3":
-					s.SetUniform(name, engine.GetVector3f(name))
+					s.setUniform(name, engine.GetVector3f(name))
 				case "float":
-					s.SetUniform(name, engine.GetFloat(name))
+					s.setUniform(name, engine.GetFloat(name))
 				default:
 					panic(uniformType)
 				}
@@ -82,21 +98,21 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 		if uniformType == "sampler2D" {
 			samplerSlot := engine.GetSamplerSlot(name)
 			mat.Texture(name).Bind(samplerSlot)
-			s.SetUniform(name, int32(samplerSlot))
+			s.setUniform(name, int32(samplerSlot))
 			continue
 		}
 
 		switch name {
 		case "lightMVP":
-			s.SetUniform(name, engine.GetActiveLight().ViewProjection().Mul4(transform.Transformation()))
+			s.setUniform(name, engine.GetActiveLight().ViewProjection().Mul4(transform.Transformation()))
 		case "projection":
-			s.SetUniform(name, engine.GetMainCamera().GetProjection())
+			s.setUniform(name, engine.GetMainCamera().GetProjection())
 		case "model":
-			s.SetUniform(name, transform.Transformation())
+			s.setUniform(name, transform.Transformation())
 		case "view":
-			s.SetUniform(name, engine.GetMainCamera().GetView())
+			s.setUniform(name, engine.GetMainCamera().GetView())
 		case "viewPos":
-			s.SetUniform(name, engine.GetMainCamera().Pos())
+			s.setUniform(name, engine.GetMainCamera().Pos())
 		case "directionalLight":
 			s.setUniformDirectionalLight(name, engine.GetActiveLight().(components.DirectionalLight))
 		case "pointLight":
@@ -111,7 +127,44 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 	}
 }
 
-func (s *Shader) SetUniform(uniformName string, value interface{}) {
+func (s *Shader) loadShader(filepath string) (string, error) {
+	b, err := ioutil.ReadFile("./res/shaders/" + filepath)
+	if err != nil {
+		return "", err
+	}
+
+	return s.addIncludes(string(b))
+}
+
+func (s *Shader) addIncludes(shaderText string) (string, error) {
+
+	var re = regexp.MustCompile(`#include\s"([^"]*)"`)
+
+	var result string
+
+	scanner := bufio.NewScanner(strings.NewReader(shaderText))
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		includes := re.FindAllStringSubmatch(line, -1)
+		if len(includes) > 0 {
+			for _, match := range includes {
+				text, err := s.loadShader(match[1])
+				if err != nil {
+					return "", err
+				}
+				result += text
+			}
+		} else {
+			result += fmt.Sprintf("%s\n", line)
+		}
+
+	}
+
+	return result, nil
+}
+
+func (s *Shader) setUniform(uniformName string, value interface{}) {
 	loc, ok := s.resource.uniforms[uniformName]
 	if !ok {
 		panic(fmt.Sprintf("no shader location found for uniform: '%s' in shader '%s'", uniformName, s.filename))
@@ -131,71 +184,38 @@ func (s *Shader) SetUniform(uniformName string, value interface{}) {
 }
 
 func (s *Shader) setUniformBaseLight(uniformName string, baseLight components.Light) {
-	s.SetUniform(uniformName+".color", baseLight.Color())
+	s.setUniform(uniformName+".color", baseLight.Color())
 }
 
 func (s *Shader) setUniformDirectionalLight(uniformName string, directional components.DirectionalLight) {
 	s.setUniformBaseLight(uniformName+".base", directional)
-	s.SetUniform(uniformName+".direction", directional.Direction())
+	s.setUniform(uniformName+".direction", directional.Direction())
 }
 
 func (s *Shader) setUniformPointLight(uniformName string, pointLight components.PointLight) {
 	s.setUniformBaseLight(uniformName+".base", pointLight)
-	s.SetUniform(uniformName+".position", pointLight.Position())
-	s.SetUniform(uniformName+".atten.constant", pointLight.Constant())
-	s.SetUniform(uniformName+".atten.linear", pointLight.Linear())
-	s.SetUniform(uniformName+".atten.exponent", pointLight.Exponent())
+	s.setUniform(uniformName+".position", pointLight.Position())
+	s.setUniform(uniformName+".atten.constant", pointLight.Constant())
+	s.setUniform(uniformName+".atten.linear", pointLight.Linear())
+	s.setUniform(uniformName+".atten.exponent", pointLight.Exponent())
 }
 
 func (s *Shader) setUniformSpotLight(uniformName string, spotLight components.Spotlight) {
 	s.setUniformPointLight(uniformName+".pointLight", spotLight)
-	s.SetUniform(uniformName+".direction", spotLight.Direction())
-	s.SetUniform(uniformName+".cutoff", spotLight.Cutoff())
-}
-
-func (s *Shader) Bind() {
-	if shaderInUse != s.resource.Program {
-		shaderInUse = s.resource.Program
-		gl.UseProgram(s.resource.Program)
-	}
-}
-
-func (s *Shader) loadShader(filepath string) string {
-	b, err := ioutil.ReadFile("./res/shaders/" + filepath)
-	if err != nil {
-		panic(err)
-	}
-	return string(b) + "\x00"
+	s.setUniform(uniformName+".direction", spotLight.Direction())
+	s.setUniform(uniformName+".cutoff", spotLight.Cutoff())
 }
 
 func (s *Shader) addVertexShader(shader string) uint32 {
-	return s.addProgram(shader, gl.VERTEX_SHADER)
+	return s.createProgram(shader, gl.VERTEX_SHADER)
 }
 
 func (s *Shader) addGeometryShader(shader string) uint32 {
-	return s.addProgram(shader, gl.GEOMETRY_SHADER)
+	return s.createProgram(shader, gl.GEOMETRY_SHADER)
 }
 
 func (s *Shader) addFragmentShader(shader string) uint32 {
-	return s.addProgram(shader, gl.FRAGMENT_SHADER)
-}
-
-func (s *Shader) AddAllUniforms(shaderText string) {
-
-	structs := s.FindUniformStructs(shaderText)
-
-	r := regexp.MustCompile(`uniform\s*(\S*)\s(\S*);`)
-
-	for _, line := range strings.Split(shaderText, "\n") {
-		t := r.FindAllStringSubmatch(line, -1)
-		for _, i := range t {
-			if len(i) == 3 {
-				s.resource.AddUniformName(i[2])
-				s.resource.AdduniformType(i[1])
-				s.AddUniform(i[1], i[2], structs)
-			}
-		}
-	}
+	return s.createProgram(shader, gl.FRAGMENT_SHADER)
 }
 
 func (s *Shader) AddUniform(glType, name string, structs map[string][]GLSLStruct) {
@@ -213,12 +233,30 @@ func (s *Shader) AddUniform(glType, name string, structs map[string][]GLSLStruct
 	s.resource.uniforms[name] = t
 }
 
+func (s *Shader) addAllUniforms(shaderText string) {
+
+	uniformStructs := s.findUniformStructs(shaderText)
+
+	r := regexp.MustCompile(`uniform\s*(\S*)\s(\S*);`)
+
+	for _, line := range strings.Split(shaderText, "\n") {
+		t := r.FindAllStringSubmatch(line, -1)
+		for _, i := range t {
+			if len(i) == 3 {
+				s.resource.AddUniformName(i[2])
+				s.resource.AdduniformType(i[1])
+				s.AddUniform(i[1], i[2], uniformStructs)
+			}
+		}
+	}
+}
+
 type GLSLStruct struct {
 	name  string
 	stype string
 }
 
-func (s Shader) FindUniformStructs(shaderText string) map[string][]GLSLStruct {
+func (s Shader) findUniformStructs(shaderText string) map[string][]GLSLStruct {
 	result := make(map[string][]GLSLStruct)
 	var re = regexp.MustCompile(`(?s)struct\s*(\w*)\s+{\s([^}]*)};`)
 	for _, match := range re.FindAllStringSubmatch(shaderText, -1) {
@@ -237,7 +275,7 @@ func (s Shader) FindUniformStructs(shaderText string) map[string][]GLSLStruct {
 	return result
 }
 
-func (s *Shader) CompileShader() {
+func (s *Shader) compile() {
 
 	gl.LinkProgram(s.resource.Program)
 
@@ -259,7 +297,7 @@ func (s *Shader) cleanUp(shader uint32) {
 	gl.DeleteShader(shader)
 }
 
-func (s *Shader) addProgram(text string, shaderType uint32) uint32 {
+func (s *Shader) createProgram(text string, shaderType uint32) uint32 {
 
 	shader := gl.CreateShader(shaderType)
 
@@ -268,7 +306,7 @@ func (s *Shader) addProgram(text string, shaderType uint32) uint32 {
 		os.Exit(1)
 	}
 
-	shaderSource, free := gl.Strs(text)
+	shaderSource, free := gl.Strs(text + "\x00")
 	gl.ShaderSource(shader, 1, shaderSource, nil)
 	free()
 	gl.CompileShader(shader)
