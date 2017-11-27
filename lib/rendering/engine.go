@@ -118,8 +118,6 @@ func (e *Engine) Render(object components.Renderable) {
 			continue
 		}
 		info := l.ShadowInfo()
-		e.SetFloat("x_varianceMin", info.ShadowVarianceMin())
-		e.SetFloat("x_lightBleedReductionAmount", info.LightBleedReduction())
 		e.shadowTextures[i].BindAsRenderTarget()
 		e.shadowTextures[i].SetViewPort()
 		gl.Clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
@@ -159,6 +157,9 @@ func (e *Engine) Render(object components.Renderable) {
 	for i, l := range e.lights {
 		e.activeLight = l
 		if l.ShadowCaster() {
+			info := l.ShadowInfo()
+			e.SetFloat("x_varianceMin", info.ShadowVarianceMin())
+			e.SetFloat("x_lightBleedReductionAmount", info.LightBleedReduction())
 			e.SetTexture("x_shadowMap", e.shadowTextures[i])
 		}
 		object.RenderAll(l.Shader(), e)
