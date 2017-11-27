@@ -27,23 +27,23 @@ type PointLight struct {
 	exponent float32
 }
 
-func (b *PointLight) AddToEngine(e components.Engine) {
-	e.GetRenderingEngine().AddLight(b)
+func (point *PointLight) AddToEngine(e components.Engine) {
+	e.GetRenderingEngine().AddLight(point)
 }
 
-func (p *PointLight) Exponent() float32 {
-	return p.exponent
+func (point *PointLight) Exponent() float32 {
+	return point.exponent
 }
 
-func (p *PointLight) Linear() float32 {
-	return p.linear
+func (point *PointLight) Linear() float32 {
+	return point.linear
 }
 
-func (p *PointLight) Constant() float32 {
-	return p.constant
+func (point *PointLight) Constant() float32 {
+	return point.constant
 }
 
-/* @todo: caclulate light range
+/* @todo: calculate light range
 float a = m_attenuation.GetExponent();
 float b = m_attenuation.GetLinear();
 float c = m_attenuation.GetConstant() - COLOR_DEPTH * intensity * color.Max();

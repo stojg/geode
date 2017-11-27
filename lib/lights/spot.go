@@ -41,18 +41,18 @@ type Spot struct {
 	cutoff float32 // radians
 }
 
-func (b *Spot) AddToEngine(e components.Engine) {
-	e.GetRenderingEngine().AddLight(b)
+func (spot *Spot) AddToEngine(e components.Engine) {
+	e.GetRenderingEngine().AddLight(spot)
 }
 
-func (c *Spot) Direction() mgl32.Vec3 {
-	return c.Transform().TransformedRot().Rotate(mgl32.Vec3{0, 0, -1})
+func (spot *Spot) Direction() mgl32.Vec3 {
+	return spot.Transform().TransformedRot().Rotate(mgl32.Vec3{0, 0, -1})
 }
 
-func (b *Spot) Cutoff() float32 {
-	return b.cutoff
+func (spot *Spot) Cutoff() float32 {
+	return spot.cutoff
 }
 
-func (b *Spot) ViewProjection() mgl32.Mat4 {
-	return b.GetProjection().Mul4(b.GetView())
+func (spot *Spot) ViewProjection() mgl32.Mat4 {
+	return spot.GetProjection().Mul4(spot.GetView())
 }

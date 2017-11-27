@@ -13,7 +13,7 @@ func NewTexture(attachment uint32, width int, height int, internalFormat int32, 
 	gl.GenTextures(1, &texture.id)
 	gl.BindTexture(textType, texture.id)
 
-	checkForError("Shadowbuffer end")
+	checkForError("ShadowBuffer end")
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
