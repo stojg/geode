@@ -27,7 +27,6 @@ func NewDirectional(r, g, b, intensity float32) *Directional {
 
 type Directional struct {
 	BaseLight
-	view mgl32.Mat4
 }
 
 func (b *Directional) AddToEngine(e components.Engine) {

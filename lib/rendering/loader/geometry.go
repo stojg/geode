@@ -19,7 +19,7 @@ func (g *geometry) readValue(t dataType, value string, strict bool) (*geometryVa
 	// W is according to the spec by default 1, not serialized in String() if not touched
 	// @todo, it doesnt look like Point is supported in the switch t loop at the end?
 	if t == tVertext || t == tPoint {
-		gv.W = 1
+		gv.w = 1
 	}
 
 	for i, part := range strings.Split(value, " ") {
@@ -41,25 +41,24 @@ func (g *geometry) readValue(t dataType, value string, strict bool) (*geometryVa
 
 		switch i {
 		case 0:
-			gv.X = num
+			gv.x = num
 		case 1:
-			gv.Y = num
+			gv.y = num
 		case 2:
-			gv.Z = num
+			gv.z = num
 		case 3:
 			if strict && t != tVertext {
-				return nil, fmt.Errorf("found invalid fourth component: %s %s", t.string(), value)
+				return nil, fmt.Errorf("found invalid fourth component: %s %s", t.String(), value)
 			}
-			gv.W = num
+			gv.w = num
 		default:
 			if strict {
-				return nil, fmt.Errorf("found invalid fifth component: %s %s", t.string(), value)
+				return nil, fmt.Errorf("found invalid fifth component: %s %s", t.String(), value)
 			}
-			break
 		}
 	}
 	// objectFile refs start from 1 not zero
-	gv.Index = len(g.get(t)) + 1
+	gv.index = len(g.get(t)) + 1
 	switch t {
 	case tVertext:
 		g.Vertices = append(g.Vertices, gv)
@@ -73,19 +72,6 @@ func (g *geometry) readValue(t dataType, value string, strict bool) (*geometryVa
 		return nil, fmt.Errorf("unkown geometry value type %d %s", t, t)
 	}
 	return gv, nil
-}
-
-func (g *geometry) set(t dataType, values []*geometryValue) {
-	switch t {
-	case tVertext:
-		g.Vertices = values
-	case tNormal:
-		g.Normals = values
-	case tUV:
-		g.UVs = values
-	case tParam:
-		g.Params = values
-	}
 }
 
 func (g *geometry) get(t dataType) []*geometryValue {

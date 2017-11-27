@@ -23,7 +23,7 @@ const (
 	tSurface        // surf
 )
 
-func (ot dataType) string() string {
+func (ot dataType) String() string {
 	switch ot {
 	case tComment:
 		return "#"

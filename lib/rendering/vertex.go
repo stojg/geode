@@ -6,7 +6,6 @@ import "unsafe"
 const numVertexPositions = 3
 const numVertexNormals = 3
 const numVertexTexCoords = 2
-const numVertexTangents = 2
 
 const sizeOfVertex = unsafe.Sizeof(Vertex{})
 const sizeOfFloat32 = int(unsafe.Sizeof(float32(1)))

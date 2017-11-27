@@ -53,7 +53,7 @@ func (o *object) readVertexData(t dataType, value string, strict bool) (*vertexD
 				return nil, fmt.Errorf("vertex index %d out of bounds, %d declared so far", decl.vertex, geomStats.Vertices)
 			}
 			decl.refVertex = o.parent.Geometry.Vertices[decl.vertex-1]
-			if decl.refVertex.Index != decl.vertex {
+			if decl.refVertex.index != decl.vertex {
 				return nil, fmt.Errorf("vertex index %d does not match with referenced geometry value %#v", decl.vertex, decl.refVertex)
 			}
 		}
@@ -66,7 +66,7 @@ func (o *object) readVertexData(t dataType, value string, strict bool) (*vertexD
 				return nil, fmt.Errorf("uv index %d out of bounds, %d declared so far", decl.uv, geomStats.UVs)
 			}
 			decl.refUV = o.parent.Geometry.UVs[decl.uv-1]
-			if decl.refUV.Index != decl.uv {
+			if decl.refUV.index != decl.uv {
 				return nil, fmt.Errorf("uv index %d does not match with referenced geometry value %#v", decl.uv, decl.refUV)
 			}
 		}
@@ -79,7 +79,7 @@ func (o *object) readVertexData(t dataType, value string, strict bool) (*vertexD
 				return nil, fmt.Errorf("normal index %d out of bounds, %d declared so far", decl.normal, geomStats.Normals)
 			}
 			decl.refNormal = o.parent.Geometry.Normals[decl.normal-1]
-			if decl.refNormal.Index != decl.normal {
+			if decl.refNormal.index != decl.normal {
 				return nil, fmt.Errorf("normal index %d does not match with referenced geometry value %#v", decl.normal, decl.refNormal)
 			}
 		}
@@ -120,7 +120,6 @@ func parseFaceVertexData(str string, strict bool) (vt *vertexData, err error) {
 				if strict {
 					return nil, fmt.Errorf("Invalid face vertex data index %d.%d in %s", iMain, iPart, str)
 				}
-				break
 			}
 		}
 	}
@@ -153,7 +152,6 @@ func parseListVertexData(t dataType, str string, strict bool) (*vertexData, erro
 				if strict {
 					return nil, fmt.Errorf("Invalid face vertex data index %d.%d in %s", iMain, iPart, str)
 				}
-				break
 			}
 		}
 		vt.Declarations = append(vt.Declarations, decl)

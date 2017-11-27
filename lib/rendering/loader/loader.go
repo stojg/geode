@@ -57,5 +57,5 @@ func appendValues(data []float32, in *geometryValue, count int) []float32 {
 }
 
 func toFloat32(val *geometryValue) []float32 {
-	return []float32{float32(val.X), float32(val.Y), float32(val.Z), float32(val.Z)}
+	return []float32{float32(val.x), float32(val.y), float32(val.z), float32(val.z)}
 }

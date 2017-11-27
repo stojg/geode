@@ -11,7 +11,7 @@ import (
 	"github.com/stojg/graphics/lib/rendering/loader"
 )
 
-func LoadModel(g *GameObject, obj string, material *rendering.Material) error {
+func LoadModel(g *GameObject, obj string, material components.Material) error {
 	objData, err := loader.Load(obj)
 	if err != nil {
 		fmt.Printf("Model loading failed: %v", err)

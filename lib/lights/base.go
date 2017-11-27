@@ -21,10 +21,6 @@ func (b *BaseLight) ShadowInfo() components.ShadowInfo {
 	return b.shadowInfo
 }
 
-func (b *BaseLight) setShadowInfo(shadowInfo *ShadowInfo) {
-	b.shadowInfo = shadowInfo
-}
-
 func (b *BaseLight) Shader() components.Shader {
 	return b.shader
 }

@@ -15,7 +15,7 @@ func NewSpot(r, g, b, intensity, viewAngle float32) *Spot {
 	const nearPlane float32 = 2
 	const farPlane float32 = 15
 
-	projection := mgl32.Perspective(fov, float32(1024/1024), nearPlane, farPlane)
+	projection := mgl32.Perspective(fov, float32(1), nearPlane, farPlane)
 
 	light := &Spot{
 		BaseLight: BaseLight{

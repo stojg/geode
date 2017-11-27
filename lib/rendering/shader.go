@@ -208,10 +208,6 @@ func (s *Shader) addVertexShader(shader string) uint32 {
 	return s.createProgram(shader, gl.VERTEX_SHADER)
 }
 
-func (s *Shader) addGeometryShader(shader string) uint32 {
-	return s.createProgram(shader, gl.GEOMETRY_SHADER)
-}
-
 func (s *Shader) addFragmentShader(shader string) uint32 {
 	return s.createProgram(shader, gl.FRAGMENT_SHADER)
 }
