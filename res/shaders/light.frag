@@ -1,31 +1,28 @@
 
 #include "light.glh"
 
-layout (location = 0) in vec3 aPosition;
-layout (location = 1) in vec3 aNormal;
-layout (location = 2) in vec2 aTexCoord;
+in vec2 TexCoord;
+in vec3 LightPos;
+in vec3 Normal;
+in vec3 ModelViewPos;
 
-uniform mat4 projection;
-uniform mat4 view;
-uniform mat4 model;
+out vec4 fragColor;
 
-out vec2 TexCoord;
-out vec3 ModelViewPos;
-out vec3 Normal;
-out vec3 LightPos;
+const float specularStrength = 0.5;
 
-// shadow & light
-uniform mat4 lightMVP;
-out vec4 FragPosLightSpace;
+uniform sampler2D diffuse;
 
-void setOutput(vec4 lightPosition) {
-gl_Position = projection * view * model * vec4(aPosition, 1.0);
-    ModelViewPos = vec3(view  * model * vec4(aPosition, 1.0));
+vec3 diffuseCalc(vec3 norm, vec3 lightDirection, vec3 color) {
+    return max(dot(norm, lightDirection), 0.0) * color;
+}
 
-    Normal = normalize(mat3(transpose(inverse(view * model))) * aNormal);
-    TexCoord = aTexCoord;
+vec3 specularCalc(vec3 norm, vec3 lightDirection, vec3 color, float strength) {
+    vec3 halfwayDir = normalize(lightDirection - normalize(ModelViewPos));
+    vec3 reflectDir = reflect(-lightDirection, norm);
+    float spec = pow(max(dot(norm, halfwayDir), 0.0), 128);
+    return strength * spec * color;
+}
 
-    FragPosLightSpace = lightMVP * vec4(aPosition, 1.0);
-
-    LightPos = vec3(view * lightPosition);
+float attenuationCalc(float lightDistance, Attenuation atten) {
+    return 1.0 / (atten.constant + atten.linear * lightDistance + atten.exponent * (lightDistance * lightDistance));
 }

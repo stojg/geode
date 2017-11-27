@@ -38,26 +38,21 @@ func NewSpot(r, g, b, intensity, viewAngle float32) *Spot {
 type Spot struct {
 	BaseLight
 	PointLight
+	cutoff float32 // radians
+}
 
-	// radians
-	cutoff float32
+func (b *Spot) AddToEngine(e components.Engine) {
+	e.GetRenderingEngine().AddLight(b)
 }
 
 func (c *Spot) Direction() mgl32.Vec3 {
-	r := c.Transform().TransformedRot()
-
-	t := r.Rotate(mgl32.Vec3{0, 0, -1})
-	return t
+	return c.Transform().TransformedRot().Rotate(mgl32.Vec3{0, 0, -1})
 }
 
 func (b *Spot) Cutoff() float32 {
 	return b.cutoff
 }
 
-func (b *Spot) AddToEngine(e components.Engine) {
-	e.GetRenderingEngine().AddLight(b)
-}
 func (b *Spot) ViewProjection() mgl32.Mat4 {
-
 	return b.GetProjection().Mul4(b.GetView())
 }

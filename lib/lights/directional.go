@@ -27,7 +27,6 @@ func NewDirectional(r, g, b, intensity float32) *Directional {
 
 type Directional struct {
 	BaseLight
-
 	view mgl32.Mat4
 }
 
@@ -36,10 +35,11 @@ func (b *Directional) AddToEngine(e components.Engine) {
 }
 
 func (b *Directional) Direction() mgl32.Vec3 {
-	return b.BaseLight.Position().Normalize()
+	return b.Parent().Transform().TransformedPos().Normalize()
 }
 
 func (b *Directional) ViewProjection() mgl32.Mat4 {
-	lightView := mgl32.LookAt(b.Position().X(), b.Position().Y(), b.Position().Z(), 0, 0, 0, 0, 1, 0)
+	pos := b.Parent().Transform().TransformedPos()
+	lightView := mgl32.LookAt(pos.X(), pos.Y(), pos.Z(), 0, 0, 0, 0, 1, 0)
 	return b.shadowInfo.Projection().Mul4(lightView)
 }

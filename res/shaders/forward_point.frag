@@ -1,45 +1,22 @@
 #version 410 core
 
-#include "light.glh"
+#include "light.frag"
 
-in vec2 TexCoord;
-in vec3 LightPos;
-in vec3 Normal;
-in vec3 ModelViewPos;
-
-out vec4 fragColor;
-
-const float specularStrength = 0.5;
-
-uniform sampler2D diffuse;
 uniform PointLight pointLight;
-
 
 void main() {
 
-    vec3 norm = Normal;
-    vec3 color = pointLight.base.color;
-
     vec3 lightDiff = LightPos - ModelViewPos;
     float lightDistance = length(lightDiff);
-
     vec3 lightDir = normalize(lightDiff);
 
-    float attenuation = 1.0 / (pointLight.atten.constant + pointLight.atten.linear * lightDistance + pointLight.atten.exponent * (lightDistance * lightDistance));
+    vec3 color = pointLight.base.color;
 
-    float diff = max(dot(norm, lightDir), 0.0);
-
-    vec3 diffuseLight = diff * color;
-
-    vec3 halfwayDir = normalize(lightDir - normalize(ModelViewPos));
-    vec3 reflectDir = reflect(-lightDir, norm);
-    float spec = pow(max(dot(norm, halfwayDir), 0.0), 128);
-    vec3 specular = specularStrength * spec * color;
-
-    float shadow = 1.0;
+    float attenuation = attenuationCalc(lightDistance, pointLight.atten);
+    vec3 diffuseLight = diffuseCalc(Normal, lightDir, color);
+    vec3 specular = specularCalc(Normal, lightDir, color, specularStrength);
 
     fragColor = texture(diffuse, TexCoord);
     fragColor *= vec4((diffuseLight + specular), 1.0f);
     fragColor *= attenuation;
-    fragColor *= shadow;
 }

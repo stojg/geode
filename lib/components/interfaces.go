@@ -27,7 +27,6 @@ type Renderable interface {
 type Viewable interface {
 	GetView() mgl32.Mat4
 	GetProjection() mgl32.Mat4
-	Pos() mgl32.Vec3
 }
 
 type ShadowInfo interface {

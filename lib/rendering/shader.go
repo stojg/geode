@@ -103,16 +103,14 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 		}
 
 		switch name {
-		case "lightMVP":
-			s.setUniform(name, engine.GetActiveLight().ViewProjection().Mul4(transform.Transformation()))
 		case "projection":
 			s.setUniform(name, engine.GetMainCamera().GetProjection())
 		case "model":
 			s.setUniform(name, transform.Transformation())
 		case "view":
 			s.setUniform(name, engine.GetMainCamera().GetView())
-		case "viewPos":
-			s.setUniform(name, engine.GetMainCamera().Pos())
+		case "lightMVP":
+			s.setUniform(name, engine.GetActiveLight().ViewProjection().Mul4(transform.Transformation()))
 		case "directionalLight":
 			s.setUniformDirectionalLight(name, engine.GetActiveLight().(components.DirectionalLight))
 		case "pointLight":

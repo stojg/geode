@@ -8,10 +8,13 @@ import (
 
 type BaseLight struct {
 	components.GameComponent
-
 	shadowInfo *ShadowInfo
 	color      mgl32.Vec3
 	shader     components.Shader
+}
+
+func (b *BaseLight) AddToEngine(e components.Engine) {
+	e.GetRenderingEngine().AddLight(b)
 }
 
 func (b *BaseLight) ShadowInfo() components.ShadowInfo {
@@ -56,13 +59,9 @@ func (b *BaseLight) GetProjection() mgl32.Mat4 {
 
 func (b *BaseLight) GetView() mgl32.Mat4 {
 	//This comes from the conjugate rotation because the world should appear to rotate opposite to the camera's rotation.
-	cameraRotation := b.Transform().TransformedRot().Conjugate().Mat4()
+	lightRotation := b.Transform().TransformedRot().Conjugate().Mat4()
 	//Similarly, the translation is inverted because the world appears to move opposite to the camera's movement.
-	cameraPos := b.Transform().TransformedPos().Mul(-1)
-	cameraTranslation := mgl32.Translate3D(cameraPos[0], cameraPos[1], cameraPos[2])
-	return cameraRotation.Mul4(cameraTranslation)
-}
-
-func (b *BaseLight) Pos() mgl32.Vec3 {
-	return b.Transform().Pos()
+	lightPosition := b.Transform().TransformedPos().Mul(-1)
+	lightTranslation := mgl32.Translate3D(lightPosition[0], lightPosition[1], lightPosition[2])
+	return lightRotation.Mul4(lightTranslation)
 }
