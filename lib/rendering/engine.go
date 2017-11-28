@@ -39,6 +39,7 @@ func NewEngine(width, height int) *Engine {
 		screenQuad: NewScreenQuad(),
 
 		nullShader:    NewShader("filter_null"),
+		overlayShader: NewShader("filter_overlay"),
 		fxaaShader:    NewShader("filter_fxaa"),
 		gaussShader:   NewShader("filter_gauss"),
 		ambientShader: NewShader("forward_ambient"),
@@ -51,14 +52,16 @@ func NewEngine(width, height int) *Engine {
 
 		fullScreenTemp: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, gl.NEAREST, false),
 
+		debugTexture: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, gl.NEAREST, false),
+
 		capabilities: make(map[string]bool),
 	}
 
-	e.shadowTextures = make([]components.Texture, 11)
-	e.tempShadowTextures = make([]components.Texture, 11)
+	e.shadowTextures = make([]components.Texture, 13)
+	e.tempShadowTextures = make([]components.Texture, 13)
 	e.shadowTextures[0] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, 1, 1, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
 	e.tempShadowTextures[0] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, 1, 1, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
-	for i := uint(0); i < 10; i++ {
+	for i := uint(0); i < 12; i++ {
 		size := 2 << i // power of two, 2, 4, 8, 16 and so on
 		e.shadowTextures[i+1] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, size, size, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
 		e.tempShadowTextures[i+1] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, size, size, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
@@ -92,6 +95,7 @@ type Engine struct {
 	toneMapShader *Shader
 	shadowShader  *Shader
 	fxaaShader    *Shader
+	overlayShader *Shader
 
 	debugShadowShader *Shader
 
@@ -101,6 +105,9 @@ type Engine struct {
 	tempShadowTextures []components.Texture
 
 	fullScreenTemp *framebuffer.Texture
+
+	debugTexture *framebuffer.Texture
+	debugScreens [2]int
 
 	capabilities map[string]bool
 }
@@ -119,16 +126,8 @@ func (e *Engine) Render(object components.Renderable) {
 	checkForError("renderer.Engine.Render [start]")
 	gl.Enable(gl.DEPTH_TEST)
 
-	// shadow map
-	//for _, l := range e.lights {
-	//	e.activeLight = l
-	//	if !l.ShadowCaster() {
-	//		continue
-	//	}
-	//	info := l.ShadowInfo()
-	//
-	//
-	//}
+	e.debugScreens[0] = 0
+	e.debugScreens[1] = 0
 
 	// ambient pass
 	e.screenTexture.BindAsRenderTarget()
@@ -158,10 +157,7 @@ func (e *Engine) Render(object components.Renderable) {
 
 			gl.GenerateMipmap(gl.TEXTURE_2D)
 
-			//gl.Disable(gl.DEPTH_TEST)
-			//gl.Viewport(0, 0, e.width, e.height)
-			//e.applyFilter(e.debugShadowShader, e.shadowTextures[info.SizeAsPowerOfTwo()], nil)
-			//return
+			e.addDebug(e.debugShadowShader, e.shadowTextures[info.SizeAsPowerOfTwo()])
 
 			e.blurShadowMap(info.SizeAsPowerOfTwo(), 1)
 
@@ -189,10 +185,32 @@ func (e *Engine) Render(object components.Renderable) {
 	gl.Disable(gl.DEPTH_TEST)
 	e.applyFilter(e.toneMapShader, e.screenTexture, e.fullScreenTemp)
 	e.applyFilter(e.fxaaShader, e.fullScreenTemp, nil)
+	e.applyFilter(e.overlayShader, e.debugTexture, nil)
 	gl.Enable(gl.DEPTH_TEST)
 
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 	checkForError("renderer.Engine.Render [end]")
+}
+
+func (e *Engine) addDebug(shader *Shader, in components.Texture) {
+	gl.Disable(gl.DEPTH_TEST)
+	var gutter int32 = 10
+	width := e.debugTexture.Width()/4 - gutter
+	height := e.debugTexture.Height()/4 - gutter
+	i := int32(e.debugScreens[0])
+	j := int32(e.debugScreens[1])
+
+	x := i*width + gutter/2 + gutter*i
+	y := e.height - height - height*j - gutter/2 - gutter*j
+
+	gl.Viewport(x, y, width, height)
+	e.applyFilter(shader, in, e.debugTexture)
+	e.debugScreens[0]++
+	if e.debugScreens[0] > 3 {
+		e.debugScreens[0] = 0
+		e.debugScreens[1]++
+	}
+	gl.Enable(gl.DEPTH_TEST)
 }
 
 func (e *Engine) ActiveLight() components.Light {
@@ -205,11 +223,14 @@ func (e *Engine) AddLight(l components.Light) {
 
 func (e *Engine) blurShadowMap(sizeAsPowerOfTwo int, blurAmount float32) {
 	var size = 2 << uint(sizeAsPowerOfTwo)
+	src := e.shadowTextures[sizeAsPowerOfTwo]
+	tmp := e.tempShadowTextures[sizeAsPowerOfTwo]
 	gl.Disable(gl.DEPTH_TEST)
+	gl.Viewport(0, 0, src.Width(), src.Height())
 	e.SetVector3f("x_blurScale", mgl32.Vec3{1 / float32(size) * blurAmount, 0, 0})
-	e.applyFilter(e.gaussShader, e.shadowTextures[sizeAsPowerOfTwo], e.tempShadowTextures[sizeAsPowerOfTwo])
+	e.applyFilter(e.gaussShader, src, tmp)
 	e.SetVector3f("x_blurScale", mgl32.Vec3{0, 1 / float32(size) * blurAmount, 0})
-	e.applyFilter(e.gaussShader, e.tempShadowTextures[sizeAsPowerOfTwo], e.shadowTextures[sizeAsPowerOfTwo])
+	e.applyFilter(e.gaussShader, tmp, src)
 	gl.GenerateMipmap(gl.TEXTURE_2D)
 	gl.Enable(gl.DEPTH_TEST)
 }
