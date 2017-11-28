@@ -8,6 +8,7 @@ struct Attenuation
 struct BaseLight
 {
     vec3 color;
+    float maxDistance;
 };
 
 struct DirectionalLight

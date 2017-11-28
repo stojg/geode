@@ -18,12 +18,21 @@ void main() {
 
     vec3 lightDiff = LightPos - ModelViewPos;
     float lightDistance = length(lightDiff);
+    if (lightDistance > spotLight.pointLight.base.maxDistance) {
+        fragColor = vec4(0,0,0,0);
+        return;
+    }
+
     vec3 ligthDirection = normalize(lightDiff);
+
+
 
     if(isOutsideSpotLight(view, ligthDirection, spotLight.direction, spotLight.cutoff)) {
         fragColor = vec4(0);
         return;
     }
+
+
 
     vec3 color = spotLight.pointLight.base.color;
     float attenuation = attenuationCalc(lightDistance, spotLight.pointLight.atten);

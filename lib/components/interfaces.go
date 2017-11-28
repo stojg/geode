@@ -41,6 +41,7 @@ type Light interface {
 	Viewable
 	Shader() Shader
 	Color() mgl32.Vec3
+	MaxDistance() float32
 	Position() mgl32.Vec3
 	ViewProjection() mgl32.Mat4
 	ShadowInfo() ShadowInfo

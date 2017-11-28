@@ -7,9 +7,14 @@ import (
 
 type BaseLight struct {
 	components.GameComponent
-	shadowInfo *ShadowInfo
-	color      mgl32.Vec3
-	shader     components.Shader
+	shadowInfo  *ShadowInfo
+	color       mgl32.Vec3
+	shader      components.Shader
+	maxDistance float32
+}
+
+func (b *BaseLight) MaxDistance() float32 {
+	return b.maxDistance
 }
 
 func (b *BaseLight) AddToEngine(e components.Engine) {

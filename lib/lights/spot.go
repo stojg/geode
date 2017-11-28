@@ -1,6 +1,7 @@
 package lights
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/go-gl/mathgl/mgl32"
@@ -9,7 +10,7 @@ import (
 )
 
 func NewSpot(shadowSize int, r, g, b, intensity, viewAngle float32) *Spot {
-
+	color := mgl32.Vec3{r, g, b}
 	fov := mgl32.DegToRad(viewAngle)
 	cutoff := float32(math.Cos(float64(fov / 2)))
 	const nearPlane float32 = 2
@@ -17,13 +18,14 @@ func NewSpot(shadowSize int, r, g, b, intensity, viewAngle float32) *Spot {
 
 	light := &Spot{
 		BaseLight: BaseLight{
-			color:  mgl32.Vec3{r, g, b}.Mul(intensity),
-			shader: rendering.NewShader("forward_spot"),
+			color:       color.Mul(intensity),
+			shader:      rendering.NewShader("forward_spot"),
+			maxDistance: 1,
 		},
 		PointLight: PointLight{
 			constant: 1,
-			linear:   0.22,
-			exponent: 0.20,
+			linear:   0.35,
+			exponent: 0.44,
 		},
 		cutoff: cutoff,
 	}
@@ -33,6 +35,29 @@ func NewSpot(shadowSize int, r, g, b, intensity, viewAngle float32) *Spot {
 		light.shadowInfo.shadowVarianceMin = 0.00002
 		light.shadowInfo.lightBleedReduction = 0.8
 	}
+
+	max := color[0]
+	if color[1] > max {
+		max = color[1]
+	}
+	if color[2] > max {
+		max = color[2]
+	}
+
+	fmt.Println(color)
+	fmt.Println(max)
+
+	const colorDepth = 256
+
+	{
+		a := light.Exponent()
+		b := light.Linear()
+		c := light.Constant() - colorDepth*intensity*max
+		dist := (-b + float32(math.Sqrt(float64(b*b-4*a*c)))) / (2 * a)
+		fmt.Println(dist)
+		light.BaseLight.maxDistance = dist
+	}
+
 	return light
 }
 

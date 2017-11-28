@@ -183,6 +183,7 @@ func (s *Shader) setUniform(uniformName string, value interface{}) {
 
 func (s *Shader) setUniformBaseLight(uniformName string, baseLight components.Light) {
 	s.setUniform(uniformName+".color", baseLight.Color())
+	s.setUniform(uniformName+".maxDistance", baseLight.MaxDistance())
 }
 
 func (s *Shader) setUniformDirectionalLight(uniformName string, directional components.DirectionalLight) {

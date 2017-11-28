@@ -1,20 +1,47 @@
 package lights
 
 import (
+	"fmt"
+	"math"
+
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/rendering"
 )
 
 func NewPoint(r, g, b, intensity float32) *PointLight {
+	color := mgl32.Vec3{r, g, b}
 	pointLight := &PointLight{
 		BaseLight: BaseLight{
-			color:  mgl32.Vec3{r, g, b}.Mul(intensity),
-			shader: rendering.NewShader("forward_point"),
+			color:       color.Mul(intensity),
+			shader:      rendering.NewShader("forward_point"),
+			maxDistance: 3,
 		},
 		constant: 1,
-		linear:   0.22,
-		exponent: 0.20,
+		linear:   0.7,
+		exponent: 1.80,
+	}
+
+	max := color[0]
+	if color[1] > max {
+		max = color[1]
+	}
+	if color[2] > max {
+		max = color[2]
+	}
+
+	fmt.Println(color)
+	fmt.Println(max)
+
+	const colorDepth = 256
+
+	{
+		a := pointLight.Exponent()
+		b := pointLight.Linear()
+		c := pointLight.Constant() - colorDepth*intensity*max
+		dist := (-b + float32(math.Sqrt(float64(b*b-4*a*c)))) / (2 * a)
+		fmt.Println(dist)
+		pointLight.BaseLight.maxDistance = dist
 	}
 
 	return pointLight
