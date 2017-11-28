@@ -46,22 +46,22 @@ func NewEngine(width, height int) *Engine {
 
 		debugShadowShader: NewShader("debug_shadow"),
 
-		screenTexture: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA32F, gl.RGBA, gl.FLOAT, gl.NEAREST, false),
+		screenTexture: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGB16F, gl.RGB, gl.FLOAT, gl.NEAREST, false),
 		toneMapShader: NewShader("filter_tonemap"),
 
-		fullScreenTemp: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA32F, gl.RGBA, gl.FLOAT, gl.NEAREST, false),
+		fullScreenTemp: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, gl.NEAREST, false),
 
 		capabilities: make(map[string]bool),
 	}
 
 	e.shadowTextures = make([]components.Texture, 11)
 	e.tempShadowTextures = make([]components.Texture, 11)
-	e.shadowTextures[0] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, 1, 1, gl.RG32F, gl.RGBA, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
-	e.tempShadowTextures[0] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, 1, 1, gl.RG32F, gl.RGBA, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
+	e.shadowTextures[0] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, 1, 1, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
+	e.tempShadowTextures[0] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, 1, 1, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
 	for i := uint(0); i < 10; i++ {
 		size := 2 << i // power of two, 2, 4, 8, 16 and so on
-		e.shadowTextures[i+1] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, size, size, gl.RG32F, gl.RGBA, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
-		e.tempShadowTextures[i+1] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, size, size, gl.RG32F, gl.RGBA, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
+		e.shadowTextures[i+1] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, size, size, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
+		e.tempShadowTextures[i+1] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, size, size, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
 	}
 
 	// set defaults
