@@ -1,7 +1,12 @@
 package rendering
 
-import "math"
+import (
+	"math"
+)
 
+// ConvertToVertices takes an slice of float32 and turnes them into nice Vertexes.
+// It requires that the indata is packed in this order: [3] position, [3] normals, [2] texture coordinates. If the
+// in data doesn't follow this convention, there will be tears and possibly your GPU will implode.
 func ConvertToVertices(meshdata []float32) []Vertex {
 
 	const stride = 8
@@ -11,6 +16,7 @@ func ConvertToVertices(meshdata []float32) []Vertex {
 	}
 	var vertices []Vertex
 
+	// 1. Add Pos, Normal and TexCoords to all Vertices
 	for i := 0; i < len(meshdata); i += stride {
 		var vertex Vertex
 		// position
@@ -22,14 +28,12 @@ func ConvertToVertices(meshdata []float32) []Vertex {
 		vertices = append(vertices, vertex)
 	}
 
-	// calculate tangents and bi-tangents
+	// 2. calculate tangents from the texture UVs so we can properly use bumpmap texture on meshes (we can calculate the bi-tangents
+	// in the vertex shader when we need it)
 	for i := 0; i < len(vertices); i += 3 {
 		v0 := vertices[i]
 		v1 := vertices[i+1]
 		v2 := vertices[i+2]
-
-		edge1 := edge(v1, v0)
-		edge2 := edge(v2, v0)
 
 		deltaU1 := v1.TexCoords[0] - v0.TexCoords[0]
 		deltaV1 := v1.TexCoords[1] - v0.TexCoords[1]
@@ -37,6 +41,9 @@ func ConvertToVertices(meshdata []float32) []Vertex {
 		deltaV2 := v2.TexCoords[1] - v0.TexCoords[1]
 
 		f := 1.0 / (deltaU1*deltaV2 - deltaU2*deltaV1)
+
+		edge1 := edge(v1, v0)
+		edge2 := edge(v2, v0)
 
 		var tangent [3]float32
 		tangent[0] = f * (deltaV2*edge1[0] - deltaV1*edge2[0])

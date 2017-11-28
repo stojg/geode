@@ -9,8 +9,6 @@ import (
 	"github.com/stojg/graphics/lib/rendering/framebuffer"
 )
 
-const maxShadowMaps = 3
-
 func NewEngine(width, height int) *Engine {
 
 	gl.ClearColor(0.00, 0.00, 0.00, 1)
@@ -56,11 +54,15 @@ func NewEngine(width, height int) *Engine {
 		capabilities: make(map[string]bool),
 	}
 
-	shadowW, shadowH := 1024, 1024
-	for i := 0; i < maxShadowMaps; i++ {
-		e.shadowTextures[i] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, shadowW, shadowH, gl.RG32F, gl.RGBA, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
+	e.shadowTextures = make([]components.Texture, 11)
+	e.tempShadowTextures = make([]components.Texture, 11)
+	e.shadowTextures[0] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, 1, 1, gl.RG32F, gl.RGBA, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
+	e.tempShadowTextures[0] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, 1, 1, gl.RG32F, gl.RGBA, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
+	for i := uint(0); i < 10; i++ {
+		size := 2 << i // power of two, 2, 4, 8, 16 and so on
+		e.shadowTextures[i+1] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, size, size, gl.RG32F, gl.RGBA, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
+		e.tempShadowTextures[i+1] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, size, size, gl.RG32F, gl.RGBA, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
 	}
-	e.tempShadowTexture = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, shadowW, shadowH, gl.RG32F, gl.RGB, gl.FLOAT, gl.LINEAR, true)
 
 	// set defaults
 	e.SetFloat("x_varianceMin", 0.0)
@@ -95,8 +97,8 @@ type Engine struct {
 
 	screenTexture *framebuffer.Texture
 
-	shadowTextures    [maxShadowMaps]components.Texture
-	tempShadowTexture components.Texture
+	shadowTextures     []components.Texture
+	tempShadowTextures []components.Texture
 
 	fullScreenTemp *framebuffer.Texture
 
@@ -118,19 +120,23 @@ func (e *Engine) Render(object components.Renderable) {
 	gl.Enable(gl.DEPTH_TEST)
 
 	// shadow map
-	for i, l := range e.lights {
+	for _, l := range e.lights {
 		e.activeLight = l
 		if !l.ShadowCaster() {
 			continue
 		}
 		info := l.ShadowInfo()
-		e.shadowTextures[i].BindAsRenderTarget()
-		e.shadowTextures[i].SetViewPort()
+
+		e.shadowTextures[info.SizeAsPowerOfTwo()].BindAsRenderTarget()
+		e.shadowTextures[info.SizeAsPowerOfTwo()].SetViewPort()
 		gl.Clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
+
 		if info.FlipFaces() {
 			gl.CullFace(gl.FRONT)
 		}
+
 		object.RenderAll(e.shadowShader, e)
+
 		if info.FlipFaces() {
 			gl.CullFace(gl.BACK)
 		}
@@ -142,7 +148,7 @@ func (e *Engine) Render(object components.Renderable) {
 		//e.applyFilter(e.debugShadowShader, e.shadowTextures[i], nil)
 		//return
 
-		e.blurShadowMap(e.shadowTextures[i], 1)
+		e.blurShadowMap(info.SizeAsPowerOfTwo(), 1)
 	}
 
 	//gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
@@ -160,13 +166,13 @@ func (e *Engine) Render(object components.Renderable) {
 	gl.DepthMask(false)
 	gl.DepthFunc(gl.EQUAL)
 
-	for i, l := range e.lights {
+	for _, l := range e.lights {
 		e.activeLight = l
 		if l.ShadowCaster() {
 			info := l.ShadowInfo()
 			e.SetFloat("x_varianceMin", info.ShadowVarianceMin())
 			e.SetFloat("x_lightBleedReductionAmount", info.LightBleedReduction())
-			e.SetTexture("x_shadowMap", e.shadowTextures[i])
+			e.SetTexture("x_shadowMap", e.shadowTextures[info.SizeAsPowerOfTwo()])
 		}
 		object.RenderAll(l.Shader(), e)
 	}
@@ -190,19 +196,20 @@ func (e *Engine) AddLight(l components.Light) {
 	e.lights = append(e.lights, l)
 }
 
-func (e *Engine) blurShadowMap(shadowMap components.Texture, blurAmount float32) {
+func (e *Engine) blurShadowMap(sizeAsPowerOfTwo int, blurAmount float32) {
+	var size = 2 << uint(sizeAsPowerOfTwo)
 	gl.Disable(gl.DEPTH_TEST)
-	e.SetVector3f("x_blurScale", mgl32.Vec3{1 / float32(shadowMap.Width()) * blurAmount, 0, 0})
-	e.applyFilter(e.gaussShader, shadowMap, e.tempShadowTexture)
-	e.SetVector3f("x_blurScale", mgl32.Vec3{0, 1 / float32(shadowMap.Height()) * blurAmount, 0})
-	e.applyFilter(e.gaussShader, e.tempShadowTexture, shadowMap)
+	e.SetVector3f("x_blurScale", mgl32.Vec3{1 / float32(size) * blurAmount, 0, 0})
+	e.applyFilter(e.gaussShader, e.shadowTextures[sizeAsPowerOfTwo], e.tempShadowTextures[sizeAsPowerOfTwo])
+	e.SetVector3f("x_blurScale", mgl32.Vec3{0, 1 / float32(size) * blurAmount, 0})
+	e.applyFilter(e.gaussShader, e.tempShadowTextures[sizeAsPowerOfTwo], e.shadowTextures[sizeAsPowerOfTwo])
 	gl.GenerateMipmap(gl.TEXTURE_2D)
 	gl.Enable(gl.DEPTH_TEST)
 }
 
 func (e *Engine) applyFilter(filter *Shader, in, out components.Texture) {
 	if in == out {
-		panic("Argh, can apply filter where source and destination is the same")
+		panic("Argh, can't apply filter where source and destination is the same")
 	}
 
 	if out == nil {

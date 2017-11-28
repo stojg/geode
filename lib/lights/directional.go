@@ -6,7 +6,7 @@ import (
 	"github.com/stojg/graphics/lib/rendering"
 )
 
-func NewDirectional(shadowCaster bool, r, g, b, intensity float32) *Directional {
+func NewDirectional(shadowSize int, r, g, b, intensity float32) *Directional {
 	const nearPlane float32 = 0.1
 	const farPlane float32 = 25
 
@@ -17,9 +17,9 @@ func NewDirectional(shadowCaster bool, r, g, b, intensity float32) *Directional 
 		},
 	}
 
-	if shadowCaster {
+	if shadowSize != 0 {
 		projection := mgl32.Ortho(-9, 9, -5, 18, nearPlane, farPlane)
-		light.shadowInfo = NewShadowInfo(projection, false)
+		light.shadowInfo = NewShadowInfo(shadowSize, projection, false)
 		light.shadowInfo.shadowVarianceMin = 0.00002
 		light.shadowInfo.lightBleedReduction = 0.8
 	}

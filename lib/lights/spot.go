@@ -8,7 +8,7 @@ import (
 	"github.com/stojg/graphics/lib/rendering"
 )
 
-func NewSpot(shadowCaster bool, r, g, b, intensity, viewAngle float32) *Spot {
+func NewSpot(shadowSize int, r, g, b, intensity, viewAngle float32) *Spot {
 
 	fov := mgl32.DegToRad(viewAngle)
 	cutoff := float32(math.Cos(float64(fov / 2)))
@@ -27,9 +27,9 @@ func NewSpot(shadowCaster bool, r, g, b, intensity, viewAngle float32) *Spot {
 		},
 		cutoff: cutoff,
 	}
-	if shadowCaster {
+	if shadowSize != 0 {
 		projection := mgl32.Perspective(fov, float32(1), nearPlane, farPlane)
-		light.shadowInfo = NewShadowInfo(projection, false)
+		light.shadowInfo = NewShadowInfo(shadowSize, projection, false)
 		light.shadowInfo.shadowVarianceMin = 0.00002
 		light.shadowInfo.lightBleedReduction = 0.8
 	}

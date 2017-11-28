@@ -30,6 +30,7 @@ type Viewable interface {
 }
 
 type ShadowInfo interface {
+	SizeAsPowerOfTwo() int
 	Projection() mgl32.Mat4
 	FlipFaces() bool
 	LightBleedReduction() float32

@@ -2,8 +2,9 @@ package lights
 
 import "github.com/go-gl/mathgl/mgl32"
 
-func NewShadowInfo(projection mgl32.Mat4, flipFaces bool) *ShadowInfo {
+func NewShadowInfo(sizeAsPowerOfTwo int, projection mgl32.Mat4, flipFaces bool) *ShadowInfo {
 	return &ShadowInfo{
+		sizeAsPowerOfTwo:    sizeAsPowerOfTwo,
 		projection:          projection,
 		flipFaces:           flipFaces,
 		shadowVarianceMin:   0.00002,
@@ -12,11 +13,16 @@ func NewShadowInfo(projection mgl32.Mat4, flipFaces bool) *ShadowInfo {
 }
 
 type ShadowInfo struct {
-	projection mgl32.Mat4
-	flipFaces  bool
+	sizeAsPowerOfTwo int
+	projection       mgl32.Mat4
+	flipFaces        bool
 
 	shadowVarianceMin   float32
 	lightBleedReduction float32
+}
+
+func (s *ShadowInfo) SizeAsPowerOfTwo() int {
+	return s.sizeAsPowerOfTwo
 }
 
 func (s *ShadowInfo) LightBleedReduction() float32 {

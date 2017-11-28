@@ -38,8 +38,6 @@ func run() error {
 		return err
 	}
 
-	useShadows := true
-
 	cameraObject := core.NewGameObject()
 	cameraObject.Transform().SetPos(mgl32.Vec3{0, 3, 6})
 	cameraObject.Transform().LookAt(mgl32.Vec3{0, 1, 0}, mgl32.Vec3{0, 1, 0})
@@ -48,6 +46,9 @@ func run() error {
 	cameraObject.AddComponent(components.NewFreelook(width, height))
 	cameraObject.AddComponent(&components.HeadHeight{})
 	engine.AddObject(cameraObject)
+
+	directionalLight := lights.NewDirectional(10, 0.9, 0.9, 0.9, 1)
+	spotLight := lights.NewSpot(0, 0.9, 0.4, 0.1, 20, 45)
 
 	whiteMaterial := rendering.NewMaterial()
 	whiteMaterial.AddTexture("diffuse", rendering.NewTexture("res/textures/white.png"))
@@ -64,7 +65,7 @@ func run() error {
 	dirLight := core.NewGameObject()
 	dirLight.Transform().SetPos(mgl32.Vec3{8, 8, 0})
 	dirLight.Transform().SetScale(mgl32.Vec3{0.5, 0.1, 0.5})
-	dirLight.AddComponent(lights.NewDirectional(useShadows, 0.9, 0.9, 0.9, 1))
+	dirLight.AddComponent(directionalLight)
 	//core.LoadModel(dirLight, "res/meshes/cube/model.obj", tealMaterial)
 	engine.AddObject(dirLight)
 
@@ -79,7 +80,7 @@ func run() error {
 	spot.Transform().SetPos(mgl32.Vec3{-5, 2, 5})
 	spot.Transform().SetScale(mgl32.Vec3{0.05, 0.05, 0.3})
 	spot.Transform().LookAt(mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
-	spot.AddComponent(lights.NewSpot(useShadows, 0.9, 0.4, 0.1, 20, 45))
+	spot.AddComponent(spotLight)
 	//core.LoadModel(spot, "res/meshes/cube/model.obj", tealMaterial)
 	engine.AddObject(spot)
 
