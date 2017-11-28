@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"os"
@@ -14,14 +15,18 @@ import (
 
 func main() {
 	rand.Seed(19)
-	l := NewLogger("gl.log")
+	l := newLogger("gl.log")
 	err := run()
 	if err != nil {
-		l.Error(err)
-		l.Close()
+		l.error(err)
+		if err := l.close(); err != nil {
+			fmt.Println(".. in addition the log file had problem closing", err)
+		}
 		os.Exit(1)
 	}
-	l.Close()
+	if err := l.close(); err != nil {
+		fmt.Println(".. in addition the log file had problem closing", err)
+	}
 }
 
 func run() error {
@@ -53,7 +58,7 @@ func run() error {
 	floor := core.NewGameObject()
 	floor.Transform().SetScale(mgl32.Vec3{100, 0.01, 100})
 	floor.Transform().SetPos(mgl32.Vec3{0, -0.005, 0})
-	core.LoadModel(floor, "res/meshes/cube/model.obj", whiteMaterial)
+	handle(core.LoadModel(floor, "res/meshes/cube/model.obj", whiteMaterial))
 	engine.AddObject(floor)
 
 	dirLight := core.NewGameObject()
@@ -81,13 +86,17 @@ func run() error {
 	bot := core.NewGameObject()
 	bot.Transform().SetPos(mgl32.Vec3{0, 0, 0})
 	bot.AddComponent(components.NewRotator(mgl32.Vec3{0, -1, 0}, 23))
-	core.LoadModel(bot, "res/meshes/sphere_bot/model.obj", whiteMaterial)
+	if err := core.LoadModel(bot, "res/meshes/sphere_bot/model.obj", whiteMaterial); err != nil {
+		return err
+	}
 	engine.AddObject(bot)
 
 	cube := core.NewGameObject()
 	cube.Transform().SetScale(mgl32.Vec3{1, 2, 8})
 	cube.Transform().SetPos(mgl32.Vec3{4, 1, 0})
-	core.LoadModel(cube, "res/meshes/cube/model.obj", whiteMaterial)
+	if err := core.LoadModel(cube, "res/meshes/cube/model.obj", whiteMaterial); err != nil {
+		return err
+	}
 	engine.AddObject(cube)
 
 	{
@@ -95,7 +104,9 @@ func run() error {
 		cube.Transform().SetScale(mgl32.Vec3{1, 2, 8})
 		cube.Transform().SetPos(mgl32.Vec3{-5, 1, -7})
 		cube.Transform().SetRot(mgl32.QuatRotate(math.Pi/2, mgl32.Vec3{0, 1, 0}))
-		core.LoadModel(cube, "res/meshes/cube/model.obj", whiteMaterial)
+		if err := core.LoadModel(cube, "res/meshes/cube/model.obj", whiteMaterial); err != nil {
+			return err
+		}
 		engine.AddObject(cube)
 	}
 
@@ -103,7 +114,9 @@ func run() error {
 		cube := core.NewGameObject()
 		cube.Transform().SetPos(mgl32.Vec3{4, 3.5, 0})
 		cube.Transform().SetScale(mgl32.Vec3{0.5, 0.5, 0.5})
-		core.LoadModel(cube, "res/meshes/cube/model.obj", tealMaterial)
+		if err := core.LoadModel(cube, "res/meshes/cube/model.obj", tealMaterial); err != nil {
+			return err
+		}
 		engine.AddObject(cube)
 	}
 
@@ -111,7 +124,9 @@ func run() error {
 		cube := core.NewGameObject()
 		cube.Transform().SetPos(mgl32.Vec3{-8, 0.5, 5})
 		cube.Transform().SetScale(mgl32.Vec3{0.5, 0.5, 0.5})
-		core.LoadModel(cube, "res/meshes/cube/model.obj", tealMaterial)
+		if err := core.LoadModel(cube, "res/meshes/cube/model.obj", tealMaterial); err != nil {
+			return err
+		}
 		engine.AddObject(cube)
 	}
 
@@ -119,7 +134,9 @@ func run() error {
 		cube := core.NewGameObject()
 		cube.Transform().SetPos(mgl32.Vec3{-5, 0.5, 8})
 		cube.Transform().SetScale(mgl32.Vec3{0.5, 0.5, 0.5})
-		core.LoadModel(cube, "res/meshes/cube/model.obj", tealMaterial)
+		if err := core.LoadModel(cube, "res/meshes/cube/model.obj", tealMaterial); err != nil {
+			return err
+		}
 		engine.AddObject(cube)
 	}
 
@@ -127,7 +144,9 @@ func run() error {
 		cube := core.NewGameObject()
 		cube.Transform().SetPos(mgl32.Vec3{-5, 0.5, -0})
 		cube.Transform().SetScale(mgl32.Vec3{0.5, 0.5, 0.5})
-		core.LoadModel(cube, "res/meshes/cube/model.obj", tealMaterial)
+		if err := core.LoadModel(cube, "res/meshes/cube/model.obj", tealMaterial); err != nil {
+			return err
+		}
 		engine.AddObject(cube)
 	}
 
@@ -135,11 +154,21 @@ func run() error {
 		cube := core.NewGameObject()
 		cube.Transform().SetPos(mgl32.Vec3{2.4, 0, 0})
 		cube.Transform().SetScale(mgl32.Vec3{0.1, 0.5, 0.5})
-		core.LoadModel(cube, "res/meshes/cube/model.obj", tealMaterial)
+		if err := core.LoadModel(cube, "res/meshes/cube/model.obj", tealMaterial); err != nil {
+			return err
+		}
 		engine.AddObject(cube)
 	}
 
 	engine.Start()
 
 	return nil
+}
+
+func handle(err error) {
+	if err == nil {
+		return
+	}
+	fmt.Println(err)
+	os.Exit(1)
 }
