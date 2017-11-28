@@ -28,7 +28,7 @@ type PointLight struct {
 }
 
 func (point *PointLight) AddToEngine(e components.Engine) {
-	e.GetRenderingEngine().AddLight(point)
+	e.RenderingEngine().AddLight(point)
 }
 
 func (point *PointLight) Exponent() float32 {
@@ -44,8 +44,8 @@ func (point *PointLight) Constant() float32 {
 }
 
 /* @todo: calculate light range
-float a = m_attenuation.GetExponent();
-float b = m_attenuation.GetLinear();
-float c = m_attenuation.GetConstant() - COLOR_DEPTH * intensity * color.Max();
+float a = m_attenuation.Exponent();
+float b = m_attenuation.Linear();
+float c = m_attenuation.Constant() - COLOR_DEPTH * intensity * color.Max();
 m_range = (-b + sqrtf(b*b - 4*a*c))/(2*a);
 */

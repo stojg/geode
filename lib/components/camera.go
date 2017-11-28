@@ -16,14 +16,14 @@ type Camera struct {
 }
 
 func (c *Camera) AddToEngine(engine Engine) {
-	engine.GetRenderingEngine().AddCamera(c)
+	engine.RenderingEngine().AddCamera(c)
 }
 
-func (c *Camera) GetProjection() mgl32.Mat4 {
+func (c *Camera) Projection() mgl32.Mat4 {
 	return c.projection
 }
 
-func (c *Camera) GetView() mgl32.Mat4 {
+func (c *Camera) View() mgl32.Mat4 {
 	//This comes from the conjugate rotation because the world should appear to rotate opposite to the camera's rotation.
 	cameraRotation := c.Transform().TransformedRot().Conjugate().Mat4()
 	//Similarly, the translation is inverted because the world appears to move opposite to the camera's movement.

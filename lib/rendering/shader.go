@@ -77,17 +77,17 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 		// x_ signifies that this uniform is not set by the shader directly, ie a hack
 		if strings.Index(name, "x_") == 0 {
 			if uniformType == "sampler2D" {
-				samplerSlot := engine.GetSamplerSlot(name)
-				engine.GetTexture(name).Bind(samplerSlot)
+				samplerSlot := engine.SamplerSlot(name)
+				engine.Texture(name).Bind(samplerSlot)
 				gl.Uniform1i(s.resource.uniforms[name], int32(samplerSlot))
 			} else {
 				switch uniformType {
 				case "bool":
-					s.setUniform(name, engine.GetInteger(name))
+					s.setUniform(name, engine.Integer(name))
 				case "vec3":
-					s.setUniform(name, engine.GetVector3f(name))
+					s.setUniform(name, engine.Vector3f(name))
 				case "float":
-					s.setUniform(name, engine.GetFloat(name))
+					s.setUniform(name, engine.Float(name))
 				default:
 					panic(uniformType)
 				}
@@ -96,7 +96,7 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 		}
 
 		if uniformType == "sampler2D" {
-			samplerSlot := engine.GetSamplerSlot(name)
+			samplerSlot := engine.SamplerSlot(name)
 			mat.Texture(name).Bind(samplerSlot)
 			s.setUniform(name, int32(samplerSlot))
 			continue
@@ -104,19 +104,19 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 
 		switch name {
 		case "projection":
-			s.setUniform(name, engine.GetMainCamera().GetProjection())
+			s.setUniform(name, engine.MainCamera().Projection())
 		case "model":
 			s.setUniform(name, transform.Transformation())
 		case "view":
-			s.setUniform(name, engine.GetMainCamera().GetView())
+			s.setUniform(name, engine.MainCamera().View())
 		case "lightMVP":
-			s.setUniform(name, engine.GetActiveLight().ViewProjection().Mul4(transform.Transformation()))
+			s.setUniform(name, engine.ActiveLight().ViewProjection().Mul4(transform.Transformation()))
 		case "directionalLight":
-			s.setUniformDirectionalLight(name, engine.GetActiveLight().(components.DirectionalLight))
+			s.setUniformDirectionalLight(name, engine.ActiveLight().(components.DirectionalLight))
 		case "pointLight":
-			s.setUniformPointLight(name, engine.GetActiveLight().(components.PointLight))
+			s.setUniformPointLight(name, engine.ActiveLight().(components.PointLight))
 		case "spotLight":
-			s.setUniformSpotLight(name, engine.GetActiveLight().(components.Spotlight))
+			s.setUniformSpotLight(name, engine.ActiveLight().(components.Spotlight))
 
 		default:
 			fmt.Printf("Shader.UpdateUniforms: unknow uniform %s\n", name)

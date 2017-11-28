@@ -13,7 +13,7 @@ type BaseLight struct {
 }
 
 func (b *BaseLight) AddToEngine(e components.Engine) {
-	e.GetRenderingEngine().AddLight(b)
+	e.RenderingEngine().AddLight(b)
 }
 
 func (b *BaseLight) Shader() components.Shader {
@@ -40,14 +40,14 @@ func (b *BaseLight) ViewProjection() mgl32.Mat4 {
 	return mgl32.Ident4()
 }
 
-func (b *BaseLight) GetProjection() mgl32.Mat4 {
+func (b *BaseLight) Projection() mgl32.Mat4 {
 	if b.shadowInfo == nil {
 		return mgl32.Ident4()
 	}
 	return b.shadowInfo.projection
 }
 
-func (b *BaseLight) GetView() mgl32.Mat4 {
+func (b *BaseLight) View() mgl32.Mat4 {
 	//This comes from the conjugate rotation because the world should appear to rotate opposite to the camera's rotation.
 	lightRotation := b.Transform().TransformedRot().Conjugate().Mat4()
 	//Similarly, the translation is inverted because the world appears to move opposite to the camera's movement.

@@ -108,6 +108,6 @@ func (m *Engine) cleanup() {
 	m.window.Close()
 }
 
-func (m *Engine) GetRenderingEngine() components.RenderingEngine {
+func (m *Engine) RenderingEngine() components.RenderingEngine {
 	return m.renderingEngine
 }

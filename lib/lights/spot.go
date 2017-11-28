@@ -44,7 +44,7 @@ type Spot struct {
 }
 
 func (spot *Spot) AddToEngine(e components.Engine) {
-	e.GetRenderingEngine().AddLight(spot)
+	e.RenderingEngine().AddLight(spot)
 }
 
 func (spot *Spot) Direction() mgl32.Vec3 {
@@ -56,5 +56,5 @@ func (spot *Spot) Cutoff() float32 {
 }
 
 func (spot *Spot) ViewProjection() mgl32.Mat4 {
-	return spot.GetProjection().Mul4(spot.GetView())
+	return spot.Projection().Mul4(spot.View())
 }

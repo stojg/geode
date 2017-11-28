@@ -182,7 +182,7 @@ func (e *Engine) Render(object components.Renderable) {
 	checkForError("renderer.Engine.Render [end]")
 }
 
-func (e *Engine) GetActiveLight() components.Light {
+func (e *Engine) ActiveLight() components.Light {
 	return e.activeLight
 }
 
@@ -220,10 +220,10 @@ func (e *Engine) SetTexture(name string, texture components.Texture) {
 	e.textures[name] = texture
 }
 
-func (e *Engine) GetTexture(name string) components.Texture {
+func (e *Engine) Texture(name string) components.Texture {
 	v, ok := e.textures[name]
 	if !ok {
-		panic(fmt.Sprintf("GetTexture, Could not find texture '%s'\n", name))
+		panic(fmt.Sprintf("Texture, Could not find texture '%s'\n", name))
 	}
 	return v
 }
@@ -232,10 +232,10 @@ func (e *Engine) SetInteger(name string, v int32) {
 	e.uniformsI[name] = v
 }
 
-func (e *Engine) GetInteger(name string) int32 {
+func (e *Engine) Integer(name string) int32 {
 	v, ok := e.uniformsI[name]
 	if !ok {
-		panic(fmt.Sprintf("GetInteger, no value found for uniform '%s'", name))
+		panic(fmt.Sprintf("Integer, no value found for uniform '%s'", name))
 	}
 	return v
 }
@@ -244,10 +244,10 @@ func (e *Engine) SetFloat(name string, v float32) {
 	e.uniformsFloat[name] = v
 }
 
-func (e *Engine) GetFloat(name string) float32 {
+func (e *Engine) Float(name string) float32 {
 	v, ok := e.uniformsFloat[name]
 	if !ok {
-		panic(fmt.Sprintf("GetFloat, no value found for uniform '%s'", name))
+		panic(fmt.Sprintf("Float, no value found for uniform '%s'", name))
 	}
 	return v
 }
@@ -256,10 +256,10 @@ func (e *Engine) SetVector3f(name string, v mgl32.Vec3) {
 	e.uniforms3f[name] = v
 }
 
-func (e *Engine) GetVector3f(name string) mgl32.Vec3 {
+func (e *Engine) Vector3f(name string) mgl32.Vec3 {
 	v, ok := e.uniforms3f[name]
 	if !ok {
-		panic(fmt.Sprintf("GetVector3f, no value found for uniform '%s'", name))
+		panic(fmt.Sprintf("Vector3f, no value found for uniform '%s'", name))
 	}
 	return v
 }
@@ -268,11 +268,11 @@ func (e *Engine) AddCamera(c components.Viewable) {
 	e.mainCamera = c
 }
 
-func (e *Engine) GetMainCamera() components.Viewable {
+func (e *Engine) MainCamera() components.Viewable {
 	return e.mainCamera
 }
 
-func (e *Engine) GetSamplerSlot(samplerName string) uint32 {
+func (e *Engine) SamplerSlot(samplerName string) uint32 {
 	slot, exists := e.samplerMap[samplerName]
 	if !exists {
 		fmt.Printf("rendering.Engine tried finding texture slot for %s, failed\n", samplerName)
