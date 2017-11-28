@@ -74,7 +74,7 @@ func run() error {
 	//core.LoadModel(pointLight, "res/meshes/cube/model.obj", tealMaterial)
 	engine.AddObject(pointLight)
 
-	spotLight := lights.NewSpot(0, 0.9, 0.4, 0.1, 20, 45)
+	spotLight := lights.NewSpot(8, 0.9, 0.4, 0.1, 20, 45)
 	spot := core.NewGameObject()
 	spot.Transform().SetPos(mgl32.Vec3{-5, 2, 5})
 	spot.Transform().SetScale(mgl32.Vec3{0.05, 0.05, 0.3})

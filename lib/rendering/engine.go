@@ -11,7 +11,7 @@ import (
 
 func NewEngine(width, height int) *Engine {
 
-	gl.ClearColor(0.00, 0.00, 0.00, 1)
+	gl.ClearColor(0.541, 0.616, 0.671, 1)
 
 	gl.FrontFace(gl.CCW)
 	gl.CullFace(gl.BACK)
@@ -120,71 +120,78 @@ func (e *Engine) Render(object components.Renderable) {
 	gl.Enable(gl.DEPTH_TEST)
 
 	// shadow map
-	for _, l := range e.lights {
-		e.activeLight = l
-		if !l.ShadowCaster() {
-			continue
-		}
-		info := l.ShadowInfo()
-
-		e.shadowTextures[info.SizeAsPowerOfTwo()].BindAsRenderTarget()
-		e.shadowTextures[info.SizeAsPowerOfTwo()].SetViewPort()
-		gl.Clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
-
-		if info.FlipFaces() {
-			gl.CullFace(gl.FRONT)
-		}
-
-		object.RenderAll(e.shadowShader, e)
-
-		if info.FlipFaces() {
-			gl.CullFace(gl.BACK)
-		}
-
-		gl.GenerateMipmap(gl.TEXTURE_2D)
-
-		//gl.Disable(gl.DEPTH_TEST)
-		//gl.Viewport(0, 0, e.width, e.height)
-		//e.applyFilter(e.debugShadowShader, e.shadowTextures[i], nil)
-		//return
-
-		e.blurShadowMap(info.SizeAsPowerOfTwo(), 1)
-	}
-
-	//gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-	e.screenTexture.BindAsRenderTarget()
-	e.screenTexture.SetViewPort()
-	gl.ClearColor(0.541, 0.616, 0.671, 1)
-	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+	//for _, l := range e.lights {
+	//	e.activeLight = l
+	//	if !l.ShadowCaster() {
+	//		continue
+	//	}
+	//	info := l.ShadowInfo()
+	//
+	//
+	//}
 
 	// ambient pass
-	object.RenderAll(e.ambientShader, e)
+	e.screenTexture.BindAsRenderTarget()
+	e.screenTexture.SetViewPort()
 
-	// light pass
-	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.ONE, gl.ONE)
-	gl.DepthMask(false)
-	gl.DepthFunc(gl.EQUAL)
+	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+	object.RenderAll(e.ambientShader, e)
 
 	for _, l := range e.lights {
 		e.activeLight = l
 		if l.ShadowCaster() {
 			info := l.ShadowInfo()
+
+			e.shadowTextures[info.SizeAsPowerOfTwo()].BindAsRenderTarget()
+			e.shadowTextures[info.SizeAsPowerOfTwo()].SetViewPort()
+			gl.Clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
+
+			if info.FlipFaces() {
+				gl.CullFace(gl.FRONT)
+			}
+
+			object.RenderAll(e.shadowShader, e)
+
+			if info.FlipFaces() {
+				gl.CullFace(gl.BACK)
+			}
+
+			gl.GenerateMipmap(gl.TEXTURE_2D)
+
+			//gl.Disable(gl.DEPTH_TEST)
+			//gl.Viewport(0, 0, e.width, e.height)
+			//e.applyFilter(e.debugShadowShader, e.shadowTextures[info.SizeAsPowerOfTwo()], nil)
+			//return
+
+			e.blurShadowMap(info.SizeAsPowerOfTwo(), 1)
+
 			e.SetFloat("x_varianceMin", info.ShadowVarianceMin())
 			e.SetFloat("x_lightBleedReductionAmount", info.LightBleedReduction())
 			e.SetTexture("x_shadowMap", e.shadowTextures[info.SizeAsPowerOfTwo()])
 		}
+
+		// light pass
+		gl.Enable(gl.BLEND)
+		gl.BlendFunc(gl.ONE, gl.ONE)
+		gl.DepthMask(false)
+		gl.DepthFunc(gl.EQUAL)
+
+		e.screenTexture.BindAsRenderTarget()
+		e.screenTexture.SetViewPort()
+
 		object.RenderAll(l.Shader(), e)
+
+		gl.DepthFunc(gl.LESS)
+		gl.DepthMask(true)
+		gl.Disable(gl.BLEND)
 	}
-	gl.DepthFunc(gl.LESS)
-	gl.DepthMask(true)
-	gl.Disable(gl.BLEND)
 
 	gl.Disable(gl.DEPTH_TEST)
 	e.applyFilter(e.toneMapShader, e.screenTexture, e.fullScreenTemp)
 	e.applyFilter(e.fxaaShader, e.fullScreenTemp, nil)
 	gl.Enable(gl.DEPTH_TEST)
 
+	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 	checkForError("renderer.Engine.Render [end]")
 }
 
