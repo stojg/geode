@@ -1,3 +1,3 @@
 {
-  "Enable": ["ineffassign", "vet", "gas", "goconst", "gocyclo", "vetshadow"]
+  "Enable": ["ineffassign", "vet", "goconst", "gocyclo", "vetshadow"]
 }

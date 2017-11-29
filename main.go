@@ -11,12 +11,17 @@ import (
 	"github.com/stojg/graphics/lib/core"
 	"github.com/stojg/graphics/lib/lights"
 	"github.com/stojg/graphics/lib/rendering"
+	"github.com/stojg/graphics/lib/rendering/loader"
 )
+
+var models map[string][]*rendering.Mesh
 
 func main() {
 	rand.Seed(19)
 	l := newLogger("gl.log")
+	models = make(map[string][]*rendering.Mesh)
 	err := run()
+
 	if err != nil {
 		l.error(err)
 		if err := l.close(); err != nil {
@@ -45,105 +50,146 @@ func run() error {
 	tealMaterial.AddTexture("diffuse", rendering.NewTexture("res/textures/teal.png"))
 
 	cameraObject := core.NewGameObject()
-	cameraObject.Transform().SetPos(mgl32.Vec3{0, 0, 6})
-	cameraObject.Transform().SetScale(mgl32.Vec3{0.1, 0.1, 0.1})
-	//cameraObject.Transform().LookAt(mgl32.Vec3{0, 0, -1}, mgl32.Vec3{0, 1, 0})
+	cameraObject.Transform().SetPos(vec3(0, 1.8, 6))
+	cameraObject.Transform().SetScale(vec3(0.1, 0.1, 0.1))
 	cameraObject.AddComponent(components.NewCamera(75, width, height, 0.01, 500))
 	cameraObject.AddComponent(&components.FreeMove{})
 	cameraObject.AddComponent(components.NewFreelook(width, height))
 	cameraObject.AddComponent(&components.HeadHeight{})
-	handle(core.LoadModel(cameraObject, "res/meshes/sphere/model.obj", whiteMaterial))
+	loadModel(cameraObject, "res/meshes/sphere/model.obj", whiteMaterial)
 	engine.AddObject(cameraObject)
-
-	floor := core.NewGameObject()
-	floor.Transform().SetScale(mgl32.Vec3{15, 0.01, 15})
-	floor.Transform().SetPos(mgl32.Vec3{0, -0.005, 0})
-	handle(core.LoadModel(floor, "res/meshes/cube/model.obj", whiteMaterial))
-	engine.AddObject(floor)
 
 	directionalLight := lights.NewDirectional(9, 0.9, 0.9, 0.9, 1)
 	dirLight := core.NewGameObject()
-	dirLight.Transform().SetPos(mgl32.Vec3{1, 1, 0})
-	dirLight.Transform().LookAt(mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
-	dirLight.Transform().SetScale(mgl32.Vec3{0.5, 0.1, 0.5})
+	dirLight.Transform().SetPos(vec3(1, 2, -1))
+	dirLight.Transform().LookAt(vec3(0, 0, 0), up())
+	dirLight.Transform().SetScale(vec3(0.5, 0.1, 0.5))
 	dirLight.AddComponent(directionalLight)
-	//core.LoadModel(dirLight, "res/meshes/cube/model.obj", tealMaterial)
 	engine.AddObject(dirLight)
-
-	pointLight := core.NewGameObject()
-	pointLight.Transform().SetPos(mgl32.Vec3{-3, 1, 0})
-	pointLight.Transform().SetScale(mgl32.Vec3{0.05, 0.05, 0.05})
-	pointLight.AddComponent(lights.NewPoint(0.98, 0.05, 0.02, 10))
-	core.LoadModel(pointLight, "res/meshes/ico/model.obj", tealMaterial)
-	engine.AddObject(pointLight)
 
 	spotLight := lights.NewSpot(8, 0.9, 0.4, 0.1, 20, 45)
 	spot := core.NewGameObject()
-	spot.Transform().SetPos(mgl32.Vec3{-5, 2, 5})
-	spot.Transform().SetScale(mgl32.Vec3{0.05, 0.05, 0.3})
-	spot.Transform().LookAt(mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
+	spot.Transform().SetPos(vec3(3, 3.5, 4.6))
+	spot.Transform().SetScale(vec3(0.05, 0.05, 0.3))
+	spot.Transform().LookAt(vec3(0, 1, 0), up())
 	spot.AddComponent(spotLight)
-	//core.LoadModel(spot, "res/meshes/cube/model.obj", tealMaterial)
 	engine.AddObject(spot)
 
-	bot := core.NewGameObject()
-	bot.Transform().SetPos(mgl32.Vec3{0, 0, 0})
-	bot.AddComponent(components.NewRotator(mgl32.Vec3{0, -1, 0}, 23))
-	if err := core.LoadModel(bot, "res/meshes/sphere_bot/model.obj", whiteMaterial); err != nil {
-		return err
+	pointLight := core.NewGameObject()
+	pointLight.Transform().SetPos(vec3(-2, 0.6, 2))
+	pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
+	pointLight.AddComponent(lights.NewPoint(0.98, 0.05, 0.02, 8))
+	loadModel(pointLight, "res/meshes/ico/model.obj", tealMaterial)
+	engine.AddObject(pointLight)
+
+	{
+		pointLight := core.NewGameObject()
+		pointLight.Transform().SetPos(vec3(-10, 0.3, 0))
+		pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
+		pointLight.AddComponent(lights.NewPoint(0.1, 0.05, 0.98, 5))
+		loadModel(pointLight, "res/meshes/ico/model.obj", tealMaterial)
+		engine.AddObject(pointLight)
 	}
+
+	floor := core.NewGameObject()
+	floor.Transform().SetScale(vec3(15, 0.01, 15))
+	floor.Transform().SetPos(vec3(0, -0.005, 0))
+	loadModel(floor, "res/meshes/cube/model.obj", whiteMaterial)
+	engine.AddObject(floor)
+
+	bot := core.NewGameObject()
+	bot.Transform().SetPos(vec3(0, 0.2, 0))
+	bot.AddComponent(components.NewRotator(vec3(0, -1, 0), 23))
+	loadModel(bot, "res/meshes/sphere_bot/model.obj", whiteMaterial)
 	engine.AddObject(bot)
+
+	{ //podium
+		cube := core.NewGameObject()
+		cube.Transform().SetScale(vec3(1.9, 0.1, 1.9))
+		cube.Transform().SetPos(vec3(0, 0.1, 0))
+		loadModel(cube, "res/meshes/cube/model.obj", tealMaterial)
+		engine.AddObject(cube)
+	}
 
 	{ // wall 1
 		cube := core.NewGameObject()
-		cube.Transform().SetScale(mgl32.Vec3{1, 2, 8})
-		cube.Transform().SetPos(mgl32.Vec3{4, 1, 0})
-		if err := core.LoadModel(cube, "res/meshes/cube/model.obj", whiteMaterial); err != nil {
-			return err
-		}
+		cube.Transform().SetScale(vec3(1, 2, 8))
+		cube.Transform().SetPos(vec3(4, 2, 2))
+		loadModel(cube, "res/meshes/cube/model.obj", whiteMaterial)
 		engine.AddObject(cube)
 	}
 
 	{ // wall 2
 		cube := core.NewGameObject()
-		cube.Transform().SetScale(mgl32.Vec3{1, 2, 8})
-		cube.Transform().SetPos(mgl32.Vec3{-5, 1, -7})
-		cube.Transform().SetRot(mgl32.QuatRotate(math.Pi/2, mgl32.Vec3{0, 1, 0}))
-		if err := core.LoadModel(cube, "res/meshes/cube/model.obj", whiteMaterial); err != nil {
-			return err
-		}
+		cube.Transform().SetScale(vec3(1, 2, 8))
+		cube.Transform().SetPos(vec3(-5, 2, -5))
+		cube.Transform().SetRot(mgl32.QuatRotate(math.Pi/2, vec3(0, 1, 0)))
+		loadModel(cube, "res/meshes/cube/model.obj", whiteMaterial)
 		engine.AddObject(cube)
 	}
 
-	{ // on top of wall
+	{ // wall 3
 		cube := core.NewGameObject()
-		cube.Transform().SetPos(mgl32.Vec3{4, 3.5, 0})
-		cube.Transform().SetScale(mgl32.Vec3{0.5, 0.5, 0.5})
-		if err := core.LoadModel(cube, "res/meshes/cube/model.obj", whiteMaterial); err != nil {
-			return err
-		}
+		cube.Transform().SetScale(vec3(1, 2, 8))
+		cube.Transform().SetPos(vec3(-14, 2, 2))
+		loadModel(cube, "res/meshes/cube/model.obj", whiteMaterial)
+		engine.AddObject(cube)
+	}
+
+	{ // wall 3
+		cube := core.NewGameObject()
+		cube.Transform().SetScale(vec3(3, 0.1, 8))
+		cube.Transform().SetPos(vec3(-12, 4, 2))
+		loadModel(cube, "res/meshes/cube/model.obj", whiteMaterial)
+		engine.AddObject(cube)
+	}
+
+	{ // on top of wall 1
+		cube := core.NewGameObject()
+		cube.Transform().SetScale(vec3(0.5, 0.5, 0.5))
+		cube.Transform().SetPos(vec3(4, 4.45, 0))
+		loadModel(cube, "res/meshes/cube/model.obj", whiteMaterial)
 		engine.AddObject(cube)
 	}
 
 	{ // pillar
 		cube := core.NewGameObject()
-		cube.Transform().SetScale(mgl32.Vec3{0.25, 3, 0.25})
-		cube.Transform().SetPos(mgl32.Vec3{-5, 2.99, 8})
-		if err := core.LoadModel(cube, "res/meshes/cube/model.obj", tealMaterial); err != nil {
-			return err
-		}
+		cube.Transform().SetScale(vec3(0.25, 3, 0.25))
+		cube.Transform().SetPos(vec3(-5, 2.99, 8))
+		loadModel(cube, "res/meshes/cube/model.obj", tealMaterial)
 		engine.AddObject(cube)
 	}
-
 	engine.Start()
-
 	return nil
 }
 
-func handle(err error) {
-	if err == nil {
-		return
+func loadModel(g *core.GameObject, obj string, material components.Material) {
+	objData, err := loader.Load(obj)
+	if err != nil {
+		fmt.Printf("Model loading failed: %v", err)
+		os.Exit(1)
 	}
-	fmt.Println(err)
-	os.Exit(1)
+
+	if _, ok := models[obj]; !ok {
+		var meshes []*rendering.Mesh
+		for i, data := range objData {
+			mesh := rendering.NewMesh()
+			mesh.SetVertices(rendering.ConvertToVertices(data))
+			fmt.Printf("loadModel: %s.%d has %d vertices\n", obj, i, mesh.NumVertices())
+			meshes = append(meshes, mesh)
+		}
+		models[obj] = meshes
+	}
+	for _, mesh := range models[obj] {
+		g.AddComponent(components.NewMeshRenderer(mesh, material))
+	}
+
+}
+
+func vec3(x, y, z float32) mgl32.Vec3 {
+	return mgl32.Vec3{x, y, z}
+}
+
+func up() mgl32.Vec3 {
+	return mgl32.Vec3{0, 1, 0}
 }

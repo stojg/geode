@@ -5,26 +5,9 @@ import (
 	"time"
 
 	"github.com/go-gl/glfw/v3.2/glfw"
-	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/input"
 	"github.com/stojg/graphics/lib/rendering"
-	"github.com/stojg/graphics/lib/rendering/loader"
 )
-
-func LoadModel(g *GameObject, obj string, material components.Material) error {
-	objData, err := loader.Load(obj)
-	if err != nil {
-		fmt.Printf("Model loading failed: %v", err)
-		return err
-	}
-	for i, data := range objData {
-		mesh := rendering.NewMesh()
-		mesh.SetVertices(rendering.ConvertToVertices(data))
-		fmt.Printf("LoadModel: %s.%d has %d vertices\n", obj, i, mesh.NumVertices())
-		g.AddComponent(components.NewMeshRenderer(mesh, material))
-	}
-	return nil
-}
 
 func NewGame() *Game {
 	g := &Game{
