@@ -6,7 +6,9 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
+	"github.com/stojg/graphics/lib/rendering/debugger"
 	"github.com/stojg/graphics/lib/rendering/framebuffer"
+	"github.com/stojg/graphics/lib/rendering/shader"
 )
 
 func NewEngine(width, height int) *Engine {
@@ -38,21 +40,17 @@ func NewEngine(width, height int) *Engine {
 
 		screenQuad: NewScreenQuad(),
 
-		nullShader:    NewShader("filter_null"),
-		overlayShader: NewShader("filter_overlay"),
-		fxaaShader:    NewShader("filter_fxaa"),
-		gaussShader:   NewShader("filter_gauss"),
-		ambientShader: NewShader("forward_ambient"),
-		shadowShader:  NewShader("shadow_vsm"),
-
-		debugShadowShader: NewShader("debug_shadow"),
+		nullShader:    shader.NewShader("filter_null"),
+		overlayShader: shader.NewShader("filter_overlay"),
+		fxaaShader:    shader.NewShader("filter_fxaa"),
+		gaussShader:   shader.NewShader("filter_gauss"),
+		ambientShader: shader.NewShader("forward_ambient"),
+		shadowShader:  shader.NewShader("shadow_vsm"),
 
 		screenTexture: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGB16F, gl.RGB, gl.FLOAT, gl.NEAREST, false),
-		toneMapShader: NewShader("filter_tonemap"),
+		toneMapShader: shader.NewShader("filter_tonemap"),
 
 		fullScreenTemp: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, gl.NEAREST, false),
-
-		debugTexture: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, gl.NEAREST, false),
 
 		capabilities: make(map[string]bool),
 	}
@@ -66,6 +64,8 @@ func NewEngine(width, height int) *Engine {
 		e.shadowTextures[i] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, size, size, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
 		e.tempShadowTextures[i] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, size, size, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
 	}
+
+	debugger.New(width, height)
 
 	// set defaults
 	e.SetFloat("x_varianceMin", 0.0)
@@ -89,15 +89,13 @@ type Engine struct {
 	uniformsFloat map[string]float32
 
 	screenQuad    *ScreenQuad
-	nullShader    *Shader
-	gaussShader   *Shader
-	ambientShader *Shader
-	toneMapShader *Shader
-	shadowShader  *Shader
-	fxaaShader    *Shader
-	overlayShader *Shader
-
-	debugShadowShader *Shader
+	nullShader    *shader.Shader
+	gaussShader   *shader.Shader
+	ambientShader *shader.Shader
+	toneMapShader *shader.Shader
+	shadowShader  *shader.Shader
+	fxaaShader    *shader.Shader
+	overlayShader *shader.Shader
 
 	screenTexture *framebuffer.Texture
 
@@ -105,9 +103,6 @@ type Engine struct {
 	tempShadowTextures []components.Texture
 
 	fullScreenTemp *framebuffer.Texture
-
-	debugTexture *framebuffer.Texture
-	debugScreens [2]int
 
 	capabilities map[string]bool
 }
@@ -126,8 +121,7 @@ func (e *Engine) Render(object components.Renderable) {
 	checkForError("renderer.Engine.Render [start]")
 	gl.Enable(gl.DEPTH_TEST)
 
-	e.debugScreens[0] = 0
-	e.debugScreens[1] = 0
+	debugger.Clear()
 
 	// ambient pass
 	e.screenTexture.BindAsRenderTarget()
@@ -138,12 +132,16 @@ func (e *Engine) Render(object components.Renderable) {
 
 	for _, l := range e.lights {
 		e.activeLight = l
+		textureIndex := 0
+
 		if l.ShadowCaster() {
 			info := l.ShadowInfo()
 
+			textureIndex = info.SizeAsPowerOfTwo()
+
 			l.SetCamera(e.mainCamera.Pos(), e.mainCamera.Rot())
-			e.shadowTextures[info.SizeAsPowerOfTwo()].BindAsRenderTarget()
-			e.shadowTextures[info.SizeAsPowerOfTwo()].SetViewPort()
+			e.shadowTextures[textureIndex].BindAsRenderTarget()
+			e.shadowTextures[textureIndex].SetViewPort()
 			gl.Clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
 
 			if info.FlipFaces() {
@@ -158,13 +156,12 @@ func (e *Engine) Render(object components.Renderable) {
 
 			gl.GenerateMipmap(gl.TEXTURE_2D)
 
-			e.addDebug(e.debugShadowShader, e.shadowTextures[info.SizeAsPowerOfTwo()])
+			debugger.AddTexture(e.shadowTextures[textureIndex], e.applyFilter)
 
 			e.blurShadowMap(info.SizeAsPowerOfTwo(), 1)
 
 			e.SetFloat("x_varianceMin", info.ShadowVarianceMin())
 			e.SetFloat("x_lightBleedReductionAmount", info.LightBleedReduction())
-			e.SetTexture("x_shadowMap", e.shadowTextures[info.SizeAsPowerOfTwo()])
 		}
 
 		// light pass
@@ -175,6 +172,7 @@ func (e *Engine) Render(object components.Renderable) {
 
 		e.screenTexture.BindAsRenderTarget()
 		e.screenTexture.SetViewPort()
+		e.SetTexture("x_shadowMap", e.shadowTextures[textureIndex])
 
 		object.RenderAll(l.Shader(), e)
 
@@ -186,32 +184,11 @@ func (e *Engine) Render(object components.Renderable) {
 	gl.Disable(gl.DEPTH_TEST)
 	e.applyFilter(e.toneMapShader, e.screenTexture, e.fullScreenTemp)
 	e.applyFilter(e.fxaaShader, e.fullScreenTemp, nil)
-	e.applyFilter(e.overlayShader, e.debugTexture, nil)
+	//e.applyFilter(e.overlayShader, debugger.Texture(), nil)
 	gl.Enable(gl.DEPTH_TEST)
 
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 	checkForError("renderer.Engine.Render [end]")
-}
-
-func (e *Engine) addDebug(shader *Shader, in components.Texture) {
-	gl.Disable(gl.DEPTH_TEST)
-	var gutter int32 = 10
-	width := e.debugTexture.Width()/4 - gutter
-	height := e.debugTexture.Height()/4 - gutter
-	i := int32(e.debugScreens[0])
-	j := int32(e.debugScreens[1])
-
-	x := i*width + gutter/2 + gutter*i
-	y := e.height - height - height*j - gutter/2 - gutter*j
-
-	gl.Viewport(x, y, width, height)
-	e.applyFilter(shader, in, e.debugTexture)
-	e.debugScreens[0]++
-	if e.debugScreens[0] > 3 {
-		e.debugScreens[0] = 0
-		e.debugScreens[1]++
-	}
-	gl.Enable(gl.DEPTH_TEST)
 }
 
 func (e *Engine) ActiveLight() components.Light {
@@ -236,7 +213,7 @@ func (e *Engine) blurShadowMap(sizeAsPowerOfTwo int, blurAmount float32) {
 	gl.Enable(gl.DEPTH_TEST)
 }
 
-func (e *Engine) applyFilter(filter *Shader, in, out components.Texture) {
+func (e *Engine) applyFilter(filter components.Shader, in, out components.Texture) {
 	if in == out {
 		panic("Argh, can't apply filter where source and destination is the same")
 	}

@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
-	"github.com/stojg/graphics/lib/rendering"
+	"github.com/stojg/graphics/lib/rendering/shader"
 )
 
 func NewSpot(shadowSize int, r, g, b, intensity, viewAngle float32) *Spot {
@@ -16,7 +16,7 @@ func NewSpot(shadowSize int, r, g, b, intensity, viewAngle float32) *Spot {
 	light := &Spot{
 		BaseLight: BaseLight{
 			color:       color.Mul(intensity),
-			shader:      rendering.NewShader("forward_spot"),
+			shader:      shader.NewShader("forward_spot"),
 			maxDistance: 1,
 		},
 		PointLight: PointLight{

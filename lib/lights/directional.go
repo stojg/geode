@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
-	"github.com/stojg/graphics/lib/rendering"
+	"github.com/stojg/graphics/lib/rendering/shader"
 )
 
 func NewDirectional(shadowSize int, r, g, b, intensity float32) *Directional {
@@ -14,7 +14,7 @@ func NewDirectional(shadowSize int, r, g, b, intensity float32) *Directional {
 	light := &Directional{
 		BaseLight: BaseLight{
 			color:  mgl32.Vec3{r, g, b}.Mul(intensity),
-			shader: rendering.NewShader("forward_directional"),
+			shader: shader.NewShader("forward_directional"),
 		},
 	}
 

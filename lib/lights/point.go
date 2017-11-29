@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
-	"github.com/stojg/graphics/lib/rendering"
+	"github.com/stojg/graphics/lib/rendering/shader"
 )
 
 func NewPoint(r, g, b, intensity float32) *PointLight {
@@ -13,7 +13,7 @@ func NewPoint(r, g, b, intensity float32) *PointLight {
 	pointLight := &PointLight{
 		BaseLight: BaseLight{
 			color:       color.Mul(intensity),
-			shader:      rendering.NewShader("forward_point"),
+			shader:      shader.NewShader("forward_point"),
 			maxDistance: 3,
 		},
 		constant: 1,
