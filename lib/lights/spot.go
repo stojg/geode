@@ -1,7 +1,6 @@
 package lights
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/go-gl/mathgl/mgl32"
@@ -13,8 +12,6 @@ func NewSpot(shadowSize int, r, g, b, intensity, viewAngle float32) *Spot {
 	color := mgl32.Vec3{r, g, b}
 	fov := mgl32.DegToRad(viewAngle)
 	cutoff := float32(math.Cos(float64(fov / 2)))
-	const nearPlane float32 = 2
-	const farPlane float32 = 15
 
 	light := &Spot{
 		BaseLight: BaseLight{
@@ -29,12 +26,6 @@ func NewSpot(shadowSize int, r, g, b, intensity, viewAngle float32) *Spot {
 		},
 		cutoff: cutoff,
 	}
-	if shadowSize != 0 {
-		projection := mgl32.Perspective(fov, float32(1), nearPlane, farPlane)
-		light.shadowInfo = NewShadowInfo(shadowSize, projection, false)
-		light.shadowInfo.shadowVarianceMin = 0.00002
-		light.shadowInfo.lightBleedReduction = 0.8
-	}
 
 	max := color[0]
 	if color[1] > max {
@@ -44,9 +35,6 @@ func NewSpot(shadowSize int, r, g, b, intensity, viewAngle float32) *Spot {
 		max = color[2]
 	}
 
-	fmt.Println(color)
-	fmt.Println(max)
-
 	const colorDepth = 256
 
 	{
@@ -54,8 +42,15 @@ func NewSpot(shadowSize int, r, g, b, intensity, viewAngle float32) *Spot {
 		b := light.Linear()
 		c := light.Constant() - colorDepth*intensity*max
 		dist := (-b + float32(math.Sqrt(float64(b*b-4*a*c)))) / (2 * a)
-		fmt.Println(dist)
 		light.BaseLight.maxDistance = dist
+	}
+
+	const nearPlane float32 = 0.1
+	if shadowSize != 0 {
+		projection := mgl32.Perspective(fov, float32(1), nearPlane, light.BaseLight.maxDistance)
+		light.shadowInfo = NewShadowInfo(shadowSize, projection, false)
+		light.shadowInfo.shadowVarianceMin = 0.00002
+		light.shadowInfo.lightBleedReduction = 0.8
 	}
 
 	return light
@@ -78,6 +73,15 @@ func (spot *Spot) Direction() mgl32.Vec3 {
 
 func (spot *Spot) Cutoff() float32 {
 	return spot.cutoff
+}
+
+func (spot *Spot) GetView() mgl32.Mat4 {
+	//This comes from the conjugate rotation because the world should appear to rotate opposite to the camera's rotation.
+	cameraRotation := spot.Transform().TransformedRot().Conjugate().Mat4()
+	//Similarly, the translation is inverted because the world appears to move opposite to the camera's movement.
+	cameraPos := spot.Transform().TransformedPos().Mul(-1)
+	cameraTranslation := mgl32.Translate3D(cameraPos[0], cameraPos[1], cameraPos[2])
+	return cameraRotation.Mul4(cameraTranslation)
 }
 
 func (spot *Spot) ViewProjection() mgl32.Mat4 {

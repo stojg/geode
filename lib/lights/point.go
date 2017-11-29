@@ -1,7 +1,6 @@
 package lights
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/go-gl/mathgl/mgl32"
@@ -30,9 +29,6 @@ func NewPoint(r, g, b, intensity float32) *PointLight {
 		max = color[2]
 	}
 
-	fmt.Println(color)
-	fmt.Println(max)
-
 	const colorDepth = 256
 
 	{
@@ -40,7 +36,6 @@ func NewPoint(r, g, b, intensity float32) *PointLight {
 		b := pointLight.Linear()
 		c := pointLight.Constant() - colorDepth*intensity*max
 		dist := (-b + float32(math.Sqrt(float64(b*b-4*a*c)))) / (2 * a)
-		fmt.Println(dist)
 		pointLight.BaseLight.maxDistance = dist
 	}
 

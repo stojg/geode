@@ -15,6 +15,14 @@ type Camera struct {
 	projection mgl32.Mat4
 }
 
+func (c *Camera) Pos() mgl32.Vec3 {
+	return c.parent.Transform().TransformedPos()
+}
+
+func (c *Camera) Rot() mgl32.Quat {
+	return c.parent.Transform().TransformedRot()
+}
+
 func (c *Camera) AddToEngine(engine Engine) {
 	engine.RenderingEngine().AddCamera(c)
 }

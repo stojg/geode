@@ -9,14 +9,15 @@ func NewShadowInfo(sizeAsPowerOfTwo int, projection mgl32.Mat4, flipFaces bool) 
 		flipFaces:           flipFaces,
 		shadowVarianceMin:   0.00002,
 		lightBleedReduction: 0.2,
+		halfSize:            0,
 	}
 }
 
 type ShadowInfo struct {
-	sizeAsPowerOfTwo int
-	projection       mgl32.Mat4
-	flipFaces        bool
-
+	sizeAsPowerOfTwo    int
+	projection          mgl32.Mat4
+	flipFaces           bool
+	halfSize            float32
 	shadowVarianceMin   float32
 	lightBleedReduction float32
 }

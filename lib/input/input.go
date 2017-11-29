@@ -70,11 +70,6 @@ func Update() {
 	for k, v := range mouseButtons {
 		currentButtons[glfw.MouseButton(k)] = v
 	}
-	//for k,v  := range downKeys {
-	//	if v {
-	//		fmt.Println(k)
-	//	}
-	//}
 }
 
 func ShowCursor() {

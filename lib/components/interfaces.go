@@ -27,6 +27,8 @@ type Renderable interface {
 type Viewable interface {
 	View() mgl32.Mat4
 	Projection() mgl32.Mat4
+	Pos() mgl32.Vec3
+	Rot() mgl32.Quat
 }
 
 type ShadowInfo interface {
@@ -38,12 +40,12 @@ type ShadowInfo interface {
 }
 
 type Light interface {
-	Viewable
 	Shader() Shader
 	Color() mgl32.Vec3
 	MaxDistance() float32
 	Position() mgl32.Vec3
 	ViewProjection() mgl32.Mat4
+	SetCamera(pos mgl32.Vec3, rot mgl32.Quat)
 	ShadowInfo() ShadowInfo
 	ShadowCaster() bool
 }

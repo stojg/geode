@@ -57,14 +57,14 @@ func NewEngine(width, height int) *Engine {
 		capabilities: make(map[string]bool),
 	}
 
-	e.shadowTextures = make([]components.Texture, 13)
-	e.tempShadowTextures = make([]components.Texture, 13)
+	e.shadowTextures = make([]components.Texture, 12)
+	e.tempShadowTextures = make([]components.Texture, 12)
 	e.shadowTextures[0] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, 1, 1, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
 	e.tempShadowTextures[0] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, 1, 1, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
 	for i := uint(0); i < 12; i++ {
-		size := 2 << i // power of two, 2, 4, 8, 16 and so on
-		e.shadowTextures[i+1] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, size, size, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
-		e.tempShadowTextures[i+1] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, size, size, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
+		size := 1 << i // power of two, 1, 2, 4, 8, 16 and so on
+		e.shadowTextures[i] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, size, size, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
+		e.tempShadowTextures[i] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, size, size, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
 	}
 
 	// set defaults
@@ -141,6 +141,7 @@ func (e *Engine) Render(object components.Renderable) {
 		if l.ShadowCaster() {
 			info := l.ShadowInfo()
 
+			l.SetCamera(e.mainCamera.Pos(), e.mainCamera.Rot())
 			e.shadowTextures[info.SizeAsPowerOfTwo()].BindAsRenderTarget()
 			e.shadowTextures[info.SizeAsPowerOfTwo()].SetViewPort()
 			gl.Clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)

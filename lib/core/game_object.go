@@ -1,7 +1,6 @@
 package core
 
 import (
-	//"fmt"
 	"time"
 
 	"github.com/stojg/graphics/lib/components"
