@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
@@ -51,8 +52,8 @@ func NewShader(fileName string) *Shader {
 
 	s.compile()
 
-	s.addAllUniforms(vertexShaderText)
-	s.addAllUniforms(fragmentShaderText)
+	s.findAllUniforms(vertexShaderText)
+	s.findAllUniforms(fragmentShaderText)
 
 	loadedShaders[fileName] = s.resource
 
@@ -147,18 +148,20 @@ func (s *Shader) addIncludes(shaderText string) (string, error) {
 		line := scanner.Text()
 
 		includes := re.FindAllStringSubmatch(line, -1)
-		if len(includes) > 0 {
-			for _, match := range includes {
-				text, err := s.loadShader(match[1])
-				if err != nil {
-					return "", err
-				}
-				result += text
-			}
-		} else {
+
+		if len(includes) == 0 {
 			result += fmt.Sprintf("%s\n", line)
+			continue
 		}
 
+		for _, include := range includes {
+			text, err := s.loadShader(include[1])
+			if err != nil {
+				return "", err
+			}
+			result += text
+			result += fmt.Sprintf("// ^ %s\n", include[1])
+		}
 	}
 
 	return result, nil
@@ -215,11 +218,58 @@ func (s *Shader) addFragmentShader(shader string) uint32 {
 	return s.createProgram(shader, gl.FRAGMENT_SHADER)
 }
 
-func (s *Shader) AddUniform(glType, name string, structs map[string][]GLSLStruct) {
+func (s *Shader) findAllUniforms(shaderText string) {
+	isUniform := regexp.MustCompile(`uniform\s*(\S*)\s(\S*);`)
+	isArray := regexp.MustCompile(`(\w+)\[(\d+)\]`)
+
+	uniformStructs := s.findUniformStructs(shaderText)
+
+	for _, line := range strings.Split(shaderText, "\n") {
+		for _, i := range isUniform.FindAllStringSubmatch(line, -1) {
+			if len(i) != 3 {
+				continue
+			}
+			if s.resource.UniformExists(i[2]) {
+				continue
+			}
+
+			name := i[2]
+			uType := i[1]
+
+			numItems := 0
+			arrayMatch := isArray.FindStringSubmatch(name)
+			if len(arrayMatch) != 0 {
+				max, err := strconv.Atoi(arrayMatch[2])
+				if err != nil {
+					fmt.Printf("could not parse '%s' as an integer, %v", arrayMatch[2], err)
+				}
+				numItems = max
+				name = arrayMatch[1]
+			}
+
+			if numItems == 0 {
+				s.resource.AddUniformName(name)
+				s.resource.AdduniformType(uType)
+				s.findUniformLocation(uType, i[2], uniformStructs)
+				continue
+			}
+
+			for k := 0; k < numItems; k++ {
+				newName := fmt.Sprintf("%s[%d]", name, k)
+				s.resource.AddUniformName(newName)
+				s.resource.AdduniformType(uType)
+				s.findUniformLocation(uType, newName, uniformStructs)
+			}
+
+		}
+	}
+}
+
+func (s *Shader) findUniformLocation(glType, name string, structs map[string][]glslStruct) {
 	structComponents, ok := structs[glType]
 	if ok {
 		for _, v := range structComponents {
-			s.AddUniform(v.stype, name+"."+v.name, structs)
+			s.findUniformLocation(v.propertyType, name+"."+v.propertyName, structs)
 		}
 		return
 	}
@@ -230,41 +280,23 @@ func (s *Shader) AddUniform(glType, name string, structs map[string][]GLSLStruct
 	s.resource.uniforms[name] = t
 }
 
-func (s *Shader) addAllUniforms(shaderText string) {
-
-	uniformStructs := s.findUniformStructs(shaderText)
-
-	r := regexp.MustCompile(`uniform\s*(\S*)\s(\S*);`)
-
-	for _, line := range strings.Split(shaderText, "\n") {
-		t := r.FindAllStringSubmatch(line, -1)
-		for _, i := range t {
-			if len(i) == 3 && !s.resource.UniformExists(i[2]) {
-				s.resource.AddUniformName(i[2])
-				s.resource.AdduniformType(i[1])
-				s.AddUniform(i[1], i[2], uniformStructs)
-			}
-		}
-	}
+type glslStruct struct {
+	propertyName string
+	propertyType string
 }
 
-type GLSLStruct struct {
-	name  string
-	stype string
-}
-
-func (s Shader) findUniformStructs(shaderText string) map[string][]GLSLStruct {
-	result := make(map[string][]GLSLStruct)
-	var re = regexp.MustCompile(`(?s)struct\s*(\w*)\s+{\s([^}]*)};`)
-	for _, match := range re.FindAllStringSubmatch(shaderText, -1) {
-		structName := match[1]
-		content := match[2]
-		var inner = regexp.MustCompile(`(?s)\s*(\w*)\s(\w*);`)
-		var properties []GLSLStruct
-		for _, innerMatch := range inner.FindAllStringSubmatch(content, -1) {
-			properties = append(properties, GLSLStruct{
-				name:  innerMatch[2],
-				stype: innerMatch[1],
+func (s Shader) findUniformStructs(shaderText string) map[string][]glslStruct {
+	result := make(map[string][]glslStruct)
+	isStruct := regexp.MustCompile(`(?s)struct\s*(\w*)\s+{\s([^}]*)};`)
+	isStructDefiniton := regexp.MustCompile(`(?s)\s*(\w*)\s(\w*);`)
+	for _, structMatch := range isStruct.FindAllStringSubmatch(shaderText, -1) {
+		structName := structMatch[1]
+		content := structMatch[2]
+		var properties []glslStruct
+		for _, innerMatch := range isStructDefiniton.FindAllStringSubmatch(content, -1) {
+			properties = append(properties, glslStruct{
+				propertyName: innerMatch[2],
+				propertyType: innerMatch[1],
 			})
 		}
 		result[structName] = properties

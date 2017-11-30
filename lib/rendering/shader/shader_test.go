@@ -20,18 +20,19 @@ func TestShader_NewShader(t *testing.T) {
 	}
 
 	expectedUniformNames := []string{
-		"projection", "view", "model", "light", "diffuse",
+		"projection", "view", "model", "light", "diffuse", "lights[0]", "lights[1]",
 	}
 	expectedUniformTypes := []string{
-		"mat4", "mat4", "mat4", "TestStructB", "sampler2D",
+		"mat4", "mat4", "mat4", "TestStructB", "sampler2D", "TestStructA", "TestStructA",
 	}
 
 	expectedUniforms := []string{
-		"light.inner.color", "light.position", "diffuse", "projection", "view", "model",
+		"light.inner.color", "light.position", "diffuse", "projection", "view", "model", "lights[0].color", "lights[1].color",
 	}
 
 	if len(s.resource.uniformNames) != len(expectedUniformNames) {
 		t.Errorf("expected %d uniform names, got %d", len(expectedUniformNames), len(s.resource.uniformNames))
+		t.Log(s.resource.uniformNames)
 		return
 	}
 
@@ -43,6 +44,7 @@ func TestShader_NewShader(t *testing.T) {
 
 	if len(s.resource.uniformTypes) != len(expectedUniformTypes) {
 		t.Errorf("expected %d uniform types, got %d", len(expectedUniformNames), len(s.resource.uniformTypes))
+		t.Log(s.resource.uniformTypes)
 		return
 	}
 
@@ -54,6 +56,7 @@ func TestShader_NewShader(t *testing.T) {
 
 	if len(s.resource.uniforms) != len(expectedUniforms) {
 		t.Errorf("expected %d uniforms, got %d", len(expectedUniforms), len(s.resource.uniforms))
+		t.Log(s.resource.uniforms)
 		return
 	}
 
