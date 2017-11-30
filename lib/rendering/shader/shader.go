@@ -77,7 +77,7 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 	for i, name := range s.resource.uniformNames {
 		uniformType := s.resource.uniformTypes[i]
 
-		// x_ signifies that this uniform is not set by the shader directly, ie a hack
+		// x_ means that the uniform is a engine uniform and should be fetch from the render engines storage
 		if strings.Index(name, "x_") == 0 {
 			if uniformType == "sampler2D" {
 				samplerSlot := engine.SamplerSlot(name)
@@ -86,11 +86,11 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 			} else {
 				switch uniformType {
 				case "bool":
-					s.setUniform(name, engine.Integer(name))
+					s.updateUniform(name, engine.Integer(name))
 				case "vec3":
-					s.setUniform(name, engine.Vector3f(name))
+					s.updateUniform(name, engine.Vector3f(name))
 				case "float":
-					s.setUniform(name, engine.Float(name))
+					s.updateUniform(name, engine.Float(name))
 				default:
 					panic(uniformType)
 				}
@@ -101,26 +101,25 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 		if uniformType == "sampler2D" {
 			samplerSlot := engine.SamplerSlot(name)
 			mat.Texture(name).Bind(samplerSlot)
-			s.setUniform(name, int32(samplerSlot))
+			s.updateUniform(name, int32(samplerSlot))
 			continue
 		}
 
 		switch name {
 		case "projection":
-			s.setUniform(name, engine.MainCamera().Projection())
+			s.updateUniform(name, engine.MainCamera().Projection())
 		case "model":
-			s.setUniform(name, transform.Transformation())
+			s.updateUniform(name, transform.Transformation())
 		case "view":
-			s.setUniform(name, engine.MainCamera().View())
+			s.updateUniform(name, engine.MainCamera().View())
 		case "lightMVP":
-			s.setUniform(name, engine.ActiveLight().ViewProjection().Mul4(transform.Transformation()))
+			s.updateUniform(name, engine.ActiveLight().ViewProjection().Mul4(transform.Transformation()))
 		case "directionalLight":
-			s.setUniformDirectionalLight(name, engine.ActiveLight().(components.DirectionalLight))
+			s.updateUniformDirectionalLight(name, engine.ActiveLight().(components.DirectionalLight))
 		case "pointLight":
-			s.setUniformPointLight(name, engine.ActiveLight().(components.PointLight))
+			s.updateUniformPointLight(name, engine.ActiveLight().(components.PointLight))
 		case "spotLight":
-			s.setUniformSpotLight(name, engine.ActiveLight().(components.Spotlight))
-
+			s.updateUniformSpotLight(name, engine.ActiveLight().(components.Spotlight))
 		default:
 			fmt.Printf("Shader.UpdateUniforms: unknow uniform %s\n", name)
 		}
@@ -167,7 +166,7 @@ func (s *Shader) addIncludes(shaderText string) (string, error) {
 	return result, nil
 }
 
-func (s *Shader) setUniform(uniformName string, value interface{}) {
+func (s *Shader) updateUniform(uniformName string, value interface{}) {
 	loc, ok := s.resource.uniforms[uniformName]
 	if !ok {
 		panic(fmt.Sprintf("no shader location found for uniform: '%s' in shader '%s'", uniformName, s.filename))
@@ -187,27 +186,27 @@ func (s *Shader) setUniform(uniformName string, value interface{}) {
 }
 
 func (s *Shader) setUniformBaseLight(uniformName string, baseLight components.Light) {
-	s.setUniform(uniformName+".color", baseLight.Color())
-	s.setUniform(uniformName+".maxDistance", baseLight.MaxDistance())
+	s.updateUniform(uniformName+".color", baseLight.Color())
+	s.updateUniform(uniformName+".maxDistance", baseLight.MaxDistance())
 }
 
-func (s *Shader) setUniformDirectionalLight(uniformName string, directional components.DirectionalLight) {
+func (s *Shader) updateUniformDirectionalLight(uniformName string, directional components.DirectionalLight) {
 	s.setUniformBaseLight(uniformName+".base", directional)
-	s.setUniform(uniformName+".direction", directional.Direction())
+	s.updateUniform(uniformName+".direction", directional.Direction())
 }
 
-func (s *Shader) setUniformPointLight(uniformName string, pointLight components.PointLight) {
+func (s *Shader) updateUniformPointLight(uniformName string, pointLight components.PointLight) {
 	s.setUniformBaseLight(uniformName+".base", pointLight)
-	s.setUniform(uniformName+".position", pointLight.Position())
-	s.setUniform(uniformName+".atten.constant", pointLight.Constant())
-	s.setUniform(uniformName+".atten.linear", pointLight.Linear())
-	s.setUniform(uniformName+".atten.exponent", pointLight.Exponent())
+	s.updateUniform(uniformName+".position", pointLight.Position())
+	s.updateUniform(uniformName+".atten.constant", pointLight.Constant())
+	s.updateUniform(uniformName+".atten.linear", pointLight.Linear())
+	s.updateUniform(uniformName+".atten.exponent", pointLight.Exponent())
 }
 
-func (s *Shader) setUniformSpotLight(uniformName string, spotLight components.Spotlight) {
-	s.setUniformPointLight(uniformName+".pointLight", spotLight)
-	s.setUniform(uniformName+".direction", spotLight.Direction())
-	s.setUniform(uniformName+".cutoff", spotLight.Cutoff())
+func (s *Shader) updateUniformSpotLight(uniformName string, spotLight components.Spotlight) {
+	s.updateUniformPointLight(uniformName+".pointLight", spotLight)
+	s.updateUniform(uniformName+".direction", spotLight.Direction())
+	s.updateUniform(uniformName+".cutoff", spotLight.Cutoff())
 }
 
 func (s *Shader) addVertexShader(shader string) uint32 {
