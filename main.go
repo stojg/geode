@@ -59,21 +59,21 @@ func run() error {
 	loadModel(cameraObject, "res/meshes/sphere/model.obj", whiteMaterial)
 	engine.AddObject(cameraObject)
 
-	directionalLight := lights.NewDirectional(9, 0.9, 0.9, 0.9, 1)
-	dirLight := core.NewGameObject()
-	dirLight.Transform().SetPos(vec3(1, 2, -1))
-	dirLight.Transform().LookAt(vec3(0, 0, 0), up())
-	dirLight.Transform().SetScale(vec3(0.5, 0.1, 0.5))
-	dirLight.AddComponent(directionalLight)
-	engine.AddObject(dirLight)
-
-	spotLight := lights.NewSpot(8, 0.9, 0.4, 0.1, 20, 45)
-	spot := core.NewGameObject()
-	spot.Transform().SetPos(vec3(3, 3.5, 4.6))
-	spot.Transform().SetScale(vec3(0.05, 0.05, 0.3))
-	spot.Transform().LookAt(vec3(0, 1, 0), up())
-	spot.AddComponent(spotLight)
-	engine.AddObject(spot)
+	//directionalLight := lights.NewDirectional(9, 0.9, 0.9, 0.9, 1)
+	//dirLight := core.NewGameObject()
+	//dirLight.Transform().SetPos(vec3(1, 2, -1))
+	//dirLight.Transform().LookAt(vec3(0, 0, 0), up())
+	//dirLight.Transform().SetScale(vec3(0.5, 0.1, 0.5))
+	//dirLight.AddComponent(directionalLight)
+	//engine.AddObject(dirLight)
+	//
+	//spotLight := lights.NewSpot(8, 0.9, 0.4, 0.1, 20, 45)
+	//spot := core.NewGameObject()
+	//spot.Transform().SetPos(vec3(3, 3.5, 4.6))
+	//spot.Transform().SetScale(vec3(0.05, 0.05, 0.3))
+	//spot.Transform().LookAt(vec3(0, 1, 0), up())
+	//spot.AddComponent(spotLight)
+	//engine.AddObject(spot)
 
 	pointLight := core.NewGameObject()
 	pointLight.Transform().SetPos(vec3(-2, 0.6, 2))
@@ -87,6 +87,24 @@ func run() error {
 		pointLight.Transform().SetPos(vec3(-10, 0.3, 0))
 		pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
 		pointLight.AddComponent(lights.NewPoint(0.1, 0.05, 0.98, 5))
+		loadModel(pointLight, "res/meshes/ico/model.obj", tealMaterial)
+		engine.AddObject(pointLight)
+	}
+
+	{
+		pointLight := core.NewGameObject()
+		pointLight.Transform().SetPos(vec3(2, 0.4, 4))
+		pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
+		pointLight.AddComponent(lights.NewPoint(0.1, 0.8, 0.23, 5))
+		loadModel(pointLight, "res/meshes/ico/model.obj", tealMaterial)
+		engine.AddObject(pointLight)
+	}
+
+	for i := 0; i < 4; i++ {
+		pointLight := core.NewGameObject()
+		pointLight.Transform().SetPos(vec3(rand.Float32()*20-15, 0.5, rand.Float32()*20-10))
+		pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
+		pointLight.AddComponent(lights.NewPoint(rand.Float32(), rand.Float32(), rand.Float32(), 1))
 		loadModel(pointLight, "res/meshes/ico/model.obj", tealMaterial)
 		engine.AddObject(pointLight)
 	}

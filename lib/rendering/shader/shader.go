@@ -91,8 +91,10 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 					s.updateUniform(name, engine.Vector3f(name))
 				case "float":
 					s.updateUniform(name, engine.Float(name))
+				case "int":
+					s.updateUniform(name, engine.Integer(name))
 				default:
-					panic(uniformType)
+					panic(fmt.Sprintf("Shader.UpdateUniforms, dont know how to set uniformType %s", uniformType))
 				}
 			}
 			continue
@@ -121,7 +123,7 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 		case "spotLight":
 			s.updateUniformSpotLight(name, engine.ActiveLight().(components.Spotlight))
 		default:
-			fmt.Printf("Shader.UpdateUniforms: unknow uniform %s\n", name)
+			fmt.Printf("Shader.UpdateUniforms: no values for uniform '%s' has been set\n", name)
 		}
 
 	}
@@ -356,6 +358,6 @@ func printInfoLog(shader uint32, filename, shaderText string) {
 	gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(infoLog))
 	fmt.Printf("Shader compilation failed (%s):\n%s------------\n", filename, infoLog)
 	for i, line := range strings.Split(shaderText, "\n") {
-		fmt.Printf("%d: %s\n", i, line)
+		fmt.Printf("%d: %s\n", i+1, line)
 	}
 }

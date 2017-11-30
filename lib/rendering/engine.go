@@ -13,6 +13,10 @@ import (
 
 func NewEngine(width, height int) *Engine {
 
+	var nrAttributes int32
+	gl.GetIntegerv(gl.MAX_VERTEX_ATTRIBS, &nrAttributes)
+	fmt.Printf("maximum nr of vertex attributes supported: %d\n", nrAttributes)
+
 	gl.ClearColor(0.541, 0.616, 0.671, 1)
 
 	gl.FrontFace(gl.CCW)
@@ -46,6 +50,7 @@ func NewEngine(width, height int) *Engine {
 		gaussShader:   shader.NewShader("filter_gauss"),
 		ambientShader: shader.NewShader("forward_ambient"),
 		shadowShader:  shader.NewShader("shadow_vsm"),
+		phongShader:   shader.NewShader("phong_light"),
 
 		screenTexture: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGB16F, gl.RGB, gl.FLOAT, gl.NEAREST, false),
 		toneMapShader: shader.NewShader("filter_tonemap"),
@@ -96,6 +101,7 @@ type Engine struct {
 	shadowShader  *shader.Shader
 	fxaaShader    *shader.Shader
 	overlayShader *shader.Shader
+	phongShader   *shader.Shader
 
 	screenTexture *framebuffer.Texture
 
@@ -123,63 +129,17 @@ func (e *Engine) Render(object components.Renderable) {
 
 	debugger.Clear()
 
-	// ambient pass
 	e.screenTexture.BindAsRenderTarget()
 	e.screenTexture.SetViewPort()
 
-	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-	object.RenderAll(e.ambientShader, e)
-
-	for _, l := range e.lights {
-		e.activeLight = l
-		textureIndex := 0
-
-		if l.ShadowCaster() {
-			info := l.ShadowInfo()
-
-			textureIndex = info.SizeAsPowerOfTwo()
-
-			l.SetCamera(e.mainCamera.Pos(), e.mainCamera.Rot())
-			e.shadowTextures[textureIndex].BindAsRenderTarget()
-			e.shadowTextures[textureIndex].SetViewPort()
-			gl.Clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT)
-
-			if info.FlipFaces() {
-				gl.CullFace(gl.FRONT)
-			}
-
-			object.RenderAll(e.shadowShader, e)
-
-			if info.FlipFaces() {
-				gl.CullFace(gl.BACK)
-			}
-
-			gl.GenerateMipmap(gl.TEXTURE_2D)
-
-			debugger.AddTexture(e.shadowTextures[textureIndex], e.applyFilter)
-
-			e.blurShadowMap(info.SizeAsPowerOfTwo(), 1)
-
-			e.SetFloat("x_varianceMin", info.ShadowVarianceMin())
-			e.SetFloat("x_lightBleedReductionAmount", info.LightBleedReduction())
-		}
-
-		// light pass
-		gl.Enable(gl.BLEND)
-		gl.BlendFunc(gl.ONE, gl.ONE)
-		gl.DepthMask(false)
-		gl.DepthFunc(gl.EQUAL)
-
-		e.screenTexture.BindAsRenderTarget()
-		e.screenTexture.SetViewPort()
-		e.SetTexture("x_shadowMap", e.shadowTextures[textureIndex])
-
-		object.RenderAll(l.Shader(), e)
-
-		gl.DepthFunc(gl.LESS)
-		gl.DepthMask(true)
-		gl.Disable(gl.BLEND)
+	e.SetInteger("x_numPointLights", int32(len(e.lights)))
+	for i, l := range e.lights {
+		e.SetVector3f(fmt.Sprintf("x_lightPositions[%d]", i), l.Position())
+		e.SetVector3f(fmt.Sprintf("x_lightColors[%d]", i), l.Color())
 	}
+
+	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+	object.RenderAll(e.phongShader, e)
 
 	gl.Disable(gl.DEPTH_TEST)
 	e.applyFilter(e.toneMapShader, e.screenTexture, e.fullScreenTemp)
@@ -270,10 +230,11 @@ func (e *Engine) SetVector3f(name string, v mgl32.Vec3) {
 }
 
 func (e *Engine) Vector3f(name string) mgl32.Vec3 {
-	v, ok := e.uniforms3f[name]
-	if !ok {
-		panic(fmt.Sprintf("Vector3f, no value found for uniform '%s'", name))
-	}
+	// @todo set value, regardless, this might be an array that isn't used
+	v := e.uniforms3f[name]
+	//if !ok {
+	//	fmt.Printf("Vector3f, no value found for uniform '%s'\n", name)
+	//}
 	return v
 }
 

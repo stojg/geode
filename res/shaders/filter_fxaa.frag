@@ -26,7 +26,6 @@ uniform float u_mulReduce = 1 / 8.0f; // 8.0f
 // 1/12 – upper limit (start of visible unfiltered edges)
 uniform float u_minReduce = 1 / 12.0f; // 1 / 128.0f
 
-
 uniform float u_maxSpan = 8.0f; // 8.0f;
 
 uniform uint rt_w = 800;
@@ -45,8 +44,6 @@ float FxaaLuma(vec3 val) {
  return val.y * (0.587/0.299) + val.x;
 }
 
-#define FxaaInt2 ivec2
-#define FxaaFloat2 vec2
 #define FxaaTexLod0(t, p) textureLod(t, p, 0.0)
 #define FxaaTexOff(t, p, o, r) textureLodOffset(t, p, 0.0, o)
 
@@ -61,9 +58,9 @@ vec3 FxaaPixelShader(vec2 posPos, sampler2D tex, vec2 rcpFrame)
 {
 
     vec3 rgbNW = FxaaTexLod0(tex, posPos).xyz;
-    vec3 rgbNE = FxaaTexOff(tex, posPos, FxaaInt2(1,0), rcpFrame.xy).xyz;
-    vec3 rgbSW = FxaaTexOff(tex, posPos, FxaaInt2(0,1), rcpFrame.xy).xyz;
-    vec3 rgbSE = FxaaTexOff(tex, posPos, FxaaInt2(1,1), rcpFrame.xy).xyz;
+    vec3 rgbNE = FxaaTexOff(tex, posPos, ivec2(1,0), rcpFrame.xy).xyz;
+    vec3 rgbSW = FxaaTexOff(tex, posPos, ivec2(0,1), rcpFrame.xy).xyz;
+    vec3 rgbSE = FxaaTexOff(tex, posPos, ivec2(1,1), rcpFrame.xy).xyz;
     vec3 rgbM  = FxaaTexLod0(tex, posPos.xy).xyz;
 
     vec3 luma = vec3(0.299, 0.587, 0.114);
@@ -82,7 +79,7 @@ vec3 FxaaPixelShader(vec2 posPos, sampler2D tex, vec2 rcpFrame)
 
     float dirReduce = max((lumaNW + lumaNE + lumaSW + lumaSE) * (0.25 * FXAA_REDUCE_MUL), FXAA_REDUCE_MIN);
     float rcpDirMin = 1.0/(min(abs(dir.x), abs(dir.y)) + dirReduce);
-    dir = min(FxaaFloat2( FXAA_SPAN_MAX,  FXAA_SPAN_MAX), max(FxaaFloat2(-FXAA_SPAN_MAX, -FXAA_SPAN_MAX), dir * rcpDirMin)) * rcpFrame.xy;
+    dir = min(vec2( FXAA_SPAN_MAX,  FXAA_SPAN_MAX), max(vec2(-FXAA_SPAN_MAX, -FXAA_SPAN_MAX), dir * rcpDirMin)) * rcpFrame.xy;
 
     vec3 a = FxaaTexLod0(tex, posPos.xy + dir * (1.0/3.0 - 0.5)).xyz + FxaaTexLod0(tex, posPos.xy + dir * (2.0/3.0 - 0.5)).xyz;
     vec3 rgbA = (1.0/2.0) * a;
