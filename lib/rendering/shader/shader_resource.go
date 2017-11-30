@@ -34,9 +34,17 @@ func (r *ShaderResource) AddReference() {
 }
 
 func (r *ShaderResource) Cleanup() {
-	//gl.DeleteBuffers(r.Program)
+	gl.DeleteBuffers(1, &r.Program)
 }
 
+func (r *ShaderResource) UniformExists(name string) bool {
+	for _, n := range r.uniformNames {
+		if name == n {
+			return true
+		}
+	}
+	return false
+}
 func (r *ShaderResource) AddUniformName(name string) {
 	r.uniformNames = append(r.uniformNames, name)
 }

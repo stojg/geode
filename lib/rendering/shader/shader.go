@@ -17,6 +17,8 @@ import (
 var loadedShaders = make(map[string]*ShaderResource)
 var shaderInUse uint32 = 2 ^ 32 - 1
 
+var shaderFolder = "./res/shaders/"
+
 func NewShader(fileName string) *Shader {
 
 	s := &Shader{
@@ -126,7 +128,7 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 }
 
 func (s *Shader) loadShader(filepath string) (string, error) {
-	b, err := ioutil.ReadFile("./res/shaders/" + filepath)
+	b, err := ioutil.ReadFile(shaderFolder + filepath)
 	if err != nil {
 		return "", err
 	}
@@ -223,7 +225,7 @@ func (s *Shader) AddUniform(glType, name string, structs map[string][]GLSLStruct
 	}
 	t := gl.GetUniformLocation(s.resource.Program, gl.Str(name+"\x00"))
 	if t < 0 {
-		fmt.Printf("uniform '%s' seems to not be used for shader '%s'\n", name, s.filename)
+		fmt.Printf("Could not get uniform location for '%s' in shader '%s' (not used?)\n", name, s.filename)
 	}
 	s.resource.uniforms[name] = t
 }
@@ -237,7 +239,7 @@ func (s *Shader) addAllUniforms(shaderText string) {
 	for _, line := range strings.Split(shaderText, "\n") {
 		t := r.FindAllStringSubmatch(line, -1)
 		for _, i := range t {
-			if len(i) == 3 {
+			if len(i) == 3 && !s.resource.UniformExists(i[2]) {
 				s.resource.AddUniformName(i[2])
 				s.resource.AdduniformType(i[1])
 				s.AddUniform(i[1], i[2], uniformStructs)
