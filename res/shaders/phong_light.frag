@@ -1,25 +1,23 @@
 #version 410 core
 
-out vec4 FragColor;
-
-uniform sampler2D diffuse;
-uniform vec3 x_lightColors[16];
-uniform float specularStrength = 0.1;
-uniform int x_numPointLights;
-
 in vec2 TexCoord;
 in vec3 Normal;
 in vec3 FragPos;
 in vec3 LightPositions[16];
 in vec3 ModelViewPos;
 
+uniform sampler2D diffuse;
+uniform vec3 x_lightColors[16];
+uniform float specularStrength = 0.1;
+uniform int x_numPointLights;
+
+out vec4 FragColor;
+
 vec3 CalcPointLight(vec3 lightPosition, vec3 lightColor, vec3 objectColor, vec3 norm) {
-
-
     vec3 lightDiff = lightPosition - ModelViewPos;
     float distance = length(lightDiff);
 
-    if (distance > 30) {
+    if (distance > 20) {
         return vec3(0);
     }
     vec3 lightDirection = normalize(lightDiff);
@@ -45,7 +43,6 @@ vec3 CalcPointLight(vec3 lightPosition, vec3 lightColor, vec3 objectColor, vec3 
 
     return diffuseColor + specularColor;
 }
-
 
 void main() {
     vec3 objectColor = texture(diffuse, TexCoord).rgb;

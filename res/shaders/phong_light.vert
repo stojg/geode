@@ -13,12 +13,11 @@ uniform int x_numPointLights;
 out vec3 Normal;
 out vec2 TexCoord;
 out vec3 LightPositions[16];
-out vec3 FragPos;
 out vec3 ModelViewPos;
 
 void main() {
     gl_Position = projection * view * model * vec4(aPosition, 1.0);
-    FragPos = vec3(model * vec4(aPosition, 1.0));
+    //ModelPos = vec3(model * vec4(aPosition, 1.0));
     ModelViewPos = vec3(view  * model * vec4(aPosition, 1.0));
 
     TexCoord = aTexCoord;
