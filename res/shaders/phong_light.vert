@@ -9,14 +9,7 @@ uniform mat4 MV;
 uniform mat4 InverseMV;
 uniform mat4 view;
 
-struct Light {
-    vec3 position;
-    vec3 color;
-    float constant;
-    float linear;
-    float quadratic;
-    float distance;
-};
+#include "point_lights.glsl"
 uniform Light pointLights[16];
 uniform int numPointLights;
 
@@ -33,7 +26,7 @@ void main() {
     // the position of the fragment in the perspective space
     gl_Position = MVP * vec4(aPosition, 1.0);
 
-    // the position of the the view relative to the fragment
+    // the position of the camara relative to the fragment
     vs_out.W_ViewPos = vec3(MV * vec4(aPosition, 1.0));
 
     vs_out.TexCoord = aTexCoord;

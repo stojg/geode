@@ -7,6 +7,22 @@ import (
 	"github.com/stojg/graphics/lib/physics"
 )
 
+type Texture interface {
+	Bind(samplerSlot uint32)
+	BindAsRenderTarget()
+	SetViewPort()
+
+	Width() int32
+	Height() int32
+}
+
+type Material interface {
+	Texture(name string) Texture
+	Albedo() mgl32.Vec3
+	Metallic() float32
+	Roughness() float32
+}
+
 type Drawable interface {
 	Draw()
 }

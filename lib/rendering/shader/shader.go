@@ -122,6 +122,10 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 			s.updateUniform(name, transform.Transformation())
 		case "view":
 			s.updateUniform(name, engine.MainCamera().View())
+		case "material":
+			s.updateUniform(name+".albedo", mat.Albedo())
+			s.updateUniform(name+".metallic", mat.Metallic())
+			s.updateUniform(name+".roughness", mat.Roughness())
 		case "pointLights":
 			if len(engine.Lights()) > index {
 				light := engine.Lights()[index].(components.PointLight)

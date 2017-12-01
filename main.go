@@ -35,8 +35,8 @@ func main() {
 }
 
 func run() error {
-	width := 800
-	height := 600
+	width := 400
+	height := 300
 
 	engine, err := core.NewEngine(width, height, "graphics")
 	if err != nil {
@@ -44,10 +44,10 @@ func run() error {
 	}
 
 	whiteMaterial := rendering.NewMaterial()
-	whiteMaterial.AddTexture("diffuse", rendering.NewTexture("res/textures/white.png"))
+	whiteMaterial.SetAlbedo(mgl32.Vec3{0.961, 0.922, 0.898})
 
 	tealMaterial := rendering.NewMaterial()
-	tealMaterial.AddTexture("diffuse", rendering.NewTexture("res/textures/teal.png"))
+	tealMaterial.SetAlbedo(mgl32.Vec3{0.447, 0.792, 0.918})
 
 	cameraObject := core.NewGameObject()
 	cameraObject.Transform().SetPos(vec3(0, 1.8, 6))
@@ -79,7 +79,9 @@ func run() error {
 	pointLight.Transform().SetPos(vec3(-2, 0.6, 2))
 	pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
 	pointLight.AddComponent(lights.NewPoint(0.98, 0.05, 0.02, 8))
-	loadModel(pointLight, "res/meshes/ico/model.obj", tealMaterial)
+	lightMaterial := rendering.NewMaterial()
+	lightMaterial.SetAlbedo(mgl32.Vec3{0.98, 0.05, 0.02})
+	loadModel(pointLight, "res/meshes/ico/model.obj", lightMaterial)
 	engine.AddObject(pointLight)
 
 	{
@@ -87,7 +89,9 @@ func run() error {
 		pointLight.Transform().SetPos(vec3(-10, 0.3, 0))
 		pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
 		pointLight.AddComponent(lights.NewPoint(0.1, 0.05, 0.98, 5))
-		loadModel(pointLight, "res/meshes/ico/model.obj", tealMaterial)
+		lightMaterial := rendering.NewMaterial()
+		lightMaterial.SetAlbedo(mgl32.Vec3{0.1, 0.05, 0.98})
+		loadModel(pointLight, "res/meshes/ico/model.obj", lightMaterial)
 		engine.AddObject(pointLight)
 	}
 
@@ -96,7 +100,9 @@ func run() error {
 		pointLight.Transform().SetPos(vec3(2, 0.4, 4))
 		pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
 		pointLight.AddComponent(lights.NewPoint(0.1, 0.8, 0.23, 5))
-		loadModel(pointLight, "res/meshes/ico/model.obj", tealMaterial)
+		lightMaterial := rendering.NewMaterial()
+		lightMaterial.SetAlbedo(mgl32.Vec3{0.1, 0.8, 0.23})
+		loadModel(pointLight, "res/meshes/ico/model.obj", lightMaterial)
 		engine.AddObject(pointLight)
 	}
 
@@ -104,14 +110,19 @@ func run() error {
 		pointLight := core.NewGameObject()
 		pointLight.Transform().SetPos(vec3(rand.Float32()*20-15, 0.5, rand.Float32()*20-10))
 		pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
-		pointLight.AddComponent(lights.NewPoint(rand.Float32(), rand.Float32(), rand.Float32(), 1))
-		loadModel(pointLight, "res/meshes/ico/model.obj", tealMaterial)
+		r, g, b := rand.Float32(), rand.Float32(), rand.Float32()
+		pointLight.AddComponent(lights.NewPoint(r, g, b, 1))
+		lightMaterial := rendering.NewMaterial()
+		lightMaterial.SetAlbedo(mgl32.Vec3{r, g, b})
+		loadModel(pointLight, "res/meshes/ico/model.obj", lightMaterial)
 		engine.AddObject(pointLight)
 	}
 
 	floor := core.NewGameObject()
 	floor.Transform().SetScale(vec3(15, 0.01, 15))
 	floor.Transform().SetPos(vec3(0, -0.005, 0))
+	floorMaterial := rendering.NewMaterial()
+	floorMaterial.SetAlbedo(mgl32.Vec3{0.4, 0.4, 0.4})
 	loadModel(floor, "res/meshes/cube/model.obj", whiteMaterial)
 	engine.AddObject(floor)
 

@@ -1,18 +1,5 @@
 package components
 
-type Texture interface {
-	Bind(samplerSlot uint32)
-	BindAsRenderTarget()
-	SetViewPort()
-
-	Width() int32
-	Height() int32
-}
-
-type Material interface {
-	Texture(name string) Texture
-}
-
 func NewMeshRenderer(mesh Drawable, material Material) *MeshRenderer {
 	return &MeshRenderer{
 		mesh:     mesh,
