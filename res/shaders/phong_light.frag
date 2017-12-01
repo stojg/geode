@@ -11,21 +11,24 @@ in VS_OUT
 uniform sampler2D diffuse;
 uniform float specularStrength = 0.1;
 
-
 struct Light {
     vec3 position;
     vec3 color;
+    float constant;
+    float linear;
+    float quadratic;
+    float distance;
 };
 uniform int numPointLights;
 uniform Light pointLights[16];
 
 out vec4 FragColor;
 
-vec3 CalcPointLight(vec3 lightPosition, vec3 lightColor, vec3 objectColor, vec3 norm, vec3 viewPos) {
+vec3 CalcPointLight(vec3 lightPosition, Light light, vec3 objectColor, vec3 norm, vec3 viewPos) {
     vec3 lightDiff = lightPosition - viewPos;
     float distance = length(lightDiff);
 
-    if (distance > 20) {
+    if (distance > light.distance) {
         return vec3(0);
     }
     vec3 lightDirection = normalize(lightDiff);
@@ -33,7 +36,7 @@ vec3 CalcPointLight(vec3 lightPosition, vec3 lightColor, vec3 objectColor, vec3 
     const float constant = 1.0;
     const float linear = 0.7;
     const float quadratic = 1.8;
-    float attenuation = 1.0 / (constant + linear * distance + quadratic * (distance * distance));
+    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
 
     // diffuse
     float diff = max(dot(norm, lightDirection), 0.0);
@@ -44,8 +47,8 @@ vec3 CalcPointLight(vec3 lightPosition, vec3 lightColor, vec3 objectColor, vec3 
     float spec = pow(max(dot(norm, halfwayDir), 0.0), 16);
 
     // combine results
-    vec3 diffuseColor = lightColor * diff * objectColor;
-    vec3 specularColor = lightColor * spec * objectColor;
+    vec3 diffuseColor = light.color * diff * objectColor;
+    vec3 specularColor = light.color * spec * objectColor;
 
     diffuseColor *= attenuation;
     specularColor *= attenuation;
@@ -63,7 +66,7 @@ void main() {
     final += ambientStrength * objectColor;
 
     for (int i = 0; i < numPointLights; i++) {
-        final += CalcPointLight(vs_in.V_LightPositions[i], pointLights[i].color, objectColor, normal, vs_in.W_ViewPos);
+        final += CalcPointLight(vs_in.V_LightPositions[i], pointLights[i], objectColor, normal, vs_in.W_ViewPos);
     }
 
     FragColor = vec4(final, 0);

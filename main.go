@@ -100,7 +100,7 @@ func run() error {
 		engine.AddObject(pointLight)
 	}
 
-	for i := 0; i < 4; i++ {
+	for i := 0; i < 14; i++ {
 		pointLight := core.NewGameObject()
 		pointLight.Transform().SetPos(vec3(rand.Float32()*20-15, 0.5, rand.Float32()*20-10))
 		pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))

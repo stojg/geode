@@ -9,12 +9,14 @@ uniform mat4 MV;
 uniform mat4 InverseMV;
 uniform mat4 view;
 
-
 struct Light {
     vec3 position;
     vec3 color;
+    float constant;
+    float linear;
+    float quadratic;
+    float distance;
 };
-
 uniform Light pointLights[16];
 uniform int numPointLights;
 

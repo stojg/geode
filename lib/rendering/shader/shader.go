@@ -124,8 +124,13 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 			s.updateUniform(name, engine.MainCamera().View())
 		case "pointLights":
 			if len(engine.Lights()) > index {
-				s.updateUniform(fmt.Sprintf("%s[%d].position", name, index), engine.Lights()[index].Position())
-				s.updateUniform(fmt.Sprintf("%s[%d].color", name, index), engine.Lights()[index].Color())
+				light := engine.Lights()[index].(components.PointLight)
+				s.updateUniform(fmt.Sprintf("%s[%d].position", name, index), light.Position())
+				s.updateUniform(fmt.Sprintf("%s[%d].color", name, index), light.Color())
+				s.updateUniform(fmt.Sprintf("%s[%d].constant", name, index), light.Constant())
+				s.updateUniform(fmt.Sprintf("%s[%d].linear", name, index), light.Linear())
+				s.updateUniform(fmt.Sprintf("%s[%d].quadratic", name, index), light.Exponent())
+				s.updateUniform(fmt.Sprintf("%s[%d].distance", name, index), light.MaxDistance())
 			}
 		case "numPointLights":
 			s.updateUniform(name, int32(len(engine.Lights())))
