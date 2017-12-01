@@ -94,7 +94,7 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 				case "int":
 					s.updateUniform(name, engine.Integer(name))
 				default:
-					panic(fmt.Sprintf("Shader.UpdateUniforms, dont know how to set uniformType %s", uniformType))
+					panic(fmt.Sprintf("Shader.UpdateUniforms, dont know how to set uniformType '%s' with name '%s'", uniformType, name))
 				}
 			}
 			continue
@@ -107,21 +107,28 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 			continue
 		}
 
+		name, index := getArray(name)
+
 		switch name {
+		case "MVP":
+			s.updateUniform(name, engine.MainCamera().Projection().Mul4(engine.MainCamera().View().Mul4(transform.Transformation())))
+		case "MV":
+			s.updateUniform(name, engine.MainCamera().View().Mul4(transform.Transformation()))
+		case "InverseMV":
+			s.updateUniform(name, engine.MainCamera().View().Mul4(transform.Transformation()).Inv().Transpose())
 		case "projection":
 			s.updateUniform(name, engine.MainCamera().Projection())
 		case "model":
 			s.updateUniform(name, transform.Transformation())
 		case "view":
 			s.updateUniform(name, engine.MainCamera().View())
-		case "lightMVP":
-			s.updateUniform(name, engine.ActiveLight().ViewProjection().Mul4(transform.Transformation()))
-		case "directionalLight":
-			s.updateUniformDirectionalLight(name, engine.ActiveLight().(components.DirectionalLight))
-		case "pointLight":
-			s.updateUniformPointLight(name, engine.ActiveLight().(components.PointLight))
-		case "spotLight":
-			s.updateUniformSpotLight(name, engine.ActiveLight().(components.Spotlight))
+		case "pointLights":
+			if len(engine.Lights()) > index {
+				s.updateUniform(fmt.Sprintf("%s[%d].position", name, index), engine.Lights()[index].Position())
+				s.updateUniform(fmt.Sprintf("%s[%d].color", name, index), engine.Lights()[index].Color())
+			}
+		case "numPointLights":
+			s.updateUniform(name, int32(len(engine.Lights())))
 		default:
 			fmt.Printf("Shader.UpdateUniforms: no values for uniform '%s' has been set\n", name)
 		}
@@ -219,9 +226,10 @@ func (s *Shader) addFragmentShader(shader string) uint32 {
 	return s.createProgram(shader, gl.FRAGMENT_SHADER)
 }
 
+var isArray = regexp.MustCompile(`(\w+)\[(\d+)\]`)
+
 func (s *Shader) findAllUniforms(shaderText string) {
 	isUniform := regexp.MustCompile(`uniform\s*(\S*)\s(\S*);`)
-	isArray := regexp.MustCompile(`(\w+)\[(\d+)\]`)
 
 	uniformStructs := s.findUniformStructs(shaderText)
 
@@ -237,16 +245,7 @@ func (s *Shader) findAllUniforms(shaderText string) {
 			name := i[2]
 			uType := i[1]
 
-			numItems := 0
-			arrayMatch := isArray.FindStringSubmatch(name)
-			if len(arrayMatch) != 0 {
-				max, err := strconv.Atoi(arrayMatch[2])
-				if err != nil {
-					fmt.Printf("could not parse '%s' as an integer, %v", arrayMatch[2], err)
-				}
-				numItems = max
-				name = arrayMatch[1]
-			}
+			name, numItems := getArray(name)
 
 			if numItems == 0 {
 				s.resource.AddUniformName(name)
@@ -264,6 +263,19 @@ func (s *Shader) findAllUniforms(shaderText string) {
 
 		}
 	}
+}
+
+func getArray(name string) (string, int) {
+	number := 0
+	arrayMatch := isArray.FindStringSubmatch(name)
+	if len(arrayMatch) != 0 {
+		max, err := strconv.Atoi(arrayMatch[2])
+		if err != nil {
+			fmt.Printf("could not parse '%s' as an integer, %v", arrayMatch[2], err)
+		}
+		return arrayMatch[1], max
+	}
+	return name, number
 }
 
 func (s *Shader) findUniformLocation(glType, name string, structs map[string][]glslStruct) {

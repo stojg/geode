@@ -85,7 +85,6 @@ type Engine struct {
 	width, height int32
 	mainCamera    components.Viewable
 	lights        []components.Light
-	activeLight   components.Light
 
 	samplerMap    map[string]uint32
 	textures      map[string]components.Texture
@@ -132,12 +131,6 @@ func (e *Engine) Render(object components.Renderable) {
 	e.screenTexture.BindAsRenderTarget()
 	e.screenTexture.SetViewPort()
 
-	e.SetInteger("x_numPointLights", int32(len(e.lights)))
-	for i, l := range e.lights {
-		e.SetVector3f(fmt.Sprintf("x_lightPositions[%d]", i), l.Position())
-		e.SetVector3f(fmt.Sprintf("x_lightColors[%d]", i), l.Color())
-	}
-
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	object.RenderAll(e.phongShader, e)
 
@@ -151,8 +144,8 @@ func (e *Engine) Render(object components.Renderable) {
 	checkForError("renderer.Engine.Render [end]")
 }
 
-func (e *Engine) ActiveLight() components.Light {
-	return e.activeLight
+func (e *Engine) Lights() []components.Light {
+	return e.lights
 }
 
 func (e *Engine) AddLight(l components.Light) {

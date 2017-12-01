@@ -72,7 +72,7 @@ type RenderingEngine interface {
 	AddLight(light Light)
 	AddCamera(camera Viewable)
 	MainCamera() Viewable
-	ActiveLight() Light
+	Lights() []Light
 	SamplerSlot(string) uint32
 	Texture(string) Texture
 	SetTexture(string, Texture)

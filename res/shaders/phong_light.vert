@@ -4,26 +4,44 @@ layout (location = 0) in vec3 aPosition;
 layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoord;
 
-uniform mat4 projection;
+uniform mat4 MVP;
+uniform mat4 MV;
+uniform mat4 InverseMV;
 uniform mat4 view;
-uniform mat4 model;
-uniform vec3 x_lightPositions[16];
-uniform int x_numPointLights;
 
-out vec3 Normal;
-out vec2 TexCoord;
-out vec3 LightPositions[16];
-out vec3 ModelViewPos;
+
+struct Light {
+    vec3 position;
+    vec3 color;
+};
+
+uniform Light pointLights[16];
+uniform int numPointLights;
+
+out VS_OUT
+{
+    vec3 V_Normal;
+    vec2 TexCoord;
+    vec3 V_LightPositions[16];
+    vec3 W_ViewPos;
+} vs_out;
 
 void main() {
-    gl_Position = projection * view * model * vec4(aPosition, 1.0);
-    //ModelPos = vec3(model * vec4(aPosition, 1.0));
-    ModelViewPos = vec3(view  * model * vec4(aPosition, 1.0));
 
-    TexCoord = aTexCoord;
-    Normal = normalize(mat3(transpose(inverse(view * model))) * aNormal);
+    // the position of the fragment in the perspective space
+    gl_Position = MVP * vec4(aPosition, 1.0);
 
-    for (int i = 0; i < x_numPointLights; i++ ) {
-        LightPositions[i] = vec3(view * vec4(x_lightPositions[i], 1));
+    // the position of the the view relative to the fragment
+    vs_out.W_ViewPos = vec3(MV * vec4(aPosition, 1.0));
+
+    vs_out.TexCoord = aTexCoord;
+
+    // transform normals into view space
+    vs_out.V_Normal = normalize(mat3(InverseMV) * aNormal);
+
+    // transform light positions into view space
+    for (int i = 0; i < numPointLights; i++ ) {
+        // point lights have a position, so it's vec4(pos, 1); directional lights are vec4(pos, 0);
+        vs_out.V_LightPositions[i] = vec3(view * vec4(pointLights[i].position, 1));
     }
 }

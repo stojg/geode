@@ -67,6 +67,8 @@ func (m *Engine) run() {
 	currentTime := time.Now()
 	var accumulator time.Duration
 
+	defer m.cleanup()
+
 	for m.isRunning {
 
 		newTime := time.Now()

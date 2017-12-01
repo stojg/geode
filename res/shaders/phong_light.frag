@@ -1,20 +1,28 @@
 #version 410 core
 
-in vec2 TexCoord;
-in vec3 Normal;
-in vec3 FragPos;
-in vec3 LightPositions[16];
-in vec3 ModelViewPos;
+in VS_OUT
+{
+    vec3 V_Normal;
+    vec2 TexCoord;
+    vec3 V_LightPositions[16];
+    vec3 W_ViewPos;
+} vs_in;
 
 uniform sampler2D diffuse;
-uniform vec3 x_lightColors[16];
 uniform float specularStrength = 0.1;
-uniform int x_numPointLights;
+
+
+struct Light {
+    vec3 position;
+    vec3 color;
+};
+uniform int numPointLights;
+uniform Light pointLights[16];
 
 out vec4 FragColor;
 
-vec3 CalcPointLight(vec3 lightPosition, vec3 lightColor, vec3 objectColor, vec3 norm) {
-    vec3 lightDiff = lightPosition - ModelViewPos;
+vec3 CalcPointLight(vec3 lightPosition, vec3 lightColor, vec3 objectColor, vec3 norm, vec3 viewPos) {
+    vec3 lightDiff = lightPosition - viewPos;
     float distance = length(lightDiff);
 
     if (distance > 20) {
@@ -29,8 +37,9 @@ vec3 CalcPointLight(vec3 lightPosition, vec3 lightColor, vec3 objectColor, vec3 
 
     // diffuse
     float diff = max(dot(norm, lightDirection), 0.0);
+
     // specular
-    vec3 halfwayDir = normalize(lightDirection - normalize(ModelViewPos));
+    vec3 halfwayDir = normalize(lightDirection - normalize(viewPos));
     vec3 reflectDir = reflect(-lightDirection, norm);
     float spec = pow(max(dot(norm, halfwayDir), 0.0), 16);
 
@@ -45,16 +54,16 @@ vec3 CalcPointLight(vec3 lightPosition, vec3 lightColor, vec3 objectColor, vec3 
 }
 
 void main() {
-    vec3 objectColor = texture(diffuse, TexCoord).rgb;
-    vec3 norm = normalize(Normal);
+    vec3 objectColor = texture(diffuse, vs_in.TexCoord).rgb;
+    vec3 normal = normalize(vs_in.V_Normal);
 
     vec3 final = vec3(0);
 
     float ambientStrength = 0.01;
     final += ambientStrength * objectColor;
 
-    for (int i = 0; i < x_numPointLights; i++) {
-        final += CalcPointLight(LightPositions[i], x_lightColors[i], objectColor, norm);
+    for (int i = 0; i < numPointLights; i++) {
+        final += CalcPointLight(vs_in.V_LightPositions[i], pointLights[i].color, objectColor, normal, vs_in.W_ViewPos);
     }
 
     FragColor = vec4(final, 0);

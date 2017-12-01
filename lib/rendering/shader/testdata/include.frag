@@ -1,16 +1,18 @@
 
 #include "include.glsl"
 
-in vec2 TexCoord;
-in vec3 Normal;
+in VS_OUT {
+    vec2 TexCoord;
+    vec3 Normal;
+} vs_in;
 
 out vec3 FragColor;
 
 uniform sampler2D diffuse;
 
 vec3 calcLight(vec3 color) {
-    vec3 result = texture(diffuse, TexCoord).rgb;
+    vec3 result = texture(diffuse, vs_in.TexCoord).rgb;
     result *= color;
-    result *= Normal;
+    result *= vs_in.Normal;
     return result;
 }
