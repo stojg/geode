@@ -50,7 +50,7 @@ func NewEngine(width, height int) *Engine {
 		gaussShader:   shader.NewShader("filter_gauss"),
 		ambientShader: shader.NewShader("forward_ambient"),
 		shadowShader:  shader.NewShader("shadow_vsm"),
-		phongShader:   shader.NewShader("phong_light"),
+		phongShader:   shader.NewShader("pbr_light"),
 
 		screenTexture: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGB16F, gl.RGB, gl.FLOAT, gl.NEAREST, false),
 		toneMapShader: shader.NewShader("filter_tonemap"),

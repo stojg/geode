@@ -9,7 +9,7 @@ func NewMaterial() *Material {
 	return &Material{
 		textures:  make(map[string]*Texture),
 		albedo:    mgl32.Vec3{0.02, 0.02, 0.02}, // charcoal
-		metallic:  0.04,                         // non metallic
+		metallic:  0.00,                         // non metallic
 		roughness: 0.5,
 	}
 }
