@@ -9,7 +9,7 @@ uniform sampler2D x_filterTexture;
 void main()
 {
     const float gamma = 2.2;
-    const float exposure = 0.9;
+    const float exposure = 1.0;
     vec3 hdrColor = texture(x_filterTexture, TexCoords).rgb;
 
     // Exposure tone mapping
