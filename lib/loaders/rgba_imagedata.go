@@ -29,6 +29,15 @@ func RGBAImagedata(filename string) (*image.RGBA, error) {
 	return rgba, nil
 }
 
+func RGBEImagedata(filename string) (int, int, []float32, error) {
+	imgFile, err := os.Open(filename)
+	if err != nil {
+		return 0, 0, nil, fmt.Errorf("texture %q not found on disk: %v", filename, err)
+	}
+	defer imgFile.Close()
+	return RGBEDecoder(imgFile)
+}
+
 // Flip the image upside down so that OpenGL can use it as a texture properly
 func Flip(src *image.RGBA) *image.RGBA {
 	maxX := src.Bounds().Max.X

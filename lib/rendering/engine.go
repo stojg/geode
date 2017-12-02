@@ -34,20 +34,15 @@ func NewEngine(width, height int) *Engine {
 	samplerMap["x_shadowMap"] = 9
 	samplerMap["x_filterTexture"] = 10
 
+	envMap := framebuffer.NewHDRCubeMap(1024, 1024, "res/textures/sky0016.hdr")
+
 	e := &Engine{
 		width:  int32(width),
 		height: int32(height),
 
 		samplerMap: samplerMap,
 
-		skybox: technique.NewSkyBox([6]string{
-			"res/textures/skybox/right.png",
-			"res/textures/skybox/left.png",
-			"res/textures/skybox/top.png",
-			"res/textures/skybox/bottom.png",
-			"res/textures/skybox/back.png",
-			"res/textures/skybox/front.png",
-		}),
+		skybox: technique.NewSkyBox(envMap),
 
 		textures:      make(map[string]components.Texture),
 		uniforms3f:    make(map[string]mgl32.Vec3),
