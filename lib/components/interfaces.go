@@ -86,10 +86,14 @@ type Spotlight interface {
 
 type RenderingEngine interface {
 	AddLight(light Light)
+	Lights() []Light
+
 	AddCamera(camera Viewable)
 	MainCamera() Viewable
-	Lights() []Light
+
 	SamplerSlot(string) uint32
+	SetSamplerSlot(string, uint32)
+
 	Texture(string) Texture
 	SetTexture(string, Texture)
 
