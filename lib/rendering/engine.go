@@ -9,6 +9,7 @@ import (
 	"github.com/stojg/graphics/lib/rendering/debugger"
 	"github.com/stojg/graphics/lib/rendering/framebuffer"
 	"github.com/stojg/graphics/lib/rendering/shader"
+	"github.com/stojg/graphics/lib/rendering/technique"
 )
 
 func NewEngine(width, height int) *Engine {
@@ -17,7 +18,7 @@ func NewEngine(width, height int) *Engine {
 	gl.GetIntegerv(gl.MAX_VERTEX_ATTRIBS, &nrAttributes)
 	fmt.Printf("maximum nr of vertex attributes supported: %d\n", nrAttributes)
 
-	gl.ClearColor(0.541, 0.616, 0.671, 1)
+	gl.ClearColor(0.01, 0.01, 0.01, 1)
 
 	gl.FrontFace(gl.CCW)
 	gl.CullFace(gl.BACK)
@@ -34,9 +35,20 @@ func NewEngine(width, height int) *Engine {
 	samplerMap["x_filterTexture"] = 10
 
 	e := &Engine{
-		width:         int32(width),
-		height:        int32(height),
-		samplerMap:    samplerMap,
+		width:  int32(width),
+		height: int32(height),
+
+		samplerMap: samplerMap,
+
+		skybox: technique.NewSkyBox([6]string{
+			"res/textures/skybox/right.png",
+			"res/textures/skybox/left.png",
+			"res/textures/skybox/top.png",
+			"res/textures/skybox/bottom.png",
+			"res/textures/skybox/back.png",
+			"res/textures/skybox/front.png",
+		}),
+
 		textures:      make(map[string]components.Texture),
 		uniforms3f:    make(map[string]mgl32.Vec3),
 		uniformsI:     make(map[string]int32),
@@ -50,7 +62,7 @@ func NewEngine(width, height int) *Engine {
 		gaussShader:   shader.NewShader("filter_gauss"),
 		ambientShader: shader.NewShader("forward_ambient"),
 		shadowShader:  shader.NewShader("shadow_vsm"),
-		phongShader:   shader.NewShader("pbr_light"),
+		lightShader:   shader.NewShader("pbr_light"),
 
 		screenTexture: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGB16F, gl.RGB, gl.FLOAT, gl.NEAREST, false),
 		toneMapShader: shader.NewShader("filter_tonemap"),
@@ -86,6 +98,8 @@ type Engine struct {
 	mainCamera    components.Viewable
 	lights        []components.Light
 
+	skybox *technique.SkyBox
+
 	samplerMap    map[string]uint32
 	textures      map[string]components.Texture
 	uniforms3f    map[string]mgl32.Vec3
@@ -100,7 +114,7 @@ type Engine struct {
 	shadowShader  *shader.Shader
 	fxaaShader    *shader.Shader
 	overlayShader *shader.Shader
-	phongShader   *shader.Shader
+	lightShader   *shader.Shader
 
 	screenTexture *framebuffer.Texture
 
@@ -132,15 +146,16 @@ func (e *Engine) Render(object components.Renderable) {
 	e.screenTexture.SetViewPort()
 
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-	object.RenderAll(e.phongShader, e)
+	object.RenderAll(e.lightShader, e)
+
+	e.skybox.Draw(e)
 
 	gl.Disable(gl.DEPTH_TEST)
+	defer gl.Enable(gl.DEPTH_TEST)
 	e.applyFilter(e.toneMapShader, e.screenTexture, e.fullScreenTemp)
 	e.applyFilter(e.fxaaShader, e.fullScreenTemp, nil)
-	//e.applyFilter(e.overlayShader, debugger.Texture(), nil)
-	gl.Enable(gl.DEPTH_TEST)
-
-	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+	e.applyFilter(e.overlayShader, debugger.Texture(), nil)
+	// gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 	checkForError("renderer.Engine.Render [end]")
 }
 
@@ -245,4 +260,8 @@ func (e *Engine) SamplerSlot(samplerName string) uint32 {
 		fmt.Printf("rendering.Engine tried finding texture slot for %s, failed\n", samplerName)
 	}
 	return slot
+}
+
+func (e *Engine) SetSamplerSlot(samplerName string, slot uint32) {
+	e.samplerMap[samplerName] = slot
 }

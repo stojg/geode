@@ -79,7 +79,7 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 
 		// x_ means that the uniform is a engine uniform and should be fetch from the render engines storage
 		if strings.Index(name, "x_") == 0 {
-			if uniformType == "sampler2D" {
+			if uniformType == "sampler2D" || uniformType == "samplerCube" {
 				samplerSlot := engine.SamplerSlot(name)
 				engine.Texture(name).Bind(samplerSlot)
 				gl.Uniform1i(s.resource.uniforms[name], int32(samplerSlot))
@@ -122,6 +122,8 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 			s.updateUniform(name, transform.Transformation())
 		case "view":
 			s.updateUniform(name, engine.MainCamera().View())
+		case "skyboxView":
+			s.updateUniform(name, engine.MainCamera().View().Mat3().Mat4()) // remove rotation
 		case "material":
 			s.updateUniform(name+".albedo", mat.Albedo())
 			s.updateUniform(name+".metallic", mat.Metallic())
