@@ -39,6 +39,10 @@ type Texture struct {
 	resource *TextureResource
 }
 
+func (t *Texture) ID() uint32 {
+	return t.resource.ID()
+}
+
 func (t *Texture) Height() int32 {
 	return t.resource.height
 }

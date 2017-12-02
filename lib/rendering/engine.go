@@ -33,8 +33,11 @@ func NewEngine(width, height int) *Engine {
 	samplerMap["diffuse"] = 0
 	samplerMap["x_shadowMap"] = 9
 	samplerMap["x_filterTexture"] = 10
+	samplerMap["x_irradianceMap"] = 11
 
 	envMap := framebuffer.NewHDRCubeMap(1024, 1024, "res/textures/sky0016.hdr")
+	irradianceMap := framebuffer.NewCubeMap(32, 32)
+	technique.Convolute(envMap, irradianceMap)
 
 	e := &Engine{
 		width:  int32(width),
@@ -66,6 +69,8 @@ func NewEngine(width, height int) *Engine {
 
 		capabilities: make(map[string]bool),
 	}
+
+	e.SetTexture("x_irradianceMap", irradianceMap)
 
 	e.shadowTextures = make([]components.Texture, 12)
 	e.tempShadowTextures = make([]components.Texture, 12)

@@ -68,7 +68,6 @@ func (t *HDRCubeMap) LoadHDR(filename string) {
 	shad.UpdateUniform("projection", captureProjection)
 
 	gl.Viewport(0, 0, t.width, t.height)
-	checkForError("framebuffer.Cubemap debug")
 	gl.Disable(gl.CULL_FACE)
 	for i := 0; i < 6; i++ {
 		shad.UpdateUniform("view", captureViews[i])
@@ -103,8 +102,8 @@ func (t *HDRCubeMap) Bind(unit uint32) {
 
 func (t *HDRCubeMap) BindAsRenderTarget() {
 	// this probably wont work without setting which side of the cubemap to render to?
-	gl.BindTexture(textType, t.id)
 	gl.BindFramebuffer(gl.FRAMEBUFFER, t.fbo)
+	gl.BindTexture(gl.TEXTURE_CUBE_MAP, t.id)
 }
 
 func (t *HDRCubeMap) SetViewPort() {

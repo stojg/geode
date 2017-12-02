@@ -8,6 +8,7 @@ uniform mat4 MVP;
 uniform mat4 MV;
 uniform mat4 InverseMV;
 uniform mat4 view;
+uniform mat4 model;
 
 #include "point_lights.glsl"
 uniform Light pointLights[16];
@@ -15,6 +16,7 @@ uniform int numPointLights;
 
 out VS_OUT
 {
+    vec3 Normal;
     vec3 V_Normal;
     vec2 TexCoord;
     vec3 V_LightPositions[16];
@@ -33,6 +35,9 @@ void main() {
 
     // transform normals into view space
     vs_out.V_Normal = normalize(mat3(InverseMV) * aNormal);
+
+    //surface normal in the world space, used for lookup env map coordinates
+    vs_out.Normal = mat3(model) * aNormal;
 
     // transform light positions into view space
     for (int i = 0; i < numPointLights; i++ ) {

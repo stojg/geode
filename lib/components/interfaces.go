@@ -8,6 +8,7 @@ import (
 )
 
 type Texture interface {
+	ID() uint32
 	Bind(samplerSlot uint32)
 	BindAsRenderTarget()
 	SetViewPort()

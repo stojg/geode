@@ -15,7 +15,6 @@ vec3 CalcPointLight(vec3 F0, vec3 lightPosition, Light light, Material material,
     }
 
     vec3 lightDirection = normalize(lightDiff);
-//    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
     float attenuation = 1.0 / (distance * distance);
 
     vec3 V = normalize(-viewPos);
