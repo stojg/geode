@@ -74,8 +74,6 @@ func (t *LDRCubeMap) Bind(unit uint32) {
 }
 
 func (t *LDRCubeMap) BindAsRenderTarget() {
-	// this probably wont work without setting which side of the cubemap to render to?
-	gl.BindTexture(textType, t.id)
 	gl.BindFramebuffer(gl.FRAMEBUFFER, t.fbo)
 }
 

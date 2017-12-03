@@ -1,64 +1,86 @@
 #version 410 core
 
-in VS_OUT
-{
-    vec3 Normal;
-    vec3 V_Normal;
-    vec2 TexCoord;
-    vec3 V_LightPositions[16];
-    vec3 W_ViewPos;
-} vs_in;
-
-uniform float specularStrength = 0.1;
-
 struct Material {
     vec3 albedo;
     float metallic;
     float roughness;
 };
 
+#include "point_lights.glsl"
+#include "pbr.glsl"
+
+uniform sampler2D   x_brdfLUT;
 uniform samplerCube x_irradianceMap;
+uniform samplerCube x_prefilterMap;
+
+uniform mat4 InverseMV;
+uniform mat4 InvView;
 
 uniform Material material;
 
-#include "point_lights.glsl"
 uniform int numPointLights;
 uniform Light pointLights[16];
 
 out vec4 FragColor;
 
-vec3 CalcPointLight(vec3 F0, vec3 lightPosition, Light light, Material material, vec3 norm, vec3 viewPos);
-
-#include "pbr.glsl"
-
-vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+in VS_OUT
 {
-    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
-}
+    // surface normal in the world space
+    vec3 Normal;
+    // surface normal in view space
+    vec3 V_Normal;
+    vec2 TexCoord;
+    vec3 V_LightPositions[16];
+    // camera position in world space
+    vec3 W_ViewPos;
+} vs_in;
 
 void main() {
+
+    // Normal in view space
     vec3 normal = normalize(vs_in.V_Normal);
 
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, material.albedo, material.metallic);
 
     vec3 Lo = vec3(0.0);
+
     for (int i = 0; i < numPointLights; i++) {
         Lo += CalcPointLight(F0, vs_in.V_LightPositions[i], pointLights[i], material, normal, vs_in.W_ViewPos);
     }
 
-    vec3 V = normalize(-vs_in.W_ViewPos);
-    float nDotV = max(dot(vs_in.V_Normal, V), 0.0);
-    vec3 kS = fresnelSchlickRoughness(nDotV, F0, material.roughness);
-    vec3 kD = 1.0 - kS;
+    // enviroment ambient lightning
 
+    // direction towards they eye (camera) in the view (eye) space
+    vec3 viewDirection = normalize(-vs_in.W_ViewPos);
+    // eye direction in worldspace
+    vec3 wcEyeDir = vec3(InvView * vec4(viewDirection, 0.0));
+
+    // reflection
+    vec3 R = reflect(-wcEyeDir, normalize(vs_in.Normal));
+
+    vec3 V = normalize(-vs_in.W_ViewPos);
+    vec3 F = fresnelSchlickRoughness(max(dot(vs_in.V_Normal, viewDirection), 0.0), F0, material.roughness);
+
+    vec3 kS = F;
+    vec3 kD = 1.0 - kS;
+    kD *= 1.0 - material.metallic;
+
+    // diffuse
     vec3 irradiance = texture(x_irradianceMap, vs_in.Normal).rgb;
     vec3 diffuse    = irradiance * material.albedo;
-    vec3 ambient    = (kD * diffuse);
 
-    vec3 color = ambient + Lo;
+    // specular
+    const float MAX_REFLECTION_LOD = 4.0;
+    vec3 prefilteredColor = textureLod(x_prefilterMap, R,  material.roughness * MAX_REFLECTION_LOD).rgb;
+    vec2 brdf  = texture(x_brdfLUT, vec2(max(dot(vs_in.Normal, wcEyeDir), 0.0), material.roughness)).rg;
+    vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
+
+    // sum up all ambient
+    vec3 ambient = (kD * diffuse + specular);
+
+    // combine with lights
+    vec3 color = Lo + ambient;
 
     FragColor = vec4(color, 1);
 }
-
-

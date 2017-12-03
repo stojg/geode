@@ -15,7 +15,8 @@ vec3 CalcPointLight(vec3 F0, vec3 lightPosition, Light light, Material material,
     }
 
     vec3 lightDirection = normalize(lightDiff);
-    float attenuation = 1.0 / (distance * distance);
+
+    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
 
     vec3 V = normalize(-viewPos);
     vec3 N = norm;
@@ -48,6 +49,11 @@ vec3 CalcPointLight(vec3 F0, vec3 lightPosition, Light light, Material material,
 vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
 float DistributionGGX(vec3 N, vec3 H, float roughness)

@@ -7,11 +7,11 @@ import (
 )
 
 // checkForError will check for OpenGL errors and panic if an error has been raised
-func checkForError(name string) {
+func checkForError(name string) bool {
 	err := gl.GetError()
 	switch err {
 	case 0:
-		return
+		return false
 	case gl.INVALID_OPERATION:
 		fmt.Printf("[%s] GL Error: INVALID_OPERATION 0x0%x\n", name, err)
 	case gl.INVALID_ENUM:
@@ -21,4 +21,5 @@ func checkForError(name string) {
 	default:
 		fmt.Printf("[%s] GL Error: 0x0%x\n", name, err)
 	}
+	return true
 }

@@ -6,7 +6,6 @@ import (
 	"math/rand"
 	"os"
 
-	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/core"
@@ -36,8 +35,8 @@ func main() {
 }
 
 func run() error {
-	width := 800
-	height := 600
+	width := 1024
+	height := 800
 
 	engine, err := core.NewEngine(width, height, "graphics")
 	if err != nil {
@@ -95,35 +94,35 @@ func run() error {
 		loadModel(pointLight, "res/meshes/ico/model.obj", lightMaterial)
 		engine.AddObject(pointLight)
 	}
-
-	{
-		pointLight := core.NewGameObject()
-		pointLight.Transform().SetPos(vec3(2, 0.4, 4))
-		pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
-		pointLight.AddComponent(lights.NewPoint(1.0, 1.0, 1.0, 50))
-		pointLight.AddComponent(components.NewTimeMove(mgl32.Vec3{-1, 0, 0}, func(elapsed float64) float64 {
-			return math.Sin(glfw.GetTime())
-		}))
-		lightMaterial := rendering.NewMaterial()
-		lightMaterial.SetAlbedo(mgl32.Vec3{50, 50, 50})
-		loadModel(pointLight, "res/meshes/ico/model.obj", lightMaterial)
-		engine.AddObject(pointLight)
-	}
-
-	//for i := 0; i < 14; i++ {
+	//
+	//{
 	//	pointLight := core.NewGameObject()
-	//	pointLight.Transform().SetPos(vec3(rand.Float32()*30-15, 0.5, rand.Float32()*30-10))
+	//	pointLight.Transform().SetPos(vec3(2, 0.4, 4))
 	//	pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
-	//	r, g, b := rand.Float32(), rand.Float32(), rand.Float32()
-	//	pointLight.AddComponent(lights.NewPoint(r, g, b, 50))
+	//	pointLight.AddComponent(lights.NewPoint(1.0, 1.0, 1.0, 50))
+	//	pointLight.AddComponent(components.NewTimeMove(mgl32.Vec3{-1, 0, 0}, func(elapsed float64) float64 {
+	//		return math.Sin(glfw.GetTime())
+	//	}))
 	//	lightMaterial := rendering.NewMaterial()
-	//	lightMaterial.SetAlbedo(mgl32.Vec3{r, g, b})
+	//	lightMaterial.SetAlbedo(mgl32.Vec3{50, 50, 50})
 	//	loadModel(pointLight, "res/meshes/ico/model.obj", lightMaterial)
 	//	engine.AddObject(pointLight)
 	//}
 
+	for i := 0; i < 3; i++ {
+		pointLight := core.NewGameObject()
+		pointLight.Transform().SetPos(vec3(rand.Float32()*30-15, 0.5, rand.Float32()*30-10))
+		pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
+		r, g, b := rand.Float32(), rand.Float32(), rand.Float32()
+		pointLight.AddComponent(lights.NewPoint(r, g, b, 50))
+		lightMaterial := rendering.NewMaterial()
+		lightMaterial.SetAlbedo(mgl32.Vec3{r, g, b})
+		loadModel(pointLight, "res/meshes/ico/model.obj", lightMaterial)
+		engine.AddObject(pointLight)
+	}
+
 	floor := core.NewGameObject()
-	floor.Transform().SetScale(vec3(15, 0.01, 15))
+	floor.Transform().SetScale(vec3(100, 0.01, 100))
 	floor.Transform().SetPos(vec3(0, -0.005, 0))
 	floorMaterial := rendering.NewMaterial()
 	floorMaterial.SetAlbedo(mgl32.Vec3{0.8, 0.8, 0.8})
@@ -137,8 +136,8 @@ func run() error {
 	bot.AddComponent(components.NewRotator(vec3(0, -1, 0), 23))
 	botMaterial := rendering.NewMaterial()
 	//botMaterial.SetAlbedo(mgl32.Vec3{1, 0.765557, 0.336057}) // gold
-	botMaterial.SetAlbedo(mgl32.Vec3{0.3, 0.3, 0.3})
-	botMaterial.SetRoughness(0.3)
+	botMaterial.SetAlbedo(mgl32.Vec3{0.400, 0.249, 0.000})
+	botMaterial.SetRoughness(0.25)
 	botMaterial.SetMetallic(0)
 	loadModel(bot, "res/meshes/sphere_bot/model.obj", botMaterial)
 	engine.AddObject(bot)
@@ -150,30 +149,30 @@ func run() error {
 
 	{
 		sphereMtrl := rendering.NewMaterial()
-		sphereMtrl.SetAlbedo(mgl32.Vec3{0.8, 0.8, 0.8})
-		sphereMtrl.SetRoughness(0.5)
-		sphereMtrl.SetMetallic(0.02)
+		sphereMtrl.SetAlbedo(mgl32.Vec3{0.202, 0.545, 0.147})
+		sphereMtrl.SetRoughness(0.2)
+		sphereMtrl.SetMetallic(0)
 		cube := core.NewGameObject()
-		cube.Transform().SetScale(vec3(1, 1, 1))
-		cube.Transform().SetPos(vec3(-4, 1, 0))
-		loadModel(cube, "res/meshes/sphere/model.obj", sphereMtrl)
+		cube.Transform().SetScale(vec3(0.5, 0.5, 0.5))
+		cube.Transform().SetPos(vec3(-4, 0.5, 0))
+		loadModel(cube, "res/meshes/cube/model.obj", sphereMtrl)
 		engine.AddObject(cube)
 	}
 
 	{
 		sphereMtrl := rendering.NewMaterial()
-		sphereMtrl.SetAlbedo(mgl32.Vec3{0.01, 0.01, 0.01})
-		sphereMtrl.SetRoughness(0.8)
-		sphereMtrl.SetMetallic(0.00)
+		sphereMtrl.SetAlbedo(mgl32.Vec3{1, 0.765557, 0.336057})
+		sphereMtrl.SetRoughness(0.3)
+		sphereMtrl.SetMetallic(1)
 		cube := core.NewGameObject()
 		cube.Transform().SetScale(vec3(0.2, 0.2, 0.2))
-		cube.Transform().SetPos(vec3(-4, 1, 4))
+		cube.Transform().SetPos(vec3(-4, 0.2, 4))
 		loadModel(cube, "res/meshes/sphere/model.obj", sphereMtrl)
 		engine.AddObject(cube)
 		{
 			cube := core.NewGameObject()
 			cube.Transform().SetScale(vec3(0.2, 0.2, 0.2))
-			cube.Transform().SetPos(vec3(-5, 1, 4))
+			cube.Transform().SetPos(vec3(-5, 0.2, 4))
 			loadModel(cube, "res/meshes/sphere/model.obj", sphereMtrl)
 			engine.AddObject(cube)
 		}
@@ -181,9 +180,13 @@ func run() error {
 
 	{ //podium
 		cube := core.NewGameObject()
+		podiumMtrl := rendering.NewMaterial()
+		podiumMtrl.SetAlbedo(mgl32.Vec3{0.0, 0.0, 0.0})
+		podiumMtrl.SetRoughness(0.03)
+		podiumMtrl.SetMetallic(1)
 		cube.Transform().SetScale(vec3(1.9, 0.1, 1.9))
 		cube.Transform().SetPos(vec3(0, 0.1, 0))
-		loadModel(cube, "res/meshes/cube/model.obj", wallMaterial)
+		loadModel(cube, "res/meshes/cube/model.obj", podiumMtrl)
 		engine.AddObject(cube)
 	}
 

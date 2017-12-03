@@ -101,9 +101,7 @@ func (t *HDRCubeMap) Bind(unit uint32) {
 }
 
 func (t *HDRCubeMap) BindAsRenderTarget() {
-	// this probably wont work without setting which side of the cubemap to render to?
 	gl.BindFramebuffer(gl.FRAMEBUFFER, t.fbo)
-	gl.BindTexture(gl.TEXTURE_CUBE_MAP, t.id)
 }
 
 func (t *HDRCubeMap) SetViewPort() {

@@ -6,19 +6,23 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
-func NewCubeMap(width, height int32) *CubeMap {
+func NewCubeMap(width, height int32, mipMap bool) *CubeMap {
 	texture := &CubeMap{
 		attachment: gl.COLOR_ATTACHMENT0,
 		width:      width,
 		height:     height,
 	}
-	texture.initCubemap()
+
+	texture.initCubemap(mipMap)
 
 	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_CUBE_MAP_POSITIVE_X, texture.id, 0)
 
 	for i := 0; i < 6; i++ {
 		gl.TexImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X+uint32(i), 0, gl.RGB16F, texture.width, texture.height, 0, gl.RGB, gl.FLOAT, nil)
-		checkForError("framebuffer.Cubemap end")
+	}
+
+	if mipMap {
+		gl.GenerateMipmap(gl.TEXTURE_CUBE_MAP)
 	}
 
 	if e := gl.CheckFramebufferStatus(gl.FRAMEBUFFER); e != gl.FRAMEBUFFER_COMPLETE {
@@ -59,8 +63,6 @@ func (t *CubeMap) Bind(unit uint32) {
 }
 
 func (t *CubeMap) BindAsRenderTarget() {
-	// this probably wont work without setting which side of the cubemap to render to?
-	gl.BindTexture(textType, t.id)
 	gl.BindFramebuffer(gl.FRAMEBUFFER, t.fbo)
 }
 
@@ -68,7 +70,7 @@ func (t *CubeMap) SetViewPort() {
 	gl.Viewport(0, 0, t.width, t.height)
 }
 
-func (t *CubeMap) initCubemap() {
+func (t *CubeMap) initCubemap(mipMap bool) {
 	gl.GenFramebuffers(1, &t.fbo)
 	gl.GenRenderbuffers(1, &t.rbo)
 
@@ -83,13 +85,20 @@ func (t *CubeMap) initCubemap() {
 	gl.BindTexture(gl.TEXTURE_CUBE_MAP, t.id)
 	gl.FramebufferTexture2D(gl.FRAMEBUFFER, t.attachment, gl.TEXTURE_CUBE_MAP_POSITIVE_X, t.id, 0)
 
-	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_BASE_LEVEL, 0)
-	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAX_LEVEL, 0)
-
 	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
 	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE)
 
-	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
 	gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+	if mipMap {
+		gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
+	} else {
+		gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+		//gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_BASE_LEVEL, 0)
+		//gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAX_LEVEL, 0)
+	}
+
+	if checkForError("initCubeMap") {
+		panic("init cubemap")
+	}
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/rendering/debugger"
 	"github.com/stojg/graphics/lib/rendering/framebuffer"
+	"github.com/stojg/graphics/lib/rendering/primitives"
 	"github.com/stojg/graphics/lib/rendering/shader"
 	"github.com/stojg/graphics/lib/rendering/technique"
 )
@@ -26,6 +27,7 @@ func NewEngine(width, height int) *Engine {
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LESS)
 
+	gl.Enable(gl.TEXTURE_CUBE_MAP_SEAMLESS)
 	gl.Disable(gl.MULTISAMPLE)
 	gl.Disable(gl.FRAMEBUFFER_SRGB)
 
@@ -33,11 +35,6 @@ func NewEngine(width, height int) *Engine {
 	samplerMap["diffuse"] = 0
 	samplerMap["x_shadowMap"] = 9
 	samplerMap["x_filterTexture"] = 10
-	samplerMap["x_irradianceMap"] = 11
-
-	envMap := framebuffer.NewHDRCubeMap(1024, 1024, "res/textures/sky0016.hdr")
-	irradianceMap := framebuffer.NewCubeMap(32, 32)
-	technique.Convolute(envMap, irradianceMap)
 
 	e := &Engine{
 		width:  int32(width),
@@ -45,14 +42,10 @@ func NewEngine(width, height int) *Engine {
 
 		samplerMap: samplerMap,
 
-		skybox: technique.NewSkyBox(envMap),
-
 		textures:      make(map[string]components.Texture),
 		uniforms3f:    make(map[string]mgl32.Vec3),
 		uniformsI:     make(map[string]int32),
 		uniformsFloat: make(map[string]float32),
-
-		screenQuad: NewScreenQuad(),
 
 		nullShader:    shader.NewShader("filter_null"),
 		overlayShader: shader.NewShader("filter_overlay"),
@@ -70,7 +63,23 @@ func NewEngine(width, height int) *Engine {
 		capabilities: make(map[string]bool),
 	}
 
+	envMap := framebuffer.NewHDRCubeMap(1024, 1024, "res/textures/sky0016.hdr")
+
+	e.skybox = technique.NewSkyBox(envMap)
+
+	irradianceMap := framebuffer.NewCubeMap(32, 32, false)
+	technique.Convolute(envMap, irradianceMap)
+	samplerMap["x_irradianceMap"] = 11
 	e.SetTexture("x_irradianceMap", irradianceMap)
+
+	preFilterMap := framebuffer.NewCubeMap(128, 128, true)
+	technique.Prefilter(envMap, preFilterMap)
+	samplerMap["x_prefilterMap"] = 12
+	e.SetTexture("x_prefilterMap", preFilterMap)
+
+	brdfLutTexture := technique.BrdfLutTexture()
+	samplerMap["x_brdfLUT"] = 13
+	e.SetTexture("x_brdfLUT", brdfLutTexture)
 
 	e.shadowTextures = make([]components.Texture, 12)
 	e.tempShadowTextures = make([]components.Texture, 12)
@@ -106,7 +115,6 @@ type Engine struct {
 	uniformsI     map[string]int32
 	uniformsFloat map[string]float32
 
-	screenQuad    *ScreenQuad
 	nullShader    *shader.Shader
 	gaussShader   *shader.Shader
 	ambientShader *shader.Shader
@@ -137,7 +145,6 @@ func (e *Engine) Render(object components.Renderable) {
 	if e.mainCamera == nil {
 		panic("mainCamera not found, the game cannot render")
 	}
-	checkForError("renderer.Engine.Render [start]")
 	gl.Enable(gl.DEPTH_TEST)
 
 	debugger.Clear()
@@ -151,7 +158,6 @@ func (e *Engine) Render(object components.Renderable) {
 	e.skybox.Draw(e)
 
 	gl.Disable(gl.DEPTH_TEST)
-	defer gl.Enable(gl.DEPTH_TEST)
 	e.applyFilter(e.toneMapShader, e.screenTexture, e.fullScreenTemp)
 	e.applyFilter(e.fxaaShader, e.fullScreenTemp, nil)
 	e.applyFilter(e.overlayShader, debugger.Texture(), nil)
@@ -194,7 +200,7 @@ func (e *Engine) applyFilter(filter components.Shader, in, out components.Textur
 	e.SetTexture("x_filterTexture", in)
 	filter.Bind()
 	filter.UpdateUniforms(nil, nil, e)
-	e.screenQuad.Draw()
+	primitives.DrawQuad()
 }
 
 func (e *Engine) SetTexture(name string, texture components.Texture) {

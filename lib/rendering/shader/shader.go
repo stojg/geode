@@ -76,7 +76,6 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 
 	for i, name := range s.resource.uniformNames {
 		uniformType := s.resource.uniformTypes[i]
-
 		// x_ means that the uniform is a engine uniform and should be fetch from the render engines storage
 		if strings.Index(name, "x_") == 0 {
 			if uniformType == "sampler2D" || uniformType == "samplerCube" {
@@ -122,6 +121,8 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 			s.UpdateUniform(name, transform.Transformation())
 		case "view":
 			s.UpdateUniform(name, engine.MainCamera().View())
+		case "InvView":
+			s.UpdateUniform(name, engine.MainCamera().View().Inv())
 		case "skyboxView":
 			s.UpdateUniform(name, engine.MainCamera().View().Mat3().Mat4()) // remove rotation
 		case "material":
@@ -240,7 +241,7 @@ func (s *Shader) addFragmentShader(shader string) uint32 {
 var isArray = regexp.MustCompile(`(\w+)\[(\d+)\]`)
 
 func (s *Shader) findAllUniforms(shaderText string) {
-	isUniform := regexp.MustCompile(`uniform\s*(\S*)\s(\S*);`)
+	isUniform := regexp.MustCompile(`uniform\s+(\S*)\s+(\S*);`)
 
 	uniformStructs := s.findUniformStructs(shaderText)
 
