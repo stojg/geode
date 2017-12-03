@@ -58,9 +58,14 @@ type ShadowInfo interface {
 }
 
 type Light interface {
-	Shader() Shader
 	Color() mgl32.Vec3
 	MaxDistance() float32
+	Exponent() float32
+	Linear() float32
+	Constant() float32
+	Cutoff() float32
+	Direction() mgl32.Vec3
+
 	Position() mgl32.Vec3
 	ViewProjection() mgl32.Mat4
 	SetCamera(pos mgl32.Vec3, rot mgl32.Quat)
@@ -70,20 +75,14 @@ type Light interface {
 
 type DirectionalLight interface {
 	Light
-	Direction() mgl32.Vec3
 }
 
 type PointLight interface {
 	Light
-	Exponent() float32
-	Linear() float32
-	Constant() float32
 }
 
 type Spotlight interface {
 	PointLight
-	Direction() mgl32.Vec3
-	Cutoff() float32
 }
 
 type RenderingEngine interface {

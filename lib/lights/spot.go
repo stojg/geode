@@ -5,7 +5,6 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
-	"github.com/stojg/graphics/lib/rendering/shader"
 )
 
 func NewSpot(shadowSize int, r, g, b, intensity, viewAngle float32) *Spot {
@@ -16,34 +15,18 @@ func NewSpot(shadowSize int, r, g, b, intensity, viewAngle float32) *Spot {
 	light := &Spot{
 		BaseLight: BaseLight{
 			color:       color.Mul(intensity),
-			shader:      shader.NewShader("forward_spot"),
 			maxDistance: 1,
-		},
-		PointLight: PointLight{
+			intensity:   intensity,
+
 			constant: 1,
 			linear:   0.35,
 			exponent: 0.44,
+
+			cutoff: cutoff,
 		},
-		cutoff: cutoff,
 	}
 
-	max := color[0]
-	if color[1] > max {
-		max = color[1]
-	}
-	if color[2] > max {
-		max = color[2]
-	}
-
-	const colorDepth = 256
-
-	{
-		a := light.Exponent()
-		b := light.Linear()
-		c := light.Constant() - colorDepth*intensity*max
-		dist := (-b + float32(math.Sqrt(float64(b*b-4*a*c)))) / (2 * a)
-		light.BaseLight.maxDistance = dist
-	}
+	calcRange(&light.BaseLight)
 
 	const nearPlane float32 = 0.1
 	if shadowSize != 0 {
@@ -58,9 +41,6 @@ func NewSpot(shadowSize int, r, g, b, intensity, viewAngle float32) *Spot {
 
 type Spot struct {
 	BaseLight
-	PointLight
-
-	cutoff float32 // radians
 }
 
 func (spot *Spot) AddToEngine(e components.Engine) {
@@ -69,10 +49,6 @@ func (spot *Spot) AddToEngine(e components.Engine) {
 
 func (spot *Spot) Direction() mgl32.Vec3 {
 	return spot.Transform().TransformedRot().Rotate(mgl32.Vec3{0, 0, -1})
-}
-
-func (spot *Spot) Cutoff() float32 {
-	return spot.cutoff
 }
 
 func (spot *Spot) GetView() mgl32.Mat4 {

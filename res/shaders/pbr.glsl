@@ -16,9 +16,18 @@ vec3 CalcPointLight(vec3 F0, vec3 lightPosition, Light light, Material material,
 
     vec3 lightDirection = normalize(lightDiff);
 
+    vec3 V = normalize(-viewPos);
+
+    if(light.cutoff > 0) {
+        vec3 viewDirection = (view * vec4(light.direction, 0)).xyz;
+        float theta = dot(lightDirection, normalize(-viewDirection));
+        if (theta < light.cutoff) {
+            return vec3(0);
+        }
+    }
+
     float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
 
-    vec3 V = normalize(-viewPos);
     vec3 N = norm;
     vec3 L = normalize(lightPosition - viewPos);
     vec3 H = normalize(V + L);

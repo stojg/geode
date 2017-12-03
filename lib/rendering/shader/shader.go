@@ -129,17 +129,19 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 			s.UpdateUniform(name+".albedo", mat.Albedo())
 			s.UpdateUniform(name+".metallic", mat.Metallic())
 			s.UpdateUniform(name+".roughness", mat.Roughness())
-		case "pointLights":
+		case "lights":
 			if len(engine.Lights()) > index {
-				light := engine.Lights()[index].(components.PointLight)
+				light := engine.Lights()[index]
 				s.UpdateUniform(fmt.Sprintf("%s[%d].position", name, index), light.Position())
 				s.UpdateUniform(fmt.Sprintf("%s[%d].color", name, index), light.Color())
 				s.UpdateUniform(fmt.Sprintf("%s[%d].constant", name, index), light.Constant())
 				s.UpdateUniform(fmt.Sprintf("%s[%d].linear", name, index), light.Linear())
 				s.UpdateUniform(fmt.Sprintf("%s[%d].quadratic", name, index), light.Exponent())
 				s.UpdateUniform(fmt.Sprintf("%s[%d].distance", name, index), light.MaxDistance())
+				s.UpdateUniform(fmt.Sprintf("%s[%d].direction", name, index), light.Direction())
+				s.UpdateUniform(fmt.Sprintf("%s[%d].cutoff", name, index), light.Cutoff())
 			}
-		case "numPointLights":
+		case "numLights":
 			s.UpdateUniform(name, int32(len(engine.Lights())))
 		default:
 			fmt.Printf("Shader.UpdateUniforms: no values for uniform '%s' has been set\n", name)

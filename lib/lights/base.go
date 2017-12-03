@@ -1,63 +1,111 @@
 package lights
 
 import (
+	"math"
+
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
 )
 
 type BaseLight struct {
 	components.GameComponent
-	shadowInfo  *ShadowInfo
-	color       mgl32.Vec3
-	shader      components.Shader
+	shadowInfo *ShadowInfo
+	color      mgl32.Vec3
+
 	maxDistance float32
+
+	constant float32
+	linear   float32
+	exponent float32
+
+	cutoff float32
+
+	intensity float32
 }
 
-func (b *BaseLight) MaxDistance() float32 {
-	return b.maxDistance
+func (l *BaseLight) MaxDistance() float32 {
+	return l.maxDistance
 }
 
-func (b *BaseLight) SetCamera(pos mgl32.Vec3, rot mgl32.Quat) {}
-func (b *BaseLight) AddToEngine(e components.Engine) {
-	e.RenderingEngine().AddLight(b)
+func (l *BaseLight) SetCamera(pos mgl32.Vec3, rot mgl32.Quat) {}
+
+func (l *BaseLight) AddToEngine(e components.Engine) {
+	e.RenderingEngine().AddLight(l)
 }
 
-func (b *BaseLight) Shader() components.Shader {
-	return b.shader
+func (l *BaseLight) Direction() mgl32.Vec3 {
+	return l.Parent().Transform().TransformedPos().Normalize()
 }
 
-func (b *BaseLight) Color() mgl32.Vec3 {
-	return b.color
+func (l *BaseLight) Color() mgl32.Vec3 {
+	return l.color
 }
 
-func (b *BaseLight) Position() mgl32.Vec3 {
-	return b.Parent().Transform().Pos()
+func (l *BaseLight) Exponent() float32 {
+	return l.exponent
 }
 
-func (b *BaseLight) ShadowInfo() components.ShadowInfo {
-	return b.shadowInfo
+func (l *BaseLight) Linear() float32 {
+	return l.linear
 }
 
-func (b *BaseLight) ShadowCaster() bool {
-	return b.shadowInfo != nil
+func (l *BaseLight) Constant() float32 {
+	return l.constant
 }
 
-func (b *BaseLight) ViewProjection() mgl32.Mat4 {
+func (l *BaseLight) Cutoff() float32 {
+	return l.cutoff
+}
+
+func (l *BaseLight) Position() mgl32.Vec3 {
+	return l.Parent().Transform().Pos()
+}
+
+func (l *BaseLight) ShadowInfo() components.ShadowInfo {
+	return l.shadowInfo
+}
+
+func (l *BaseLight) ShadowCaster() bool {
+	return l.shadowInfo != nil
+}
+
+func (l *BaseLight) ViewProjection() mgl32.Mat4 {
 	return mgl32.Ident4()
 }
 
-func (b *BaseLight) Projection() mgl32.Mat4 {
-	if b.shadowInfo == nil {
+func (l *BaseLight) Projection() mgl32.Mat4 {
+	if l.shadowInfo == nil {
 		return mgl32.Ident4()
 	}
-	return b.shadowInfo.projection
+	return l.shadowInfo.projection
 }
 
-func (b *BaseLight) View() mgl32.Mat4 {
+func calcRange(l *BaseLight) {
+
+	max := l.color[0]
+	if l.color[1] > max {
+		max = l.color[1]
+	}
+	if l.color[2] > max {
+		max = l.color[2]
+	}
+
+	const colorDepth = 256
+
+	{
+		a := l.Exponent()
+		b := l.Linear()
+		c := l.Constant() - colorDepth*l.intensity*max
+		dist := (-b + float32(math.Sqrt(float64(b*b-4*a*c)))) / (2 * a)
+		l.maxDistance = dist
+	}
+}
+
+func (l *BaseLight) View() mgl32.Mat4 {
 	//This comes from the conjugate rotation because the world should appear to rotate opposite to the camera's rotation.
-	lightRotation := b.Transform().TransformedRot().Conjugate().Mat4()
+	lightRotation := l.Transform().TransformedRot().Conjugate().Mat4()
 	//Similarly, the translation is inverted because the world appears to move opposite to the camera's movement.
-	lightPosition := b.Transform().TransformedPos().Mul(-1)
+	lightPosition := l.Transform().TransformedPos().Mul(-1)
 	lightTranslation := mgl32.Translate3D(lightPosition[0], lightPosition[1], lightPosition[2])
 	return lightRotation.Mul4(lightTranslation)
 }

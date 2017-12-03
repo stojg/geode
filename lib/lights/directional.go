@@ -5,7 +5,6 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
-	"github.com/stojg/graphics/lib/rendering/shader"
 )
 
 func NewDirectional(shadowSize int, r, g, b, intensity float32) *Directional {
@@ -13,8 +12,7 @@ func NewDirectional(shadowSize int, r, g, b, intensity float32) *Directional {
 
 	light := &Directional{
 		BaseLight: BaseLight{
-			color:  mgl32.Vec3{r, g, b}.Mul(intensity),
-			shader: shader.NewShader("forward_directional"),
+			color: mgl32.Vec3{r, g, b}.Mul(intensity),
 		},
 	}
 
@@ -52,10 +50,6 @@ func (b *Directional) SetCamera(inPos mgl32.Vec3, inRot mgl32.Quat) {
 
 	translation := mgl32.Translate3D(resultPos[0], resultPos[1], resultPos[2])
 	b.matrix = resultRot.Mat4().Mul4(translation)
-}
-
-func (b *Directional) Direction() mgl32.Vec3 {
-	return b.Parent().Transform().TransformedPos().Normalize()
 }
 
 func (b *Directional) GetView() mgl32.Mat4 {

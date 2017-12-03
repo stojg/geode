@@ -6,20 +6,22 @@ struct Material {
     float roughness;
 };
 
-#include "point_lights.glsl"
-#include "pbr.glsl"
-
 uniform sampler2D   x_brdfLUT;
 uniform samplerCube x_irradianceMap;
 uniform samplerCube x_prefilterMap;
 
 uniform mat4 InverseMV;
 uniform mat4 InvView;
+uniform mat4 view;
+
+#include "point_lights.glsl"
+#include "pbr.glsl"
 
 uniform Material material;
 
-uniform int numPointLights;
-uniform Light pointLights[16];
+uniform int numLights;
+uniform Light lights[16];
+
 uniform int x_enable_env_map;
 
 out vec4 FragColor;
@@ -46,8 +48,8 @@ void main() {
 
     vec3 Lo = vec3(0.0);
 
-    for (int i = 0; i < numPointLights; i++) {
-        Lo += CalcPointLight(F0, vs_in.V_LightPositions[i], pointLights[i], material, normal, vs_in.W_ViewPos);
+    for (int i = 0; i < numLights; i++) {
+        Lo += CalcPointLight(F0, vs_in.V_LightPositions[i], lights[i], material, normal, vs_in.W_ViewPos);
     }
 
     if (x_enable_env_map == 0) {
