@@ -35,6 +35,8 @@ type Engine struct {
 	game            *Game
 	renderingEngine *rendering.Engine
 	isRunning       bool
+
+	skybox bool
 }
 
 func (m *Engine) Start() {

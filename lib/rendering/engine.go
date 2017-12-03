@@ -98,6 +98,9 @@ func NewEngine(width, height int) *Engine {
 	e.SetFloat("x_lightBleedReductionAmount", 0.0)
 	e.SetTexture("x_shadowMap", e.shadowTextures[0])
 
+	e.SetInteger("x_enable_env_map", 0)
+	e.SetInteger("x_enable_skybox", 0)
+
 	checkForError("rendering.NewEngine end")
 	return e
 }
@@ -141,6 +144,7 @@ func (e *Engine) Enable(cap string) {
 func (e *Engine) Disable(cap string) {
 	e.capabilities[cap] = false
 }
+
 func (e *Engine) Render(object components.Renderable) {
 	if e.mainCamera == nil {
 		panic("mainCamera not found, the game cannot render")
@@ -155,7 +159,9 @@ func (e *Engine) Render(object components.Renderable) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	object.RenderAll(e.lightShader, e)
 
-	e.skybox.Draw(e)
+	if e.Integer("x_enable_skybox") == 1 {
+		e.skybox.Draw(e)
+	}
 
 	gl.Disable(gl.DEPTH_TEST)
 	e.applyFilter(e.toneMapShader, e.screenTexture, e.fullScreenTemp)

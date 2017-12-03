@@ -109,17 +109,17 @@ func run() error {
 	//	engine.AddObject(pointLight)
 	//}
 
-	for i := 0; i < 3; i++ {
-		pointLight := core.NewGameObject()
-		pointLight.Transform().SetPos(vec3(rand.Float32()*30-15, 0.5, rand.Float32()*30-10))
-		pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
-		r, g, b := rand.Float32(), rand.Float32(), rand.Float32()
-		pointLight.AddComponent(lights.NewPoint(r, g, b, 50))
-		lightMaterial := rendering.NewMaterial()
-		lightMaterial.SetAlbedo(mgl32.Vec3{r, g, b})
-		loadModel(pointLight, "res/meshes/ico/model.obj", lightMaterial)
-		engine.AddObject(pointLight)
-	}
+	//for i := 0; i < 3; i++ {
+	//	pointLight := core.NewGameObject()
+	//	pointLight.Transform().SetPos(vec3(rand.Float32()*30-15, 0.5, rand.Float32()*30-10))
+	//	pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
+	//	r, g, b := rand.Float32(), rand.Float32(), rand.Float32()
+	//	pointLight.AddComponent(lights.NewPoint(r, g, b, 50))
+	//	lightMaterial := rendering.NewMaterial()
+	//	lightMaterial.SetAlbedo(mgl32.Vec3{r, g, b})
+	//	loadModel(pointLight, "res/meshes/ico/model.obj", lightMaterial)
+	//	engine.AddObject(pointLight)
+	//}
 
 	floor := core.NewGameObject()
 	floor.Transform().SetScale(vec3(100, 0.01, 100))

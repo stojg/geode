@@ -20,6 +20,7 @@ uniform Material material;
 
 uniform int numPointLights;
 uniform Light pointLights[16];
+uniform int x_enable_env_map;
 
 out vec4 FragColor;
 
@@ -49,6 +50,10 @@ void main() {
         Lo += CalcPointLight(F0, vs_in.V_LightPositions[i], pointLights[i], material, normal, vs_in.W_ViewPos);
     }
 
+    if (x_enable_env_map == 0) {
+        FragColor = vec4(Lo, 1);
+        return;
+    }
     // enviroment ambient lightning
 
     // direction towards they eye (camera) in the view (eye) space
