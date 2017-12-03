@@ -98,8 +98,8 @@ func NewEngine(width, height int) *Engine {
 	e.SetFloat("x_lightBleedReductionAmount", 0.0)
 	e.SetTexture("x_shadowMap", e.shadowTextures[0])
 
-	e.SetInteger("x_enable_env_map", 0)
-	e.SetInteger("x_enable_skybox", 0)
+	e.SetInteger("x_enable_env_map", 1)
+	e.SetInteger("x_enable_skybox", 1)
 
 	checkForError("rendering.NewEngine end")
 	return e

@@ -12,7 +12,10 @@ func NewDirectional(shadowSize int, r, g, b, intensity float32) *Directional {
 
 	light := &Directional{
 		BaseLight: BaseLight{
-			color: mgl32.Vec3{r, g, b}.Mul(intensity),
+			color:       mgl32.Vec3{r, g, b}.Mul(intensity),
+			constant:    0,
+			maxDistance: 10,
+			intensity:   intensity,
 		},
 	}
 

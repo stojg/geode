@@ -14,29 +14,8 @@ uniform mat4 InverseMV;
 uniform mat4 InvView;
 uniform mat4 view;
 
-#include "point_lights.glsl"
+#include "pbr_lights.glsl"
 #include "pbr.glsl"
-
-uniform Material material;
-
-uniform int numLights;
-uniform Light lights[16];
-
-uniform int x_enable_env_map;
-
-out vec4 FragColor;
-
-in VS_OUT
-{
-    // surface normal in the world space
-    vec3 Normal;
-    // surface normal in view space
-    vec3 V_Normal;
-    vec2 TexCoord;
-    vec3 V_LightPositions[16];
-    // camera position in world space
-    vec3 W_ViewPos;
-} vs_in;
 
 void main() {
 
@@ -48,8 +27,16 @@ void main() {
 
     vec3 Lo = vec3(0.0);
 
+    vec3 V = normalize(-vs_in.W_ViewPos);
+
     for (int i = 0; i < numLights; i++) {
-        Lo += CalcPointLight(F0, vs_in.V_LightPositions[i], lights[i], material, normal, vs_in.W_ViewPos);
+        if (lights[i].constant == 0) {
+            Lo += CalcDirectional(F0, vs_in.V_LightPositions[i], lights[i], material, normal, vs_in.W_ViewPos, V);
+        } else if (lights[i].cutoff > 0) {
+            Lo += CalcSpot(F0, vs_in.V_LightPositions[i], lights[i], material, normal, vs_in.W_ViewPos, V);
+        } else {
+            Lo += CalcPoint(F0, vs_in.V_LightPositions[i], lights[i], material, normal, vs_in.W_ViewPos, V);
+        }
     }
 
     if (x_enable_env_map == 0) {
@@ -66,7 +53,6 @@ void main() {
     // reflection
     vec3 R = reflect(-wcEyeDir, normalize(vs_in.Normal));
 
-    vec3 V = normalize(-vs_in.W_ViewPos);
     vec3 F = fresnelSchlickRoughness(max(dot(vs_in.V_Normal, viewDirection), 0.0), F0, material.roughness);
 
     vec3 kS = F;

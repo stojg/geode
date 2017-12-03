@@ -1,57 +1,6 @@
 
 const float PI = 3.14159265359;
 
-vec3 fresnelSchlick(float cosTheta, vec3 F0);
-float DistributionGGX(vec3 N, vec3 H, float roughness);
-float GeometrySchlickGGX(float NdotV, float roughness);
-float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
-
-vec3 CalcPointLight(vec3 F0, vec3 lightPosition, Light light, Material material, vec3 norm, vec3 viewPos) {
-    vec3 lightDiff = lightPosition - viewPos;
-    float distance = length(lightDiff);
-
-    if (distance > light.distance) {
-        return vec3(0);
-    }
-
-    vec3 lightDirection = normalize(lightDiff);
-
-    vec3 V = normalize(-viewPos);
-
-    if(light.cutoff > 0) {
-        vec3 viewDirection = (view * vec4(light.direction, 0)).xyz;
-        float theta = dot(lightDirection, normalize(-viewDirection));
-        if (theta < light.cutoff) {
-            return vec3(0);
-        }
-    }
-
-    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
-
-    vec3 N = norm;
-    vec3 L = normalize(lightPosition - viewPos);
-    vec3 H = normalize(V + L);
-
-    vec3 radiance = light.color * attenuation;
-
-    // cook-torrance brdf
-    float NDF = DistributionGGX(N, H, material.roughness);
-    float G = GeometrySmith(N, V, L, material.roughness);
-    vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
-
-    vec3 kS = F;
-    vec3 kD = vec3(1.0) - kS;
-    kD *= 1.0 - material.metallic;
-
-    vec3 nominator    = NDF * G * F;
-    float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
-    vec3 specular     = nominator / max(denominator, 0.001);
-
-    // add to outgoing radiance Lo
-    float NdotL = max(dot(N, L), 0.0);
-    return (kD * material.albedo / PI + specular) * radiance * NdotL;
-}
-
 // The Fresnel-Schlick approximation expects a F0 parameter which is known as the surface reflection at zero incidence
 // or how much the surface reflects if looking directly at the surface, ie it calculates the ratio between specular and
 // diffuse reflection, or how much the surface reflects light versus how much it refracts light.
@@ -98,4 +47,85 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
     float ggx1  = GeometrySchlickGGX(NdotL, roughness);
 
     return ggx1 * ggx2;
+}
+
+uniform Material material;
+
+uniform int numLights;
+uniform Light lights[16];
+
+uniform int x_enable_env_map;
+
+out vec4 FragColor;
+
+in VS_OUT
+{
+    // surface normal in the world space
+    vec3 Normal;
+    // surface normal in view space
+    vec3 V_Normal;
+    vec2 TexCoord;
+    vec3 V_LightPositions[16];
+    // camera position in world space
+    vec3 W_ViewPos;
+} vs_in;
+
+vec3 calcCookTorrance(vec3 H, vec3 V, vec3 N, Material material, vec3 F0, vec3 L, vec3 radiance) {
+    vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
+    float NDF = DistributionGGX(N, H, material.roughness);
+    float G   = GeometrySmith(N, V, L, material.roughness);
+
+    vec3 nominator    = NDF * G * F;
+    float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
+    vec3 specular     = nominator / max(denominator, 0.001);
+
+    vec3 kS = F;
+    vec3 kD = vec3(1.0) - kS;
+    kD *= 1.0 - material.metallic;
+    float NdotL = max(dot(N, L), 0.0);
+    return (kD * material.albedo / PI + specular) * radiance * NdotL;
+}
+
+vec3 CalcPoint(vec3 F0, vec3 lightPosition, Light light, Material material, vec3 N, vec3 viewPos, vec3 V) {
+
+    vec3 viewLightDirection = (view * vec4(light.direction, 0)).xyz;
+    float dist = distance(lightPosition, viewPos);
+
+    vec3 L = normalize(lightPosition - viewPos);
+    vec3 H = normalize(V + L);
+
+    if (dist > light.distance) {
+        return vec3(0);
+    }
+
+    float attenuation = 1.0 / (light.constant + light.linear * dist + light.quadratic * (dist * dist));
+    return calcCookTorrance(H, V, N, material, F0, L, light.color * attenuation);
+}
+
+vec3 CalcSpot(vec3 F0, vec3 lightPosition, Light light, Material material, vec3 N, vec3 viewPos, vec3 V) {
+
+    vec3 viewLightDirection = (view * vec4(light.direction, 0)).xyz;
+    float dist = distance(lightPosition, viewPos);
+
+    vec3 L = normalize(lightPosition - viewPos);
+    vec3 H = normalize(V + L);
+
+    if (dist > light.distance) {
+        return vec3(0);
+    }
+    if (light.cutoff > 0) {
+        float theta = dot(L, normalize(-viewLightDirection));
+        if (theta < light.cutoff) { return vec3(0); }
+    }
+    float attenuation = 1.0 / (light.constant + light.linear * dist + light.quadratic * (dist * dist));
+
+    return calcCookTorrance(H, V, N, material, F0, L, light.color * attenuation);
+}
+
+vec3 CalcDirectional(vec3 F0, vec3 lightPosition, Light light, Material material, vec3 N, vec3 viewPos, vec3 V) {
+    vec3 viewLightDirection = (view * vec4(light.direction, 0)).xyz;
+    float dist = distance(lightPosition, viewPos);
+    vec3 L = viewLightDirection;
+    vec3 H = normalize(V + L);
+    return calcCookTorrance(H, V, N, material, F0, L, light.color);
 }

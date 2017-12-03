@@ -10,7 +10,7 @@ uniform mat4 InverseMV;
 uniform mat4 view;
 uniform mat4 model;
 
-#include "point_lights.glsl"
+#include "pbr_lights.glsl"
 uniform Light lights[16];
 uniform int numLights;
 
@@ -41,7 +41,6 @@ void main() {
 
     // transform light positions into view space
     for (int i = 0; i < numLights; i++ ) {
-        // point lights have a position, so it's vec4(pos, 1); directional lights are vec4(pos, 0);
         vs_out.V_LightPositions[i] = vec3(view * vec4(lights[i].position, 1));
     }
 }
