@@ -29,7 +29,7 @@ func setupQuad() {
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.BufferData(gl.ARRAY_BUFFER, len(quadVertices)*sizeOfFloat32, gl.Ptr(quadVertices), gl.STATIC_DRAW)
 	gl.EnableVertexAttribArray(0)
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 5*4, gl.PtrOffset(0))
+	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, int32(5*sizeOfFloat32), gl.PtrOffset(0))
 	gl.EnableVertexAttribArray(1)
-	gl.VertexAttribPointer(1, 2, gl.FLOAT, false, 5*4, gl.PtrOffset(3*sizeOfFloat32))
+	gl.VertexAttribPointer(1, 2, gl.FLOAT, false, int32(5*sizeOfFloat32), gl.PtrOffset(3*sizeOfFloat32))
 }
