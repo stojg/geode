@@ -23,3 +23,9 @@ func CheckForError(debugName string) bool {
 	}
 	return true
 }
+
+func FramebufferComplete(debugName string) {
+	if e := gl.CheckFramebufferStatus(gl.FRAMEBUFFER); e != gl.FRAMEBUFFER_COMPLETE {
+		panic(fmt.Sprintf("%s Framebuffer creation failed, FBO isn't complete: 0x%x", debugName, e))
+	}
+}

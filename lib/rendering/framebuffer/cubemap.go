@@ -1,8 +1,6 @@
 package framebuffer
 
 import (
-	"fmt"
-
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/stojg/graphics/lib/debug"
 )
@@ -29,9 +27,8 @@ func NewCubeMap(width, height int32, mipMap bool) *CubeMap {
 		gl.GenerateMipmap(gl.TEXTURE_CUBE_MAP)
 	}
 
-	if e := gl.CheckFramebufferStatus(gl.FRAMEBUFFER); e != gl.FRAMEBUFFER_COMPLETE {
-		panic(fmt.Sprintf("Cubmap  Framebuffer creation failed, FBO isn't complete: 0x%x", e))
-	}
+	debug.CheckForError("framebuffer.CubeMap end")
+	debug.FramebufferComplete("framebuffer.LDRCubeMap")
 
 	gl.BindTexture(gl.TEXTURE_CUBE_MAP, 0)
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)

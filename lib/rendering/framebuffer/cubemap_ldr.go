@@ -55,10 +55,8 @@ func (t *LDRCubeMap) LoadFromFiles(files [6]string) {
 		gl.TexImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X+uint32(i), 0, gl.SRGB, t.width, t.height, 0, gl.RGBA, gl.UNSIGNED_INT_8_8_8_8_REV, gl.Ptr(img.Pix))
 	}
 
-	debug.CheckForError("framebuffer.Cubemap end")
-	if e := gl.CheckFramebufferStatus(gl.FRAMEBUFFER); e != gl.FRAMEBUFFER_COMPLETE {
-		panic(fmt.Sprintf("Cubmap LDR Framebuffer creation failed, FBO isn't complete: 0x%x", e))
-	}
+	debug.CheckForError("framebuffer.LDRCubeMap end")
+	debug.FramebufferComplete("framebuffer.LDRCubeMap")
 
 	gl.BindTexture(gl.TEXTURE_CUBE_MAP, 0)
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)

@@ -1,6 +1,9 @@
 package framebuffer
 
-import "github.com/go-gl/gl/v4.1-core/gl"
+import (
+	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/stojg/graphics/lib/debug"
+)
 
 const textType = gl.TEXTURE_2D
 
@@ -50,13 +53,11 @@ func NewTexture(attachment uint32, width int, height int, internalFormat int32, 
 		gl.GenRenderbuffers(1, &texture.rbo)
 		gl.BindRenderbuffer(gl.RENDERBUFFER, texture.rbo)
 		gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, int32(width), int32(height))
-		//gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, int32(width), int32(height))
 		gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, texture.rbo)
 	}
 
-	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
-		panic("Framebuffer creation failed, FBO isn't complete.")
-	}
+	debug.CheckForError("framebuffer.Texture end")
+	debug.FramebufferComplete("framebuffer.Texture")
 
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 

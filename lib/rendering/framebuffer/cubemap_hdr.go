@@ -81,10 +81,8 @@ func (t *HDRCubeMap) LoadHDR(filename string) {
 	}
 	gl.Enable(gl.CULL_FACE)
 
-	debug.CheckForError("framebuffer.Cubemap end")
-	if e := gl.CheckFramebufferStatus(gl.FRAMEBUFFER); e != gl.FRAMEBUFFER_COMPLETE {
-		panic(fmt.Sprintf("Cubmap HDR Framebuffer creation failed, FBO isn't complete: 0x%x", e))
-	}
+	debug.CheckForError("framebuffer.HDRCubeMap end")
+	debug.FramebufferComplete("framebuffer.HDRCubeMap")
 
 	hdrTexture.Delete()
 	gl.BindTexture(gl.TEXTURE_CUBE_MAP, 0)
