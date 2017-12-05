@@ -48,6 +48,9 @@ func (t *LDRCubeMap) LoadFromFiles(files [6]string) {
 			fmt.Println(err)
 			continue
 		}
+		if t.width == 0 || t.height == 0 {
+			panic("texture cannot have zero height or width")
+		}
 		gl.TexImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X+uint32(i), 0, gl.SRGB, t.width, t.height, 0, gl.RGBA, gl.UNSIGNED_INT_8_8_8_8_REV, gl.Ptr(img.Pix))
 	}
 

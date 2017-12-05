@@ -28,6 +28,9 @@ func createTextureResource(width, height int, internalFormat int32, dataType uin
 	gl.TexParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
 	gl.TexParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
+	if resource.width == 0 || resource.height == 0 {
+		panic("texture cannot have zero height or width")
+	}
 	gl.TexImage2D(gl.TEXTURE_2D, 0, internalFormat, resource.width, resource.height, 0, gl.RGB, dataType, gl.Ptr(data))
 
 	return resource

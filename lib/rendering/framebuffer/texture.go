@@ -33,6 +33,9 @@ func NewTexture(attachment uint32, width int, height int, internalFormat int32, 
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0)
 	}
 
+	if texture.width == 0 || texture.height == 0 {
+		panic("texture cannot have zero height or width")
+	}
 	gl.TexImage2D(gl.TEXTURE_2D, 0, internalFormat, texture.width, texture.height, 0, format, xtype, nil)
 
 	gl.BindTexture(textType, 0)

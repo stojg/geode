@@ -38,6 +38,9 @@ func (t *HDRCubeMap) Height() int32 {
 
 func (t *HDRCubeMap) LoadHDR(filename string) {
 
+	if t.width == 0 || t.height == 0 {
+		panic("texture cannot have zero height or width")
+	}
 	for i := 0; i < 6; i++ {
 		gl.TexImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X+uint32(i), 0, gl.RGB16F, t.width, t.height, 0, gl.RGB, gl.FLOAT, nil)
 	}
