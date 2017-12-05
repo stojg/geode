@@ -40,10 +40,8 @@ func NewWindow(width, height int, title string) (*Window, error) {
 	// disable or enable vertical refresh (vsync)
 	glfw.SwapInterval(1)
 
-	// this is the actual numVertices we got
-	fbw, fbh := window.GetFramebufferSize()
-	w.viewPortWidth = int32(fbw)
-	w.viewPortHeight = int32(fbh)
+	// the actual size of the window might be different due to screen, for example retina screens
+	w.viewPortWidth, w.viewPortHeight = window.GetFramebufferSize()
 
 	return w, gl.Init()
 }
@@ -53,8 +51,8 @@ type Window struct {
 	width          int
 	height         int
 	title          string
-	viewPortHeight int32
-	viewPortWidth  int32
+	viewPortHeight int
+	viewPortWidth  int
 }
 
 func (w *Window) Instance() *glfw.Window {
