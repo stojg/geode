@@ -19,7 +19,7 @@ func RGBEDecoder(r io.Reader) (int, int, []float32, error) {
 		return 0, 0, nil, err
 	}
 	data := make([]float32, width*height*3)
-	if err := readPixels_RLE(br, width, height, data); err != nil {
+	if err := readPixelsRLE(br, width, height, data); err != nil {
 		return 0, 0, nil, err
 	}
 
@@ -30,11 +30,11 @@ func readHeader(r *bufio.Reader) (int, int, error) {
 	line, err := r.ReadString('\n')
 
 	if err != nil {
-		return 0, 0, newError(ReadError, err.Error())
+		return 0, 0, newError(readError, err.Error())
 	}
 
 	if line[0] != '#' || line[1] != '?' {
-		return 0, 0, newError(FormatError, "Bad initial token.")
+		return 0, 0, newError(formatError, "Bad initial token.")
 	}
 
 	formatSpecifier := false
@@ -43,7 +43,7 @@ func readHeader(r *bufio.Reader) (int, int, error) {
 		line, err = r.ReadString('\n')
 
 		if err != nil {
-			return 0, 0, newError(ReadError, err.Error())
+			return 0, 0, newError(readError, err.Error())
 		}
 
 		if line[0] == 0 || line[0] == '\n' {
@@ -55,24 +55,24 @@ func readHeader(r *bufio.Reader) (int, int, error) {
 	}
 
 	if !formatSpecifier {
-		return 0, 0, newError(FormatError, "No FORMAT specifier found.")
+		return 0, 0, newError(formatError, "No FORMAT specifier found.")
 	}
 
 	line, err = r.ReadString('\n')
 
 	if err != nil {
-		return 0, 0, newError(ReadError, err.Error())
+		return 0, 0, newError(readError, err.Error())
 	}
 
 	width, height := 0, 0
 	if n, err := fmt.Sscanf(line, "-Y %d +X %d", &height, &width); n < 2 || err != nil {
-		return 0, 0, newError(FormatError, "Missing image size specifier.")
+		return 0, 0, newError(formatError, "Missing image size specifier.")
 	}
 
 	return width, height, nil
 }
 
-func readPixels_RLE(r *bufio.Reader, scanlineWidth, numScanlines int, data []float32) error {
+func readPixelsRLE(r io.Reader, scanlineWidth, numScanlines int, data []float32) error {
 	if scanlineWidth < 8 || scanlineWidth > 0x7fff {
 		// run length encoding is not allowed so read flat
 		return readPixels(r, scanlineWidth*numScanlines, data)
@@ -85,7 +85,7 @@ func readPixels_RLE(r *bufio.Reader, scanlineWidth, numScanlines int, data []flo
 
 	for ; numScanlines > 0; numScanlines-- {
 		if _, err := io.ReadFull(r, rgbe); err != nil {
-			return newError(ReadError, err.Error())
+			return newError(readError, err.Error())
 		}
 
 		if rgbe[0] != 2 || rgbe[1] != 2 || (rgbe[2]&0x80) != 0 {
@@ -96,7 +96,7 @@ func readPixels_RLE(r *bufio.Reader, scanlineWidth, numScanlines int, data []flo
 		}
 
 		if int(rgbe[2])<<8|int(rgbe[3]) != scanlineWidth {
-			return newError(FormatError, "Wrong scanline width.")
+			return newError(formatError, "Wrong scanline width.")
 		}
 
 		// read each of the four channels for the scanline into the buffer
@@ -106,7 +106,7 @@ func readPixels_RLE(r *bufio.Reader, scanlineWidth, numScanlines int, data []flo
 
 			for index < end {
 				if _, err := io.ReadFull(r, buf); err != nil {
-					return newError(ReadError, err.Error())
+					return newError(readError, err.Error())
 				}
 
 				if buf[0] > 128 {
@@ -114,7 +114,7 @@ func readPixels_RLE(r *bufio.Reader, scanlineWidth, numScanlines int, data []flo
 					count := int(buf[0]) - 128
 
 					if count == 0 || count > end-index {
-						return newError(FormatError, "Bad scanline data.")
+						return newError(formatError, "Bad scanline data.")
 					}
 
 					for ; count > 0; count-- {
@@ -126,7 +126,7 @@ func readPixels_RLE(r *bufio.Reader, scanlineWidth, numScanlines int, data []flo
 					count := int(buf[0])
 
 					if count == 0 || count > end-index {
-						return newError(FormatError, "Bad scanline data.")
+						return newError(formatError, "Bad scanline data.")
 					}
 
 					scanlineBuffer[index] = buf[1]
@@ -135,7 +135,7 @@ func readPixels_RLE(r *bufio.Reader, scanlineWidth, numScanlines int, data []flo
 					count--
 					if count > 0 {
 						if _, err := io.ReadFull(r, scanlineBuffer[index:index+count]); err != nil {
-							return newError(ReadError, err.Error())
+							return newError(readError, err.Error())
 						}
 
 						index += count
@@ -159,13 +159,13 @@ func readPixels_RLE(r *bufio.Reader, scanlineWidth, numScanlines int, data []flo
 	return nil
 }
 
-func readPixels(r *bufio.Reader, numPixels int, data []float32) error {
+func readPixels(r io.Reader, numPixels int, data []float32) error {
 	rgbe := make([]byte, 4)
 	offset := 0
 
 	for ; numPixels > 0; numPixels-- {
 		if _, err := io.ReadFull(r, rgbe); err != nil {
-			return newError(MemoryError, err.Error())
+			return newError(memoryError, err.Error())
 		}
 
 		data[offset], data[offset+1], data[offset+2] = rgbeToFloat(rgbe[0], rgbe[1], rgbe[2], rgbe[3])
@@ -176,42 +176,33 @@ func readPixels(r *bufio.Reader, numPixels int, data []float32) error {
 }
 
 // standard conversion from rgbe to float pixels
-// note: Ward uses ldexp(col+0.5,exp-(128+8)).  However we wanted pixels
-//       in the range [0,1] to map back into the range [0,1].
+// note: Ward uses ldexp(col+0.5,exp-(128+8)). However we want pixels in the range [0,1] to map back into the range [0,1].
 func rgbeToFloat(r, g, b, e byte) (float32, float32, float32) {
 	if e > 0 {
-		// nonzero pixel
-		r := float32(math.Ldexp(float64(r)+0.5, int(e)-(128+8)))
-		g := float32(math.Ldexp(float64(g)+0.5, int(e)-(128+8)))
-		b := float32(math.Ldexp(float64(b)+0.5, int(e)-(128+8)))
+		r := math.Ldexp(float64(r)+0.5, int(e)-(128+8))
+		g := math.Ldexp(float64(g)+0.5, int(e)-(128+8))
+		b := math.Ldexp(float64(b)+0.5, int(e)-(128+8))
 		return float32(r), float32(g), float32(b)
-	} else {
-		return 0, 0, 0
 	}
-}
-
-func convertComponent(expo, val byte) float32 {
-	v := float32(val) / (256.0)
-	d := float32(math.Pow(2, float64(expo)))
-	return v * d
+	return 0, 0, 0
 }
 
 const (
-	ReadError   = iota
-	WriteError  = iota
-	FormatError = iota
-	MemoryError = iota
+	readError   = iota
+	writeError  = iota
+	formatError = iota
+	memoryError = iota
 )
 
 func newError(code int, text string) error {
 	switch code {
-	case ReadError:
+	case readError:
 		return errors.New("RGBE read error: " + text)
-	case WriteError:
+	case writeError:
 		return errors.New("RGBE write error: " + text)
-	case FormatError:
+	case formatError:
 		return errors.New("RGBE bad file format: " + text)
-	case MemoryError:
+	case memoryError:
 		fallthrough
 	default:
 		return errors.New("RGBE error: " + text)
