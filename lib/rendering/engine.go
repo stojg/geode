@@ -55,8 +55,8 @@ func NewEngine(width, height int) *Engine {
 		shadowShader:  shader.NewShader("shadow_vsm"),
 		lightShader:   shader.NewShader("pbr_light"),
 
-		screenTexture: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGB16F, gl.RGB, gl.FLOAT, gl.NEAREST, false),
-		toneMapShader: shader.NewShader("filter_tonemap"),
+		offScreenTexture: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGB16F, gl.RGB, gl.FLOAT, gl.NEAREST, false),
+		toneMapShader:    shader.NewShader("filter_tonemap"),
 
 		fullScreenTemp: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, gl.NEAREST, false),
 
@@ -127,7 +127,7 @@ type Engine struct {
 	overlayShader *shader.Shader
 	lightShader   *shader.Shader
 
-	screenTexture *framebuffer.Texture
+	offScreenTexture *framebuffer.Texture
 
 	shadowTextures     []components.Texture
 	tempShadowTextures []components.Texture
@@ -153,8 +153,10 @@ func (e *Engine) Render(object components.Renderable) {
 
 	debugger.Clear()
 
-	e.screenTexture.BindAsRenderTarget()
-	e.screenTexture.SetViewPort()
+	e.offScreenTexture.BindAsRenderTarget()
+	e.offScreenTexture.SetViewPort()
+	//gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+	//gl.Viewport(0, 0, e.width, e.height)
 
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	object.RenderAll(e.lightShader, e)
@@ -164,10 +166,9 @@ func (e *Engine) Render(object components.Renderable) {
 	}
 
 	gl.Disable(gl.DEPTH_TEST)
-	e.applyFilter(e.toneMapShader, e.screenTexture, e.fullScreenTemp)
+	e.applyFilter(e.toneMapShader, e.offScreenTexture, e.fullScreenTemp)
 	e.applyFilter(e.fxaaShader, e.fullScreenTemp, nil)
-	e.applyFilter(e.overlayShader, debugger.Texture(), nil)
-	// gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+	//e.applyFilter(e.overlayShader, debugger.Texture(), nil)
 	checkForError("renderer.Engine.Render [end]")
 }
 
