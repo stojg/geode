@@ -6,6 +6,7 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
+	"github.com/stojg/graphics/lib/debug"
 	"github.com/stojg/graphics/lib/rendering/primitives"
 	"github.com/stojg/graphics/lib/rendering/shader"
 )
@@ -53,7 +54,7 @@ func Prefilter(src, dest components.Texture) {
 	}
 	gl.Enable(gl.CULL_FACE)
 
-	if checkForError("prefilter - end") {
+	if debug.CheckForError("prefilter - end") {
 		panic("crap")
 	}
 

@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/stojg/graphics/lib/debug"
 	"github.com/stojg/graphics/lib/rendering/primitives"
 	"github.com/stojg/graphics/lib/rendering/shader"
 )
@@ -80,7 +81,7 @@ func (t *HDRCubeMap) LoadHDR(filename string) {
 	}
 	gl.Enable(gl.CULL_FACE)
 
-	checkForError("framebuffer.Cubemap end")
+	debug.CheckForError("framebuffer.Cubemap end")
 	if e := gl.CheckFramebufferStatus(gl.FRAMEBUFFER); e != gl.FRAMEBUFFER_COMPLETE {
 		panic(fmt.Sprintf("Cubmap HDR Framebuffer creation failed, FBO isn't complete: 0x%x", e))
 	}

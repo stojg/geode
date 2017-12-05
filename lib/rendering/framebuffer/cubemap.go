@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/stojg/graphics/lib/debug"
 )
 
 func NewCubeMap(width, height int32, mipMap bool) *CubeMap {
@@ -101,7 +102,7 @@ func (t *CubeMap) initCubemap(mipMap bool) {
 		gl.TexParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAX_LEVEL, 0)
 	}
 
-	if checkForError("initCubeMap") {
+	if debug.CheckForError("initCubeMap") {
 		panic("init cubemap")
 	}
 }

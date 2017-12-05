@@ -6,6 +6,7 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
+	"github.com/stojg/graphics/lib/debug"
 	"github.com/stojg/graphics/lib/rendering/debugger"
 	"github.com/stojg/graphics/lib/rendering/framebuffer"
 	"github.com/stojg/graphics/lib/rendering/primitives"
@@ -101,7 +102,7 @@ func NewEngine(width, height int) *Engine {
 	e.SetInteger("x_enable_env_map", 1)
 	e.SetInteger("x_enable_skybox", 1)
 
-	checkForError("rendering.NewEngine end")
+	debug.CheckForError("rendering.NewEngine end")
 	return e
 }
 
@@ -169,7 +170,7 @@ func (e *Engine) Render(object components.Renderable) {
 	e.applyFilter(e.toneMapShader, e.offScreenTexture, e.fullScreenTemp)
 	e.applyFilter(e.fxaaShader, e.fullScreenTemp, nil)
 	//e.applyFilter(e.overlayShader, debugger.Texture(), nil)
-	checkForError("renderer.Engine.Render [end]")
+	debug.CheckForError("renderer.Engine.Render [end]")
 }
 
 func (e *Engine) Lights() []components.Light {
