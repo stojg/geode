@@ -8,7 +8,8 @@ in vec2 TexCoords;
 
 uniform sampler2D x_filterTexture;
 
-uniform vec2 u_texelStep = vec2(1/800, 1/600);
+uniform uint x_w = 800;
+uniform uint x_h = 600;
 uniform int u_showEdges = 1;
 
 uniform float u_lumaThreshold = 0.1f; // 0.45 - 0.8 - 0.6
@@ -24,12 +25,11 @@ uniform float u_mulReduce = 1 / 8.0f; // 8.0f
 // 1/32 – visible limit
 // 1/16 – high quality
 // 1/12 – upper limit (start of visible unfiltered edges)
-uniform float u_minReduce = 1 / 12.0f; // 1 / 128.0f
+uniform float u_minReduce = 1 / 16.0f; // 1 / 128.0f
 
 uniform float u_maxSpan = 8.0f; // 8.0f;
 
-uniform uint rt_w = 800;
-uniform uint rt_h = 600;
+
 
 // see FXAA
 // http://developer.download.nvidia.com/assets/gamedev/files/sdk/11/FXAA_WhitePaper.pdf
@@ -97,7 +97,7 @@ vec3 FxaaPixelShader(vec2 posPos, sampler2D tex, vec2 rcpFrame)
 
 void main(void)
 {
-    vec2 rcpFrame = vec2(1.0/rt_w, 1.0/rt_h);
+    vec2 rcpFrame = vec2(1.0/x_w, 1.0/x_h);
     FragColor.rgb = FxaaPixelShader(TexCoords, x_filterTexture, rcpFrame);
     FragColor.w = 1;
 }

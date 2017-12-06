@@ -206,6 +206,8 @@ func (e *Engine) applyFilter(filter components.Shader, in, out components.Textur
 		out.BindAsRenderTarget()
 	}
 	e.SetTexture("x_filterTexture", in)
+	e.SetInteger("x_w", in.Width())
+	e.SetInteger("x_h", in.Height())
 	filter.Bind()
 	filter.UpdateUniforms(nil, nil, e)
 	primitives.DrawQuad()
