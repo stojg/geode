@@ -11,17 +11,8 @@ func NewCubeMap(width, height int32, mipMap bool) *CubeMap {
 		width:      width,
 		height:     height,
 	}
-
-	texture.initCubemap(mipMap)
-
-	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_CUBE_MAP_POSITIVE_X, texture.id, 0)
-
-	if texture.width == 0 || texture.height == 0 {
-		panic("texture cannot have zero height or width")
-	}
-	for i := 0; i < 6; i++ {
-		gl.TexImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X+uint32(i), 0, gl.RGB16F, texture.width, texture.height, 0, gl.RGB, gl.FLOAT, nil)
-	}
+	initCubeMap(texture, mipMap)
+	reserveCubeMap(texture)
 
 	if mipMap {
 		gl.GenerateMipmap(gl.TEXTURE_CUBE_MAP)
@@ -71,7 +62,7 @@ func (t *CubeMap) SetViewPort() {
 	gl.Viewport(0, 0, t.width, t.height)
 }
 
-func (t *CubeMap) initCubemap(mipMap bool) {
+func initCubeMap(t *CubeMap, mipMap bool) {
 	gl.GenFramebuffers(1, &t.fbo)
 	gl.GenRenderbuffers(1, &t.rbo)
 

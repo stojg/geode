@@ -2,17 +2,7 @@ package framebuffer
 
 import (
 	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/stojg/graphics/lib/loaders"
 )
-
-func loadHDRTextureResource(filename string) (*TextureResource, error) {
-	width, height, data, err := loaders.RGBEImagedata(filename)
-	if err != nil {
-		return nil, err
-	}
-	data = loaders.FlipRaw(width, height, data)
-	return createTextureResource(width, height, gl.RGB32F, gl.FLOAT, data), nil
-}
 
 func createTextureResource(width, height int, internalFormat int32, dataType uint32, data interface{}) *TextureResource {
 	resource := NewTextureResource()
