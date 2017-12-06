@@ -2,7 +2,6 @@ package rendering
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/stojg/graphics/lib/loaders"
@@ -18,19 +17,7 @@ func NewTexture(filename string) *Texture {
 	} else {
 		t.resource = resource
 	}
-	return t
-}
-
-func NewHDRTexture(filename string) *Texture {
-	t := &Texture{
-		filename: filename,
-	}
-	resource, err := loadHDRTexture(filename)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		t.resource = resource
-	}
+	checkForError("Error during texture load")
 	return t
 }
 
@@ -69,24 +56,10 @@ func loadLDRTexture(filename string) (*TextureResource, error) {
 		return nil, err
 	}
 	rgba = loaders.Flip(rgba)
-	return createTextureResource(rgba.Rect.Size().X, rgba.Rect.Size().Y, gl.RGB, gl.UNSIGNED_INT_8_8_8_8_REV, rgba.Pix), nil
+	return createTextureResource(rgba.Rect.Size().X, rgba.Rect.Size().Y, gl.RGBA, gl.UNSIGNED_BYTE, rgba.Pix), nil
 }
 
-func loadHDRTexture(filename string) (*TextureResource, error) {
-	imgFile, err := os.Open(filename)
-	if err != nil {
-		return nil, fmt.Errorf("texture %q not found on disk: %v", filename, err)
-	}
-	defer imgFile.Close()
-	width, height, data, err := loaders.RGBEDecoder(imgFile)
-	if err != nil {
-		return nil, err
-	}
-	data = loaders.FlipRaw(width, height, data)
-	return createTextureResource(width, height, gl.RGB32F, gl.FLOAT, data), nil
-}
-
-func createTextureResource(width, height int, internalFormat int32, dataType uint32, data interface{}) *TextureResource {
+func createTextureResource(width, height int, internalFormat int32, dataType uint32, data []uint8) *TextureResource {
 	resource := NewTextureResource()
 	resource.width = int32(width)
 	resource.height = int32(height)
@@ -102,7 +75,7 @@ func createTextureResource(width, height int, internalFormat int32, dataType uin
 	if width == 0 || height == 0 {
 		panic("texture cannot have zero height or width")
 	}
-	gl.TexImage2D(gl.TEXTURE_2D, 0, internalFormat, resource.width, resource.height, 0, gl.RGB, dataType, gl.Ptr(data))
+	gl.TexImage2D(gl.TEXTURE_2D, 0, internalFormat, resource.width, resource.height, 0, gl.RGBA, dataType, gl.Ptr(data))
 
 	gl.GenerateMipmap(gl.TEXTURE_2D)
 

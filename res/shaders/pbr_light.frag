@@ -1,7 +1,7 @@
 #version 410 core
 
 struct Material {
-    vec3 albedo;
+    sampler2D albedo;
     float metallic;
     float roughness;
 };
@@ -22,8 +22,9 @@ void main() {
     // Normal in view space
     vec3 normal = normalize(vs_in.V_Normal);
 
+    vec3 albedo = vec3(texture(material.albedo, vs_in.TexCoord));
     vec3 F0 = vec3(0.04);
-    F0 = mix(F0, material.albedo, material.metallic);
+    F0 = mix(F0, albedo, material.metallic);
 
     vec3 Lo = vec3(0.0);
 
@@ -31,11 +32,11 @@ void main() {
 
     for (int i = 0; i < numLights; i++) {
         if (lights[i].constant == 0) {
-            Lo += CalcDirectional(F0, vs_in.V_LightPositions[i], lights[i], material, normal, vs_in.W_ViewPos, V);
+            Lo += CalcDirectional(F0, vs_in.V_LightPositions[i], lights[i], material, albedo, normal, vs_in.W_ViewPos, V);
         } else if (lights[i].cutoff > 0) {
-            Lo += CalcSpot(F0, vs_in.V_LightPositions[i], lights[i], material, normal, vs_in.W_ViewPos, V);
+            Lo += CalcSpot(F0, vs_in.V_LightPositions[i], lights[i], material, albedo, normal, vs_in.W_ViewPos, V);
         } else {
-            Lo += CalcPoint(F0, vs_in.V_LightPositions[i], lights[i], material, normal, vs_in.W_ViewPos, V);
+            Lo += CalcPoint(F0, vs_in.V_LightPositions[i], lights[i], material, albedo, normal, vs_in.W_ViewPos, V);
         }
     }
 
@@ -61,7 +62,7 @@ void main() {
 
     // diffuse
     vec3 irradiance = texture(x_irradianceMap, vs_in.Normal).rgb;
-    vec3 diffuse    = irradiance * material.albedo;
+    vec3 diffuse    = irradiance * albedo;
 
     // specular
     const float MAX_REFLECTION_LOD = 4.0;
