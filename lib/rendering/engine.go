@@ -32,7 +32,7 @@ func NewEngine(width, height int) *Engine {
 	gl.Disable(gl.FRAMEBUFFER_SRGB)
 
 	samplerMap := make(map[string]uint32)
-	samplerMap["diffuse"] = 0
+	samplerMap["albedo"] = 0
 	samplerMap["x_shadowMap"] = 9
 	samplerMap["x_filterTexture"] = 10
 

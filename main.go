@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"math/rand"
 	"os"
 
@@ -56,7 +55,7 @@ func run() error {
 	cameraObject.AddComponent(&components.FreeMove{})
 	cameraObject.AddComponent(components.NewFreelook(width, height))
 	cameraObject.AddComponent(&components.HeadHeight{})
-	loadModel(cameraObject, "res/meshes/sphere/model.obj", whiteMaterial)
+	//loadModel(cameraObject, "res/meshes/sphere/model.obj", whiteMaterial)
 	engine.AddObject(cameraObject)
 
 	directionalLight := lights.NewDirectional(9, 0.9, 0.9, 0.9, 1)
@@ -79,9 +78,9 @@ func run() error {
 	pointLight.Transform().SetPos(vec3(-2, 0.6, 2))
 	pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
 	pointLight.AddComponent(lights.NewPoint(0, 0.5, 1.0, 50))
-	lightMaterial := rendering.NewMaterial()
-	lightMaterial.SetAlbedo(mgl32.Vec3{23.47, 21.31, 20.79})
-	loadModel(pointLight, "res/meshes/ico/model.obj", lightMaterial)
+	//lightMaterial := rendering.NewMaterial()
+	//lightMaterial.SetAlbedo(mgl32.Vec3{23.47, 21.31, 20.79})
+	//loadModel(pointLight, "res/meshes/ico/model.obj", lightMaterial)
 	engine.AddObject(pointLight)
 
 	{
@@ -91,7 +90,7 @@ func run() error {
 		pointLight.AddComponent(lights.NewPoint(0.0, 0.5, 1.0, 50))
 		lightMaterial := rendering.NewMaterial()
 		lightMaterial.SetAlbedo(mgl32.Vec3{0.1, 0.05, 0.98})
-		loadModel(pointLight, "res/meshes/ico/model.obj", lightMaterial)
+		//loadModel(pointLight, "res/meshes/ico/model.obj", lightMaterial)
 		engine.AddObject(pointLight)
 	}
 	//
@@ -121,128 +120,130 @@ func run() error {
 	//	engine.AddObject(pointLight)
 	//}
 
-	floor := core.NewGameObject()
-	floor.Transform().SetScale(vec3(100, 0.01, 100))
-	floor.Transform().SetPos(vec3(0, -0.005, 0))
-	floorMaterial := rendering.NewMaterial()
-	floorMaterial.SetAlbedo(mgl32.Vec3{0.8, 0.8, 0.8})
-	floorMaterial.SetRoughness(0.9)
-	floorMaterial.SetMetallic(0.02)
-	loadModel(floor, "res/meshes/cube/model.obj", floorMaterial)
-	engine.AddObject(floor)
+	//floor := core.NewGameObject()
+	//floor.Transform().SetScale(vec3(100, 0.01, 100))
+	//floor.Transform().SetPos(vec3(0, -0.005, 0))
+	//floorMaterial := rendering.NewMaterial()
+	//floorMaterial.SetAlbedo(mgl32.Vec3{0.8, 0.8, 0.8})
+	//floorMaterial.SetRoughness(0.9)
+	//floorMaterial.SetMetallic(0.02)
+	//loadModel(floor, "res/meshes/cube/model.obj", floorMaterial)
+	//engine.AddObject(floor)
 
 	bot := core.NewGameObject()
 	bot.Transform().SetPos(vec3(0, 0.2, 0))
 	bot.AddComponent(components.NewRotator(vec3(0, -1, 0), 23))
 	botMaterial := rendering.NewMaterial()
+	//botMaterial.AddTexture("albedo", rendering.NewTexture("res/textures/checkerboard.png"))
+	botMaterial.AddTexture("albedo", rendering.NewTexture("res/textures/sphere_bot/Robot_innerbody_Albedo.png"))
 	//botMaterial.SetAlbedo(mgl32.Vec3{1, 0.765557, 0.336057}) // gold
 	botMaterial.SetAlbedo(mgl32.Vec3{0.400, 0.249, 0.000})
 	botMaterial.SetRoughness(0.25)
 	botMaterial.SetMetallic(0)
 	loadModel(bot, "res/meshes/sphere_bot/model.obj", botMaterial)
 	engine.AddObject(bot)
-
-	wallMaterial := rendering.NewMaterial()
-	wallMaterial.SetAlbedo(mgl32.Vec3{0.8, 0.8, 0.8})
-	wallMaterial.SetRoughness(0.9)
-	wallMaterial.SetMetallic(0.02)
-
-	{
-		sphereMtrl := rendering.NewMaterial()
-		sphereMtrl.SetAlbedo(mgl32.Vec3{0.202, 0.545, 0.147})
-		sphereMtrl.SetRoughness(0.2)
-		sphereMtrl.SetMetallic(0)
-		cube := core.NewGameObject()
-		cube.Transform().SetScale(vec3(0.5, 0.5, 0.5))
-		cube.Transform().SetPos(vec3(-4, 0.5, 0))
-		loadModel(cube, "res/meshes/cube/model.obj", sphereMtrl)
-		engine.AddObject(cube)
-	}
-
-	{
-		sphereMtrl := rendering.NewMaterial()
-		sphereMtrl.SetAlbedo(mgl32.Vec3{1, 0.765557, 0.336057})
-		sphereMtrl.SetRoughness(0.3)
-		sphereMtrl.SetMetallic(1)
-		cube := core.NewGameObject()
-		cube.Transform().SetScale(vec3(0.2, 0.2, 0.2))
-		cube.Transform().SetPos(vec3(-4, 0.2, 4))
-		loadModel(cube, "res/meshes/sphere/model.obj", sphereMtrl)
-		engine.AddObject(cube)
-		{
-			cube := core.NewGameObject()
-			cube.Transform().SetScale(vec3(0.2, 0.2, 0.2))
-			cube.Transform().SetPos(vec3(-5, 0.2, 4))
-			loadModel(cube, "res/meshes/sphere/model.obj", sphereMtrl)
-			engine.AddObject(cube)
-		}
-	}
-
-	{ //podium
-		cube := core.NewGameObject()
-		podiumMtrl := rendering.NewMaterial()
-		podiumMtrl.SetAlbedo(mgl32.Vec3{0.0, 0.0, 0.0})
-		podiumMtrl.SetRoughness(0.03)
-		podiumMtrl.SetMetallic(1)
-		cube.Transform().SetScale(vec3(1.9, 0.1, 1.9))
-		cube.Transform().SetPos(vec3(0, 0.1, 0))
-		loadModel(cube, "res/meshes/cube/model.obj", podiumMtrl)
-		engine.AddObject(cube)
-	}
-
-	{ // wall 1
-		cube := core.NewGameObject()
-		cube.Transform().SetScale(vec3(1, 2, 8))
-		cube.Transform().SetPos(vec3(4, 2, 2))
-		loadModel(cube, "res/meshes/cube/model.obj", wallMaterial)
-		engine.AddObject(cube)
-	}
-
-	{ // wall 2
-		cube := core.NewGameObject()
-		cube.Transform().SetScale(vec3(1, 2, 8))
-		cube.Transform().SetPos(vec3(-5, 2, -5))
-		cube.Transform().SetRot(mgl32.QuatRotate(math.Pi/2, vec3(0, 1, 0)))
-		loadModel(cube, "res/meshes/cube/model.obj", wallMaterial)
-		engine.AddObject(cube)
-	}
-
-	{ // wall 3
-		cube := core.NewGameObject()
-		cube.Transform().SetScale(vec3(1, 2, 8))
-		cube.Transform().SetPos(vec3(-14, 2, 2))
-		loadModel(cube, "res/meshes/cube/model.obj", wallMaterial)
-		engine.AddObject(cube)
-	}
-
-	{ // roof
-		cube := core.NewGameObject()
-		cube.Transform().SetScale(vec3(3, 0.1, 8))
-		cube.Transform().SetPos(vec3(-12, 4, 2))
-		loadModel(cube, "res/meshes/cube/model.obj", wallMaterial)
-		engine.AddObject(cube)
-	}
-
-	{ // on top of wall 1
-		cube := core.NewGameObject()
-		cube.Transform().SetScale(vec3(0.5, 0.5, 0.5))
-		cube.Transform().SetPos(vec3(4, 4.45, 0))
-		cubeMaterial := rendering.NewMaterial()
-		cubeMaterial.SetAlbedo(mgl32.Vec3{0.0, 0.8, 0.0})
-		cubeMaterial.SetRoughness(0.03)
-		cubeMaterial.SetMetallic(0.02)
-		loadModel(cube, "res/meshes/cube/model.obj", cubeMaterial)
-		engine.AddObject(cube)
-	}
-
-	{ // pillar
-		cube := core.NewGameObject()
-		cube.Transform().SetScale(vec3(0.25, 3, 0.25))
-		cube.Transform().SetPos(vec3(-5, 2.99, 8))
-
-		loadModel(cube, "res/meshes/cube/model.obj", wallMaterial)
-		engine.AddObject(cube)
-	}
+	//
+	//wallMaterial := rendering.NewMaterial()
+	//wallMaterial.SetAlbedo(mgl32.Vec3{0.8, 0.8, 0.8})
+	//wallMaterial.SetRoughness(0.9)
+	//wallMaterial.SetMetallic(0.02)
+	//
+	//{
+	//	sphereMtrl := rendering.NewMaterial()
+	//	sphereMtrl.SetAlbedo(mgl32.Vec3{0.202, 0.545, 0.147})
+	//	sphereMtrl.SetRoughness(0.2)
+	//	sphereMtrl.SetMetallic(0)
+	//	cube := core.NewGameObject()
+	//	cube.Transform().SetScale(vec3(0.5, 0.5, 0.5))
+	//	cube.Transform().SetPos(vec3(-4, 0.5, 0))
+	//	loadModel(cube, "res/meshes/cube/model.obj", sphereMtrl)
+	//	engine.AddObject(cube)
+	//}
+	//
+	//{
+	//	sphereMtrl := rendering.NewMaterial()
+	//	sphereMtrl.SetAlbedo(mgl32.Vec3{1, 0.765557, 0.336057})
+	//	sphereMtrl.SetRoughness(0.3)
+	//	sphereMtrl.SetMetallic(1)
+	//	cube := core.NewGameObject()
+	//	cube.Transform().SetScale(vec3(0.2, 0.2, 0.2))
+	//	cube.Transform().SetPos(vec3(-4, 0.2, 4))
+	//	loadModel(cube, "res/meshes/sphere/model.obj", sphereMtrl)
+	//	engine.AddObject(cube)
+	//	{
+	//		cube := core.NewGameObject()
+	//		cube.Transform().SetScale(vec3(0.2, 0.2, 0.2))
+	//		cube.Transform().SetPos(vec3(-5, 0.2, 4))
+	//		loadModel(cube, "res/meshes/sphere/model.obj", sphereMtrl)
+	//		engine.AddObject(cube)
+	//	}
+	//}
+	//
+	//{ //podium
+	//	cube := core.NewGameObject()
+	//	podiumMtrl := rendering.NewMaterial()
+	//	podiumMtrl.SetAlbedo(mgl32.Vec3{0.0, 0.0, 0.0})
+	//	podiumMtrl.SetRoughness(0.03)
+	//	podiumMtrl.SetMetallic(1)
+	//	cube.Transform().SetScale(vec3(1.9, 0.1, 1.9))
+	//	cube.Transform().SetPos(vec3(0, 0.1, 0))
+	//	loadModel(cube, "res/meshes/cube/model.obj", podiumMtrl)
+	//	engine.AddObject(cube)
+	//}
+	//
+	//{ // wall 1
+	//	cube := core.NewGameObject()
+	//	cube.Transform().SetScale(vec3(1, 2, 8))
+	//	cube.Transform().SetPos(vec3(4, 2, 2))
+	//	loadModel(cube, "res/meshes/cube/model.obj", wallMaterial)
+	//	engine.AddObject(cube)
+	//}
+	//
+	//{ // wall 2
+	//	cube := core.NewGameObject()
+	//	cube.Transform().SetScale(vec3(1, 2, 8))
+	//	cube.Transform().SetPos(vec3(-5, 2, -5))
+	//	cube.Transform().SetRot(mgl32.QuatRotate(math.Pi/2, vec3(0, 1, 0)))
+	//	loadModel(cube, "res/meshes/cube/model.obj", wallMaterial)
+	//	engine.AddObject(cube)
+	//}
+	//
+	//{ // wall 3
+	//	cube := core.NewGameObject()
+	//	cube.Transform().SetScale(vec3(1, 2, 8))
+	//	cube.Transform().SetPos(vec3(-14, 2, 2))
+	//	loadModel(cube, "res/meshes/cube/model.obj", wallMaterial)
+	//	engine.AddObject(cube)
+	//}
+	//
+	//{ // roof
+	//	cube := core.NewGameObject()
+	//	cube.Transform().SetScale(vec3(3, 0.1, 8))
+	//	cube.Transform().SetPos(vec3(-12, 4, 2))
+	//	loadModel(cube, "res/meshes/cube/model.obj", wallMaterial)
+	//	engine.AddObject(cube)
+	//}
+	//
+	//{ // on top of wall 1
+	//	cube := core.NewGameObject()
+	//	cube.Transform().SetScale(vec3(0.5, 0.5, 0.5))
+	//	cube.Transform().SetPos(vec3(4, 4.45, 0))
+	//	cubeMaterial := rendering.NewMaterial()
+	//	cubeMaterial.SetAlbedo(mgl32.Vec3{0.0, 0.8, 0.0})
+	//	cubeMaterial.SetRoughness(0.03)
+	//	cubeMaterial.SetMetallic(0.02)
+	//	loadModel(cube, "res/meshes/cube/model.obj", cubeMaterial)
+	//	engine.AddObject(cube)
+	//}
+	//
+	//{ // pillar
+	//	cube := core.NewGameObject()
+	//	cube.Transform().SetScale(vec3(0.25, 3, 0.25))
+	//	cube.Transform().SetPos(vec3(-5, 2.99, 8))
+	//
+	//	loadModel(cube, "res/meshes/cube/model.obj", wallMaterial)
+	//	engine.AddObject(cube)
+	//}
 	engine.Start()
 	return nil
 }

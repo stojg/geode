@@ -70,7 +70,7 @@ in VS_OUT
     vec3 W_ViewPos;
 } vs_in;
 
-vec3 calcCookTorrance(vec3 H, vec3 V, vec3 N, Material material, vec3 F0, vec3 L, vec3 radiance) {
+vec3 calcCookTorrance(vec3 H, vec3 V, vec3 N, Material material, vec3 albedo,  vec3 F0, vec3 L, vec3 radiance) {
     vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
     float NDF = DistributionGGX(N, H, material.roughness);
     float G   = GeometrySmith(N, V, L, material.roughness);
@@ -83,10 +83,10 @@ vec3 calcCookTorrance(vec3 H, vec3 V, vec3 N, Material material, vec3 F0, vec3 L
     vec3 kD = vec3(1.0) - kS;
     kD *= 1.0 - material.metallic;
     float NdotL = max(dot(N, L), 0.0);
-    return (kD * material.albedo / PI + specular) * radiance * NdotL;
+    return (kD * albedo / PI + specular) * radiance * NdotL;
 }
 
-vec3 CalcPoint(vec3 F0, vec3 lightPosition, Light light, Material material, vec3 N, vec3 viewPos, vec3 V) {
+vec3 CalcPoint(vec3 F0, vec3 lightPosition, Light light, Material material,vec3 albedo,  vec3 N, vec3 viewPos, vec3 V) {
 
     vec3 viewLightDirection = (view * vec4(light.direction, 0)).xyz;
     float dist = distance(lightPosition, viewPos);
@@ -99,10 +99,10 @@ vec3 CalcPoint(vec3 F0, vec3 lightPosition, Light light, Material material, vec3
     }
 
     float attenuation = 1.0 / (light.constant + light.linear * dist + light.quadratic * (dist * dist));
-    return calcCookTorrance(H, V, N, material, F0, L, light.color * attenuation);
+    return calcCookTorrance(H, V, N, material, albedo, F0, L, light.color * attenuation);
 }
 
-vec3 CalcSpot(vec3 F0, vec3 lightPosition, Light light, Material material, vec3 N, vec3 viewPos, vec3 V) {
+vec3 CalcSpot(vec3 F0, vec3 lightPosition, Light light, Material material, vec3 albedo, vec3 N, vec3 viewPos, vec3 V) {
 
     vec3 viewLightDirection = (view * vec4(light.direction, 0)).xyz;
     float dist = distance(lightPosition, viewPos);
@@ -119,13 +119,13 @@ vec3 CalcSpot(vec3 F0, vec3 lightPosition, Light light, Material material, vec3 
     }
     float attenuation = 1.0 / (light.constant + light.linear * dist + light.quadratic * (dist * dist));
 
-    return calcCookTorrance(H, V, N, material, F0, L, light.color * attenuation);
+    return calcCookTorrance(H, V, N, material, albedo,F0, L, light.color * attenuation);
 }
 
-vec3 CalcDirectional(vec3 F0, vec3 lightPosition, Light light, Material material, vec3 N, vec3 viewPos, vec3 V) {
+vec3 CalcDirectional(vec3 F0, vec3 lightPosition, Light light, Material material, vec3 albedo, vec3 N, vec3 viewPos, vec3 V) {
     vec3 viewLightDirection = (view * vec4(light.direction, 0)).xyz;
     float dist = distance(lightPosition, viewPos);
     vec3 L = viewLightDirection;
     vec3 H = normalize(V + L);
-    return calcCookTorrance(H, V, N, material, F0, L, light.color);
+    return calcCookTorrance(H, V, N, material, albedo, F0, L, light.color);
 }

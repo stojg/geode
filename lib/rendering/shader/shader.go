@@ -126,7 +126,9 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 		case "skyboxView":
 			s.UpdateUniform(name, engine.MainCamera().View().Mat3().Mat4()) // remove rotation
 		case "material":
-			s.UpdateUniform(name+".albedo", mat.Albedo())
+			samplerSlot := engine.SamplerSlot("albedo")
+			mat.Texture("albedo").Bind(samplerSlot)
+			s.UpdateUniform(name+".albedo", int32(samplerSlot))
 			s.UpdateUniform(name+".metallic", mat.Metallic())
 			s.UpdateUniform(name+".roughness", mat.Roughness())
 		case "lights":
