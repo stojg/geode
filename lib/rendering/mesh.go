@@ -1,6 +1,8 @@
 package rendering
 
-import "github.com/go-gl/gl/v4.1-core/gl"
+import (
+	"github.com/go-gl/gl/v4.1-core/gl"
+)
 
 func NewMesh() *Mesh {
 	m := &Mesh{}
@@ -34,17 +36,17 @@ func (m *Mesh) SetVertices(vertices []Vertex) {
 
 	offset := 0
 	// vertex position
-	gl.EnableVertexAttribArray(0)
 	gl.VertexAttribPointer(0, numVertexPositions, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
+	gl.EnableVertexAttribArray(0)
 	offset += numVertexPositions
 
 	// normals
-	gl.VertexAttribPointer(1, 3, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
+	gl.VertexAttribPointer(1, numVertexNormals, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
 	gl.EnableVertexAttribArray(1)
 	offset += numVertexNormals
 
 	// texture coordinates
-	gl.VertexAttribPointer(2, 2, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
+	gl.VertexAttribPointer(2, numVertexTexCoords, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
 	gl.EnableVertexAttribArray(2)
 	offset += numVertexTexCoords
 
