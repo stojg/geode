@@ -28,6 +28,9 @@ func New(width, height int) {
 }
 
 func Clear() {
+	texture.BindAsRenderTarget()
+	clearColor := [4]uint32{0, 0, 0, 0}
+	gl.ClearBufferuiv(gl.COLOR, 0, &clearColor[0])
 	numPanels = 0
 }
 
