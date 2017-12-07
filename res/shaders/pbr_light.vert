@@ -3,10 +3,11 @@
 layout (location = 0) in vec3 aPosition;
 layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoord;
+layout (location = 3) in vec3 aTangent;
 
 uniform mat4 MVP;
 uniform mat4 MV;
-uniform mat4 InverseMV;
+//uniforx mat4 InverseMV;
 uniform mat4 view;
 uniform mat4 InvView;
 uniform mat4 model;
@@ -18,11 +19,12 @@ uniform int numLights;
 out VS_OUT
 {
     vec3 Normal;
-    vec3 V_Normal;
+//    vec3 V_Normal;
     vec2 TexCoord;
     vec3 V_LightPositions[8];
     vec3 V_Pos;
     vec3 Reflection;
+    mat3 TBN;
 } vs_out;
 
 void main() {
@@ -36,12 +38,17 @@ void main() {
     vs_out.TexCoord = aTexCoord;
 
     // transform normals into view space
-    vs_out.V_Normal = normalize(mat3(InverseMV) * aNormal);
+//    vs_out.V_Normal = normalize(mat3(InverseMV) * aNormal);
 
     //surface normal in the world space, used for lookup env map coordinates
     vs_out.Normal = mat3(model) * aNormal;
+
     vec3 eyeDir = normalize(vec3(InvView * vec4(normalize(-vs_out.V_Pos), 0.0)));
     vs_out.Reflection = reflect(-eyeDir, vs_out.Normal);
+
+    vec3 N = normalize(vec3(MV * vec4(aNormal, 0.0)));
+    vec3 T = normalize(vec3(MV * vec4(aTangent, 0.0)));
+    vs_out.TBN = mat3(T, cross(N, T), N);
 
     // transform light positions into view space
     for (int i = 0; i < numLights; i++ ) {

@@ -137,6 +137,10 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 			samplerSlot = engine.SamplerSlot("roughness")
 			mat.Texture("roughness").Bind(samplerSlot)
 			s.UpdateUniform(name+".roughness", int32(samplerSlot))
+
+			samplerSlot = engine.SamplerSlot("normal")
+			mat.Texture("normal").Bind(samplerSlot)
+			s.UpdateUniform(name+".normal", int32(samplerSlot))
 		case "lights":
 			if len(engine.Lights()) > index {
 				light := engine.Lights()[index]

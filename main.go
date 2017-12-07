@@ -129,12 +129,14 @@ func run() error {
 		outer.AddTexture("albedo", rendering.NewTexture("res/textures/sphere_bot/Robot_outerbody_Albedo.png", true))
 		outer.AddTexture("metallic", rendering.NewTexture("res/textures/sphere_bot/Robot_outerbody_Metallic.png", false))
 		outer.AddTexture("roughness", rendering.NewTexture("res/textures/sphere_bot/Robot_outerbody_Roughness.png", false))
+		outer.AddTexture("normal", rendering.NewTexture("res/textures/sphere_bot/Robot_outerbody_Normal.png", false))
 		mtrls = append(mtrls, outer)
 
 		inner := rendering.NewMaterial()
 		inner.AddTexture("albedo", rendering.NewTexture("res/textures/sphere_bot/Robot_innerbody_Albedo.png", true))
 		inner.AddTexture("metallic", rendering.NewTexture("res/textures/sphere_bot/Robot_innerbody_Metallic.png", false))
 		inner.AddTexture("roughness", rendering.NewTexture("res/textures/sphere_bot/Robot_innerbody_Roughness.png", false))
+		inner.AddTexture("normal", rendering.NewTexture("res/textures/sphere_bot/Robot_innerbody_Normal.png", false))
 		//botMaterial.SetAlbedo(mgl32.Vec3{1, 0.765557, 0.336057}) // gold
 
 		mtrls = append(mtrls, inner)

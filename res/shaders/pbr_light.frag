@@ -4,6 +4,7 @@ struct Material {
     sampler2D albedo;
     sampler2D metallic;
     sampler2D roughness;
+    sampler2D normal;
 };
 
 uniform sampler2D   x_brdfLUT;
@@ -17,12 +18,13 @@ in VS_OUT
     // surface normal in the world space
     vec3 Normal;
     // surface normal in view space
-    vec3 V_Normal;
+//    vec3 V_Normal;
     vec2 TexCoord;
     vec3 V_LightPositions[8];
     // camera position in world space
     vec3 V_Pos;
     vec3 Reflection;
+    mat3 TBN;
 } vs_in;
 
 #include "pbr_lights.glsl"
@@ -31,7 +33,11 @@ in VS_OUT
 void main() {
 
     // Normal in view space
-    vec3 normal = normalize(vs_in.V_Normal);
+//    vec3 normal = normalize(vs_in.V_Normal);
+    vec3 normal = texture(material.normal, vs_in.TexCoord).rgb;
+    // transform normal vector to range [-1,1]
+    normal = normalize(normal * 2.0 - 1.0);
+    normal = normalize(vs_in.TBN * normal);
 
     Mtrl mtrl;
 
