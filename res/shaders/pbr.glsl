@@ -64,18 +64,6 @@ uniform int x_enable_env_map;
 
 out vec4 FragColor;
 
-in VS_OUT
-{
-    // surface normal in the world space
-    vec3 Normal;
-    // surface normal in view space
-    vec3 V_Normal;
-    vec2 TexCoord;
-    vec3 V_LightPositions[16];
-    // camera position in world space
-    vec3 V_Pos;
-} vs_in;
-
 vec3 calcCookTorrance(vec3 H, vec3 V, vec3 N, Mtrl material, vec3 F0, vec3 L, vec3 radiance) {
     vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
     float NDF = DistributionGGX(N, H, material.roughness);
@@ -96,13 +84,12 @@ vec3 CalcPoint(vec3 F0, vec3 lightPosition, Light light, Mtrl material,  vec3 N,
 
     vec3 viewLightDirection = (view * vec4(light.direction, 0)).xyz;
     float dist = distance(lightPosition, viewPos);
-
-    vec3 L = normalize(lightPosition - viewPos);
-    vec3 H = normalize(V + L);
-
     if (dist > light.distance) {
         return vec3(0);
     }
+
+    vec3 L = normalize(lightPosition - viewPos);
+    vec3 H = normalize(V + L);
 
     float attenuation = 1.0 / (light.constant + light.linear * dist + light.quadratic * (dist * dist));
     return calcCookTorrance(H, V, N, material, F0, L, light.color * attenuation);
@@ -112,13 +99,13 @@ vec3 CalcSpot(vec3 F0, vec3 lightPosition, Light light, Mtrl material, vec3 N, v
 
     vec3 viewLightDirection = (view * vec4(light.direction, 0)).xyz;
     float dist = distance(lightPosition, viewPos);
+    if (dist > light.distance) {
+        return vec3(0);
+    }
 
     vec3 L = normalize(lightPosition - viewPos);
     vec3 H = normalize(V + L);
 
-    if (dist > light.distance) {
-        return vec3(0);
-    }
     if (light.cutoff > 0) {
         float theta = dot(L, normalize(-viewLightDirection));
         if (theta < light.cutoff) { return vec3(0); }

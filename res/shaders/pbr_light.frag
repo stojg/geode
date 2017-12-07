@@ -10,9 +10,20 @@ uniform sampler2D   x_brdfLUT;
 uniform samplerCube x_irradianceMap;
 uniform samplerCube x_prefilterMap;
 
-uniform mat4 InverseMV;
-uniform mat4 InvView;
 uniform mat4 view;
+uniform mat4 InvView;
+
+in VS_OUT
+{
+    // surface normal in the world space
+    vec3 Normal;
+    // surface normal in view space
+    vec3 V_Normal;
+    vec2 TexCoord;
+    vec3 V_LightPositions[16];
+    // camera position in world space
+    vec3 V_Pos;
+} vs_in;
 
 #include "pbr_lights.glsl"
 #include "pbr.glsl"
@@ -51,17 +62,14 @@ void main() {
         FragColor = vec4(Lo, 1);
         return;
     }
-    // enviroment ambient lightning
 
-    // direction towards they eye (camera) in the view (eye) space
-    vec3 viewDirection = normalize(-vs_in.V_Pos);
-    // eye direction in worldspace
-    vec3 wcEyeDir = vec3(InvView * vec4(viewDirection, 0.0));
+    // from fragment to camera direction
+    vec3 eyeDirection = normalize(vec3(InvView * vec4(V, 0.0)));
 
     // reflection
-    vec3 R = reflect(-wcEyeDir, normalize(vs_in.Normal));
+    vec3 R = reflect(-eyeDirection, vs_in.Normal);
 
-    vec3 F = fresnelSchlickRoughness(max(dot(vs_in.V_Normal, viewDirection), 0.0), F0, mtrl.roughness);
+    vec3 F = fresnelSchlickRoughness(max(dot(normal, V), 0.0), F0, mtrl.roughness);
 
     vec3 kS = F;
     vec3 kD = 1.0 - kS;
@@ -74,7 +82,7 @@ void main() {
     // specular
     const float MAX_REFLECTION_LOD = 4.0;
     vec3 prefilteredColor = textureLod(x_prefilterMap, R,  mtrl.roughness * MAX_REFLECTION_LOD).rgb;
-    vec2 brdf  = texture(x_brdfLUT, vec2(max(dot(vs_in.Normal, wcEyeDir), 0.0), mtrl.roughness)).rg;
+    vec2 brdf  = texture(x_brdfLUT, vec2(max(dot(vs_in.Normal, eyeDirection), 0.0), mtrl.roughness)).rg;
     vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
 
     // sum up all ambient
