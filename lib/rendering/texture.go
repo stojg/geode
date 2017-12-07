@@ -22,6 +22,34 @@ func NewTexture(filename string, srgb bool) *Texture {
 	return t
 }
 
+func NewMetallicTexture(filename string) *Texture {
+	t := &Texture{
+		filename: filename,
+	}
+	resource, err := loadMetallicTexture(filename)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		t.resource = resource
+	}
+	debug.CheckForError("Error during texture load")
+	return t
+}
+
+func NewRoughnessTexture(filename string) *Texture {
+	t := &Texture{
+		filename: filename,
+	}
+	resource, err := loadRoughnessTexture(filename)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		t.resource = resource
+	}
+	debug.CheckForError("Error during texture load")
+	return t
+}
+
 type Texture struct {
 	filename string
 	resource *TextureResource
@@ -63,6 +91,24 @@ func loadLDRTexture(filename string, srgb bool) (*TextureResource, error) {
 	} else {
 		return createTextureResource(rgba.Rect.Size().X, rgba.Rect.Size().Y, gl.RGBA, gl.UNSIGNED_BYTE, rgba.Pix), nil
 	}
+}
+
+func loadMetallicTexture(filename string) (*TextureResource, error) {
+	rgba, err := loaders.RGBAImagedata(filename)
+	if err != nil {
+		return nil, err
+	}
+	rgba = loaders.Flip(rgba)
+	return createTextureResource(rgba.Rect.Size().X, rgba.Rect.Size().Y, gl.R8, gl.UNSIGNED_BYTE, rgba.Pix), nil
+}
+
+func loadRoughnessTexture(filename string) (*TextureResource, error) {
+	rgba, err := loaders.RGBAImagedata(filename)
+	if err != nil {
+		return nil, err
+	}
+	rgba = loaders.Flip(rgba)
+	return createTextureResource(rgba.Rect.Size().X, rgba.Rect.Size().Y, gl.R8, gl.UNSIGNED_BYTE, rgba.Pix), nil
 }
 
 func createTextureResource(width, height int, internalFormat int32, dataType uint32, data []uint8) *TextureResource {
