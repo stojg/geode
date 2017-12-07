@@ -34,6 +34,8 @@ func NewEngine(width, height int) *Engine {
 
 	samplerMap := make(map[string]uint32)
 	samplerMap["albedo"] = 0
+	samplerMap["metallic"] = 1
+	samplerMap["roughness"] = 2
 	samplerMap["x_shadowMap"] = 9
 	samplerMap["x_filterTexture"] = 10
 

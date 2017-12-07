@@ -42,12 +42,6 @@ func run() error {
 		return err
 	}
 
-	whiteMaterial := rendering.NewMaterial()
-	whiteMaterial.SetAlbedo(mgl32.Vec3{0.961, 0.922, 0.898})
-
-	tealMaterial := rendering.NewMaterial()
-	tealMaterial.SetAlbedo(mgl32.Vec3{0.447, 0.792, 0.918})
-
 	cameraObject := core.NewGameObject()
 	cameraObject.Transform().SetPos(vec3(0, 1.8, 6))
 	cameraObject.Transform().SetScale(vec3(0.1, 0.1, 0.1))
@@ -78,9 +72,6 @@ func run() error {
 	pointLight.Transform().SetPos(vec3(-2, 0.6, 2))
 	pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
 	pointLight.AddComponent(lights.NewPoint(0, 0.5, 1.0, 50))
-	//lightMaterial := rendering.NewMaterial()
-	//lightMaterial.SetAlbedo(mgl32.Vec3{23.47, 21.31, 20.79})
-	//loadModel(pointLight, "res/meshes/ico/model.obj", lightMaterial)
 	engine.AddObject(pointLight)
 
 	{
@@ -90,7 +81,6 @@ func run() error {
 		pointLight.AddComponent(lights.NewPoint(0.0, 0.5, 1.0, 50))
 		lightMaterial := rendering.NewMaterial()
 		lightMaterial.SetAlbedo(mgl32.Vec3{0.1, 0.05, 0.98})
-		//loadModel(pointLight, "res/meshes/ico/model.obj", lightMaterial)
 		engine.AddObject(pointLight)
 	}
 	//
@@ -134,20 +124,21 @@ func run() error {
 		bot.Transform().SetPos(vec3(0, 0.2, 0))
 		bot.AddComponent(components.NewRotator(vec3(0, -1, 0), 23))
 
-		var mtrls []components.Material
+		var mtrls []*rendering.Material
 		outer := rendering.NewMaterial()
 		outer.AddTexture("albedo", rendering.NewTexture("res/textures/sphere_bot/Robot_outerbody_Albedo.png"))
-		outer.SetAlbedo(mgl32.Vec3{0.400, 0.249, 0.000})
-		outer.SetRoughness(0.25)
-		outer.SetMetallic(0)
+		outer.AddTexture("metallic", rendering.NewTexture("res/textures/sphere_bot/Robot_outerbody_Metallic.png"))
+		outer.AddTexture("roughness", rendering.NewTexture("res/textures/sphere_bot/Robot_outerbody_Roughness.png"))
 		mtrls = append(mtrls, outer)
+
 		inner := rendering.NewMaterial()
 		inner.AddTexture("albedo", rendering.NewTexture("res/textures/sphere_bot/Robot_innerbody_Albedo.png"))
+		inner.AddTexture("metallic", rendering.NewTexture("res/textures/sphere_bot/Robot_innerbody_Metallic.png"))
+		inner.AddTexture("roughness", rendering.NewTexture("res/textures/sphere_bot/Robot_innerbody_Roughness.png"))
 		//botMaterial.SetAlbedo(mgl32.Vec3{1, 0.765557, 0.336057}) // gold
-		inner.SetAlbedo(mgl32.Vec3{0.400, 0.249, 0.000})
-		inner.SetRoughness(0.25)
-		inner.SetMetallic(0)
+
 		mtrls = append(mtrls, inner)
+
 		loadModel(bot, "res/meshes/sphere_bot/model.obj", mtrls)
 		engine.AddObject(bot)
 	}
@@ -257,7 +248,7 @@ func run() error {
 	return nil
 }
 
-func loadModel(g *core.GameObject, obj string, material []components.Material) {
+func loadModel(g *core.GameObject, obj string, material []*rendering.Material) {
 	objData, err := loader.Load(obj)
 	if err != nil {
 		fmt.Printf("Model loading failed: %v", err)
@@ -269,15 +260,11 @@ func loadModel(g *core.GameObject, obj string, material []components.Material) {
 		for i, data := range objData {
 			mesh := rendering.NewMesh()
 			mesh.SetVertices(rendering.ConvertToVertices(data))
-			fmt.Printf("loadModel: %s.%d has %d vertices\n", obj, i, mesh.NumVertices())
 			meshes = append(meshes, mesh)
+			g.AddComponent(components.NewMeshRenderer(mesh, material[i]))
 		}
 		models[obj] = meshes
 	}
-	for i, mesh := range models[obj] {
-		g.AddComponent(components.NewMeshRenderer(mesh, material[i]))
-	}
-
 }
 
 func vec3(x, y, z float32) mgl32.Vec3 {

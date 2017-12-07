@@ -1,6 +1,8 @@
 package rendering
 
 import (
+	"fmt"
+
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
 )
@@ -48,12 +50,14 @@ func (m *Material) Roughness() float32 {
 
 func (m *Material) AddTexture(name string, texture *Texture) {
 	m.textures[name] = texture
+	fmt.Println(name, m.textures)
 }
 
 func (m *Material) Texture(name string) components.Texture {
 	texture, ok := m.textures[name]
 	if !ok {
-		panic("could not find texture, should return test texture instead")
+		fmt.Println(m)
+		fmt.Printf("could not find texture '%s', should return test texture instead\n", name)
 	}
 	return texture
 }

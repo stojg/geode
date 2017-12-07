@@ -129,8 +129,14 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 			samplerSlot := engine.SamplerSlot("albedo")
 			mat.Texture("albedo").Bind(samplerSlot)
 			s.UpdateUniform(name+".albedo", int32(samplerSlot))
-			s.UpdateUniform(name+".metallic", mat.Metallic())
-			s.UpdateUniform(name+".roughness", mat.Roughness())
+
+			samplerSlot = engine.SamplerSlot("metallic")
+			mat.Texture("metallic").Bind(samplerSlot)
+			s.UpdateUniform(name+".metallic", int32(samplerSlot))
+
+			samplerSlot = engine.SamplerSlot("roughness")
+			mat.Texture("roughness").Bind(samplerSlot)
+			s.UpdateUniform(name+".roughness", int32(samplerSlot))
 		case "lights":
 			if len(engine.Lights()) > index {
 				light := engine.Lights()[index]
