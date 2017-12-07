@@ -8,6 +8,7 @@ uniform mat4 MVP;
 uniform mat4 MV;
 uniform mat4 InverseMV;
 uniform mat4 view;
+uniform mat4 InvView;
 uniform mat4 model;
 
 #include "pbr_lights.glsl"
@@ -19,8 +20,9 @@ out VS_OUT
     vec3 Normal;
     vec3 V_Normal;
     vec2 TexCoord;
-    vec3 V_LightPositions[16];
+    vec3 V_LightPositions[8];
     vec3 V_Pos;
+    vec3 Reflection;
 } vs_out;
 
 void main() {
@@ -38,6 +40,8 @@ void main() {
 
     //surface normal in the world space, used for lookup env map coordinates
     vs_out.Normal = mat3(model) * aNormal;
+    vec3 eyeDir = normalize(vec3(InvView * vec4(normalize(-vs_out.V_Pos), 0.0)));
+    vs_out.Reflection = reflect(-eyeDir, vs_out.Normal);
 
     // transform light positions into view space
     for (int i = 0; i < numLights; i++ ) {

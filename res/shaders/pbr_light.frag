@@ -11,7 +11,6 @@ uniform samplerCube x_irradianceMap;
 uniform samplerCube x_prefilterMap;
 
 uniform mat4 view;
-uniform mat4 InvView;
 
 in VS_OUT
 {
@@ -20,9 +19,10 @@ in VS_OUT
     // surface normal in view space
     vec3 V_Normal;
     vec2 TexCoord;
-    vec3 V_LightPositions[16];
+    vec3 V_LightPositions[8];
     // camera position in world space
     vec3 V_Pos;
+    vec3 Reflection;
 } vs_in;
 
 #include "pbr_lights.glsl"
@@ -63,12 +63,6 @@ void main() {
         return;
     }
 
-    // from fragment to camera direction
-    vec3 eyeDirection = normalize(vec3(InvView * vec4(V, 0.0)));
-
-    // reflection
-    vec3 R = reflect(-eyeDirection, vs_in.Normal);
-
     vec3 F = fresnelSchlickRoughness(max(dot(normal, V), 0.0), F0, mtrl.roughness);
 
     vec3 kS = F;
@@ -81,8 +75,8 @@ void main() {
 
     // specular
     const float MAX_REFLECTION_LOD = 4.0;
-    vec3 prefilteredColor = textureLod(x_prefilterMap, R,  mtrl.roughness * MAX_REFLECTION_LOD).rgb;
-    vec2 brdf  = texture(x_brdfLUT, vec2(max(dot(vs_in.Normal, eyeDirection), 0.0), mtrl.roughness)).rg;
+    vec3 prefilteredColor = textureLod(x_prefilterMap, vs_in.Reflection,  mtrl.roughness * MAX_REFLECTION_LOD).rgb;
+    vec2 brdf  = texture(x_brdfLUT, vec2(max(dot(normal, V), 0.0), mtrl.roughness)).rg;
     vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
 
     // sum up all ambient
