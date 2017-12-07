@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/stojg/graphics/lib/debug"
 	"github.com/stojg/graphics/lib/loaders"
 )
 
@@ -17,7 +18,7 @@ func NewTexture(filename string) *Texture {
 	} else {
 		t.resource = resource
 	}
-	checkForError("Error during texture load")
+	debug.CheckForError("Error during texture load")
 	return t
 }
 
