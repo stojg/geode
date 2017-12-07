@@ -52,7 +52,7 @@ func NewTexture(attachment uint32, width int, height int, internalFormat int32, 
 	if attachment != gl.DEPTH_ATTACHMENT {
 		gl.GenRenderbuffers(1, &texture.rbo)
 		gl.BindRenderbuffer(gl.RENDERBUFFER, texture.rbo)
-		gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, int32(width), int32(height))
+		gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT, int32(width), int32(height))
 		gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, texture.rbo)
 	}
 
