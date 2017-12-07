@@ -73,7 +73,7 @@ in VS_OUT
     vec2 TexCoord;
     vec3 V_LightPositions[16];
     // camera position in world space
-    vec3 W_ViewPos;
+    vec3 V_Pos;
 } vs_in;
 
 vec3 calcCookTorrance(vec3 H, vec3 V, vec3 N, Mtrl material, vec3 F0, vec3 L, vec3 radiance) {

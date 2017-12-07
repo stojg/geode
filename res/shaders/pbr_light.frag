@@ -35,15 +35,15 @@ void main() {
 
     vec3 Lo = vec3(0.0);
 
-    vec3 V = normalize(-vs_in.W_ViewPos);
+    vec3 V = normalize(-vs_in.V_Pos);
 
     for (int i = 0; i < numLights; i++) {
         if (lights[i].constant == 0) {
-            Lo += CalcDirectional(F0, vs_in.V_LightPositions[i], lights[i], mtrl, normal, vs_in.W_ViewPos, V);
+            Lo += CalcDirectional(F0, vs_in.V_LightPositions[i], lights[i], mtrl, normal, vs_in.V_Pos, V);
         } else if (lights[i].cutoff > 0) {
-            Lo += CalcSpot(F0, vs_in.V_LightPositions[i], lights[i], mtrl, normal, vs_in.W_ViewPos, V);
+            Lo += CalcSpot(F0, vs_in.V_LightPositions[i], lights[i], mtrl, normal, vs_in.V_Pos, V);
         } else {
-            Lo += CalcPoint(F0, vs_in.V_LightPositions[i], lights[i], mtrl, normal, vs_in.W_ViewPos, V);
+            Lo += CalcPoint(F0, vs_in.V_LightPositions[i], lights[i], mtrl, normal, vs_in.V_Pos, V);
         }
     }
 
@@ -54,7 +54,7 @@ void main() {
     // enviroment ambient lightning
 
     // direction towards they eye (camera) in the view (eye) space
-    vec3 viewDirection = normalize(-vs_in.W_ViewPos);
+    vec3 viewDirection = normalize(-vs_in.V_Pos);
     // eye direction in worldspace
     vec3 wcEyeDir = vec3(InvView * vec4(viewDirection, 0.0));
 

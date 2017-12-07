@@ -20,7 +20,7 @@ out VS_OUT
     vec3 V_Normal;
     vec2 TexCoord;
     vec3 V_LightPositions[16];
-    vec3 W_ViewPos;
+    vec3 V_Pos;
 } vs_out;
 
 void main() {
@@ -29,7 +29,7 @@ void main() {
     gl_Position = MVP * vec4(aPosition, 1.0);
 
     // the position of the camara relative to the fragment
-    vs_out.W_ViewPos = vec3(MV * vec4(aPosition, 1.0));
+    vs_out.V_Pos = vec3(MV * vec4(aPosition, 1.0));
 
     vs_out.TexCoord = aTexCoord;
 
