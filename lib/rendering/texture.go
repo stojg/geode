@@ -8,11 +8,11 @@ import (
 	"github.com/stojg/graphics/lib/loaders"
 )
 
-func NewTexture(filename string) *Texture {
+func NewTexture(filename string, srgb bool) *Texture {
 	t := &Texture{
 		filename: filename,
 	}
-	resource, err := loadLDRTexture(filename)
+	resource, err := loadLDRTexture(filename, srgb)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -51,13 +51,18 @@ func (t *Texture) BindAsRenderTarget() {
 	panic("Cant write to material textures you mad lad!")
 }
 
-func loadLDRTexture(filename string) (*TextureResource, error) {
+func loadLDRTexture(filename string, srgb bool) (*TextureResource, error) {
 	rgba, err := loaders.RGBAImagedata(filename)
 	if err != nil {
 		return nil, err
 	}
 	rgba = loaders.Flip(rgba)
-	return createTextureResource(rgba.Rect.Size().X, rgba.Rect.Size().Y, gl.RGBA, gl.UNSIGNED_BYTE, rgba.Pix), nil
+
+	if srgb {
+		return createTextureResource(rgba.Rect.Size().X, rgba.Rect.Size().Y, gl.SRGB_ALPHA, gl.UNSIGNED_BYTE, rgba.Pix), nil
+	} else {
+		return createTextureResource(rgba.Rect.Size().X, rgba.Rect.Size().Y, gl.RGBA, gl.UNSIGNED_BYTE, rgba.Pix), nil
+	}
 }
 
 func createTextureResource(width, height int, internalFormat int32, dataType uint32, data []uint8) *TextureResource {
