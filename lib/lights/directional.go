@@ -20,7 +20,8 @@ func NewDirectional(shadowSize int, r, g, b, intensity float32) *Directional {
 	}
 
 	if shadowSize != 0 {
-		projection := mgl32.Ortho(-halfSize, halfSize, -halfSize, halfSize, -halfSize, halfSize)
+		projection := mgl32.Ortho(-halfSize, halfSize, -halfSize, halfSize, 0.01, 20)
+		//projection := mgl32.Ortho(-halfSize, halfSize, -halfSize, halfSize, -halfSize, halfSize)
 		light.shadowInfo = NewShadowInfo(shadowSize, projection, false)
 		light.shadowInfo.halfSize = halfSize
 		light.shadowInfo.shadowVarianceMin = 0.00002
@@ -57,13 +58,14 @@ func (b *Directional) SetCamera(inPos mgl32.Vec3, inRot mgl32.Quat) {
 
 func (b *Directional) GetView() mgl32.Mat4 {
 	//This comes from the conjugate rotation because the world should appear to rotate opposite to the camera's rotation.
-	rotation := b.Transform().TransformedRot().Conjugate().Mat4()
+	cameraRotation := b.Transform().TransformedRot().Conjugate().Mat4()
 	//Similarly, the translation is inverted because the world appears to move opposite to the camera's movement.
-	position := b.Transform().TransformedPos().Mul(-1)
-	translation := mgl32.Translate3D(position[0], position[1], position[2])
-	return rotation.Mul4(translation)
+	cameraPos := b.Transform().TransformedPos().Mul(-1)
+	cameraTranslation := mgl32.Translate3D(cameraPos[0], cameraPos[1], cameraPos[2])
+	return cameraRotation.Mul4(cameraTranslation)
 }
 
 func (b *Directional) ViewProjection() mgl32.Mat4 {
-	return b.Projection().Mul4(b.matrix)
+	return b.Projection().Mul4(b.GetView())
+	//return b.Projection().Mul4(b.matrix)
 }

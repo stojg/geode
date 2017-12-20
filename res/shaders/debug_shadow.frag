@@ -6,8 +6,8 @@ in vec2 TexCoords;
 
 uniform sampler2D x_filterTexture;
 
-float near = 2;
-float far  = 15.0;
+float near = 0.1;
+float far  = 20.0;
 
 float LinearizeDepth(float depth)
 {
@@ -17,7 +17,7 @@ float LinearizeDepth(float depth)
 void main()
 {
     float depth = texture(x_filterTexture, TexCoords).r;
-    depth = (depth);
+    depth = LinearizeDepth(depth);
 
     FragColor = vec4(vec3(depth), 1.0);
 }

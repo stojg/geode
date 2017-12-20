@@ -13,7 +13,7 @@ const (
 )
 
 var texture components.Texture
-var s components.Shader
+var shaders map[string]components.Shader
 var w, h int32
 var panelWidth, panelHeight int32
 
@@ -24,7 +24,9 @@ func New(width, height int) {
 	panelWidth = w/perRow - gutter
 	panelHeight = h/perRow - gutter
 	texture = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, gl.NEAREST, false)
-	s = shader.NewShader("debug_shadow")
+	shaders = make(map[string]components.Shader)
+	shaders["shadow"] = shader.NewShader("debug_shadow")
+	shaders["rgb"] = shader.NewShader("filter_null")
 }
 
 func Clear() {
@@ -34,7 +36,7 @@ func Clear() {
 	numPanels = 0
 }
 
-func AddTexture(in components.Texture, applyFilter func(s components.Shader, in, out components.Texture)) {
+func AddTexture(in components.Texture, shaderName string, applyFilter func(s components.Shader, in, out components.Texture)) {
 	x := int32(numPanels % perRow)
 	y := int32(numPanels / perRow)
 	nextSlot()
@@ -46,7 +48,7 @@ func AddTexture(in components.Texture, applyFilter func(s components.Shader, in,
 	gl.Viewport(posX, posY, panelWidth, panelHeight)
 
 	gl.Disable(gl.DEPTH_TEST)
-	applyFilter(s, in, texture)
+	applyFilter(shaders[shaderName], in, texture)
 	gl.Enable(gl.DEPTH_TEST)
 }
 

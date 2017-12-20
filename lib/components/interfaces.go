@@ -88,6 +88,7 @@ type Spotlight interface {
 type RenderingEngine interface {
 	AddLight(light Light)
 	Lights() []Light
+	ActiveLight() Light
 
 	AddCamera(camera Viewable)
 	MainCamera() Viewable

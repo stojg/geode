@@ -87,12 +87,10 @@ func NewEngine(width, height int) *Engine {
 
 	e.shadowTextures = make([]components.Texture, 12)
 	e.tempShadowTextures = make([]components.Texture, 12)
-	e.shadowTextures[0] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, 1, 1, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
-	e.tempShadowTextures[0] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, 1, 1, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
 	for i := uint(0); i < 12; i++ {
 		size := 1 << i // power of two, 1, 2, 4, 8, 16 and so on
-		e.shadowTextures[i] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, size, size, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
-		e.tempShadowTextures[i] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, size, size, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, true)
+		e.shadowTextures[i] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, size, size, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR, true)
+		e.tempShadowTextures[i] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, size, size, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR, true)
 	}
 
 	debugger.New(width, height)
@@ -113,6 +111,7 @@ type Engine struct {
 	width, height int32
 	mainCamera    components.Viewable
 	lights        []components.Light
+	activeLight   components.Light
 
 	skybox *technique.SkyBox
 
@@ -141,6 +140,10 @@ type Engine struct {
 	capabilities map[string]bool
 }
 
+func (e *Engine) ActiveLight() components.Light {
+	return e.activeLight
+}
+
 func (e *Engine) Enable(cap string) {
 	e.capabilities[cap] = true
 }
@@ -156,6 +159,22 @@ func (e *Engine) Render(object components.Renderable) {
 	gl.Enable(gl.DEPTH_TEST)
 
 	debugger.Clear()
+	//gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+	//gl.Viewport(0, 0, e.width, e.height)
+	for _, light := range e.lights {
+		if !light.ShadowCaster() {
+			continue
+		}
+		e.activeLight = light
+		light.SetCamera(e.MainCamera().Pos(), e.mainCamera.Rot())
+		idx := light.ShadowInfo().SizeAsPowerOfTwo()
+		e.shadowTextures[idx].BindAsRenderTarget()
+		e.shadowTextures[idx].SetViewPort()
+		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+		object.RenderAll(e.shadowShader, e)
+		debugger.AddTexture(e.shadowTextures[idx], "shadow", e.applyFilter)
+
+	}
 
 	e.offScreenTexture.BindAsRenderTarget()
 	e.offScreenTexture.SetViewPort()
@@ -164,15 +183,17 @@ func (e *Engine) Render(object components.Renderable) {
 
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	object.RenderAll(e.lightShader, e)
+	debugger.AddTexture(e.offScreenTexture, "rgb", e.applyFilter)
 
 	if e.Integer("x_enable_skybox") == 1 {
 		e.skybox.Draw(e)
 	}
 
+	gl.Viewport(0, 0, e.width, e.height)
 	gl.Disable(gl.DEPTH_TEST)
 	e.applyFilter(e.toneMapShader, e.offScreenTexture, e.fullScreenTemp)
 	e.applyFilter(e.fxaaShader, e.fullScreenTemp, nil)
-	//e.applyFilter(e.overlayShader, debugger.Texture(), nil)
+	e.applyFilter(e.overlayShader, debugger.Texture(), nil)
 	debug.CheckForError("renderer.Engine.Render [end]")
 }
 
