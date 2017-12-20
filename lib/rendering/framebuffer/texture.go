@@ -5,8 +5,6 @@ import (
 	"github.com/stojg/graphics/lib/debug"
 )
 
-const textType = gl.TEXTURE_2D
-
 func NewTexture(attachment uint32, width int, height int, internalFormat int32, format, xtype uint32, filter int32, clamp bool) *Texture {
 	texture := &Texture{
 		attachment: attachment,
@@ -14,7 +12,7 @@ func NewTexture(attachment uint32, width int, height int, internalFormat int32, 
 		height:     int32(height),
 	}
 	gl.GenTextures(1, &texture.id)
-	gl.BindTexture(textType, texture.id)
+	gl.BindTexture(gl.TEXTURE_2D, texture.id)
 
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
@@ -41,13 +39,11 @@ func NewTexture(attachment uint32, width int, height int, internalFormat int32, 
 	}
 	gl.TexImage2D(gl.TEXTURE_2D, 0, internalFormat, texture.width, texture.height, 0, format, xtype, nil)
 
-	gl.BindTexture(textType, 0)
-
 	// create fbo
 	gl.GenFramebuffers(1, &texture.fbo)
 	gl.BindFramebuffer(gl.FRAMEBUFFER, texture.fbo)
 
-	gl.FramebufferTexture2D(gl.FRAMEBUFFER, attachment, textType, texture.id, 0)
+	gl.FramebufferTexture2D(gl.FRAMEBUFFER, attachment, gl.TEXTURE_2D, texture.id, 0)
 
 	if attachment != gl.DEPTH_ATTACHMENT {
 		gl.GenRenderbuffers(1, &texture.rbo)
@@ -59,6 +55,7 @@ func NewTexture(attachment uint32, width int, height int, internalFormat int32, 
 	debug.CheckForError("framebuffer.Texture end")
 	debug.FramebufferComplete("framebuffer.Texture")
 
+	gl.BindTexture(gl.TEXTURE_2D, 0)
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 
 	return texture
@@ -88,7 +85,7 @@ func (t *Texture) ID() uint32 {
 
 func (t *Texture) Bind(unit uint32) {
 	gl.ActiveTexture(gl.TEXTURE0 + unit)
-	gl.BindTexture(textType, t.id)
+	gl.BindTexture(gl.TEXTURE_2D, t.id)
 }
 
 func (t *Texture) BindAsRenderTarget() {
