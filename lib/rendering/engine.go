@@ -183,7 +183,6 @@ func (e *Engine) Render(object components.Renderable) {
 
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	object.RenderAll(e.lightShader, e)
-	debugger.AddTexture(e.offScreenTexture, "rgb", e.applyFilter)
 
 	if e.Integer("x_enable_skybox") == 1 {
 		e.skybox.Draw(e)
