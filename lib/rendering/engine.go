@@ -172,8 +172,7 @@ func (e *Engine) Render(object components.Renderable) {
 		e.shadowTextures[idx].SetViewPort()
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 		object.RenderAll(e.shadowShader, e)
-		debugger.AddTexture(e.shadowTextures[idx], "shadow", e.applyFilter)
-
+		//debugger.AddTexture(e.shadowTextures[idx], "shadow", e.applyFilter)
 	}
 
 	e.offScreenTexture.BindAsRenderTarget()
@@ -192,7 +191,7 @@ func (e *Engine) Render(object components.Renderable) {
 	gl.Disable(gl.DEPTH_TEST)
 	e.applyFilter(e.toneMapShader, e.offScreenTexture, e.fullScreenTemp)
 	e.applyFilter(e.fxaaShader, e.fullScreenTemp, nil)
-	e.applyFilter(e.overlayShader, debugger.Texture(), nil)
+	//e.applyFilter(e.overlayShader, debugger.Texture(), nil)
 	debug.CheckForError("renderer.Engine.Render [end]")
 }
 

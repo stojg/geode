@@ -47,7 +47,7 @@ func run() error {
 	cameraObject := core.NewGameObject()
 	cameraObject.Transform().SetPos(vec3(0, 1.8, 6))
 	cameraObject.Transform().SetScale(vec3(0.1, 0.1, 0.1))
-	cameraObject.AddComponent(components.NewCamera(75, width, height, 0.1, 20))
+	cameraObject.AddComponent(components.NewCamera(75, width, height, 0.1, 2000))
 	cameraObject.AddComponent(&components.FreeMove{})
 	cameraObject.AddComponent(components.NewFreelook(width, height))
 	//cameraObject.AddComponent(&components.HeadHeight{})
@@ -99,9 +99,27 @@ func run() error {
 		engine.AddObject(pointLight)
 	}
 
+	var whiteMaterial []*rendering.Material
+	plasticMtrl := rendering.NewMaterial()
+	plasticMtrl.AddTexture("albedo", rendering.NewTexture("res/textures/scuffed-plastic/scuffed-plastic5-alb.png", true))
+	plasticMtrl.AddTexture("metallic", rendering.NewMetallicTexture("res/textures/scuffed-plastic/scuffed-plastic-metal.png"))
+	plasticMtrl.AddTexture("roughness", rendering.NewRoughnessTexture("res/textures/scuffed-plastic/scuffed-plastic-rough.png"))
+	plasticMtrl.AddTexture("normal", rendering.NewTexture("res/textures/scuffed-plastic/scuffed-plastic-normal.png", false))
+	whiteMaterial = append(whiteMaterial, plasticMtrl)
+
+	for i := 0; i < 2; i++ {
+		for j := 0; j < 2; j++ {
+			cube := core.NewGameObject()
+			cube.Transform().SetScale(vec3(10, 0.04, 10))
+			cube.Transform().SetPos(vec3(float32(i)*10, 0.00, float32(j)*10))
+			loadModel(cube, "res/meshes/cube/model.obj", whiteMaterial)
+			engine.AddObject(cube)
+		}
+	}
+
 	{
 		bot := core.NewGameObject()
-		bot.Transform().SetPos(vec3(0, 0.2, 0))
+		bot.Transform().SetPos(vec3(0, 0, 0))
 		bot.AddComponent(components.NewRotator(vec3(0, -1, 0), 15))
 
 		var mtrls []*rendering.Material
@@ -137,6 +155,9 @@ func loadModel(g *core.GameObject, obj string, material []*rendering.Material) {
 
 	if _, ok := models[obj]; !ok {
 		var meshes []*rendering.Mesh
+		if len(objData) != len(material) {
+			fmt.Printf("Have %d meshes in object, but only %d materials\n", len(objData), len(material))
+		}
 		for i, data := range objData {
 			mesh := rendering.NewMesh()
 			mesh.SetVertices(rendering.ConvertToVertices(data))
