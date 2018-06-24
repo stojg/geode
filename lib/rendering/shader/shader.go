@@ -72,7 +72,7 @@ func (s *Shader) Bind() {
 	}
 }
 
-func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Material, engine components.RenderingEngine) {
+func (s *Shader) UpdateUniforms(mat components.Material, engine components.RenderingEngine) {
 
 	for i, name := range s.resource.uniformNames {
 		uniformType := s.resource.uniformTypes[i]
@@ -109,18 +109,8 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 		name, index := getArray(name)
 
 		switch name {
-		case "LightMVP":
-			s.UpdateUniform(name, engine.ActiveLight().ViewProjection().Mul4(transform.Transformation()))
-		case "MVP":
-			s.UpdateUniform(name, engine.MainCamera().Projection().Mul4(engine.MainCamera().View().Mul4(transform.Transformation())))
-		case "MV":
-			s.UpdateUniform(name, engine.MainCamera().View().Mul4(transform.Transformation()))
-		case "InverseMV":
-			s.UpdateUniform(name, engine.MainCamera().View().Mul4(transform.Transformation()).Inv().Transpose())
 		case "projection":
 			s.UpdateUniform(name, engine.MainCamera().Projection())
-		case "model":
-			s.UpdateUniform(name, transform.Transformation())
 		case "view":
 			s.UpdateUniform(name, engine.MainCamera().View())
 		case "InvView":
@@ -157,10 +147,27 @@ func (s *Shader) UpdateUniforms(transform *physics.Transform, mat components.Mat
 			}
 		case "numLights":
 			s.UpdateUniform(name, int32(len(engine.Lights())))
-		default:
-			fmt.Printf("Shader.UpdateUniforms: no values for uniform '%s' has been set\n", name)
 		}
 
+	}
+}
+
+func (s *Shader) UpdateTransform(transform *physics.Transform, engine components.RenderingEngine) {
+	for _, name := range s.resource.uniformNames {
+		name, _ := getArray(name)
+
+		switch name {
+		case "LightMVP":
+			s.UpdateUniform(name, engine.ActiveLight().ViewProjection().Mul4(transform.Transformation()))
+		case "MVP":
+			s.UpdateUniform(name, engine.MainCamera().Projection().Mul4(engine.MainCamera().View().Mul4(transform.Transformation())))
+		case "MV":
+			s.UpdateUniform(name, engine.MainCamera().View().Mul4(transform.Transformation()))
+		case "InverseMV":
+			s.UpdateUniform(name, engine.MainCamera().View().Mul4(transform.Transformation()).Inv().Transpose())
+		case "model":
+			s.UpdateUniform(name, transform.Transformation())
+		}
 	}
 }
 

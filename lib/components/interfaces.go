@@ -25,17 +25,20 @@ type Material interface {
 }
 
 type Drawable interface {
+	Prepare()
 	Draw()
 }
 
 type Shader interface {
 	Bind()
-	UpdateUniforms(*physics.Transform, Material, RenderingEngine)
+	UpdateUniforms(Material, RenderingEngine)
+	UpdateTransform(*physics.Transform, RenderingEngine)
 	UpdateUniform(name string, value interface{})
 }
 
 type Transformable interface {
 	Transform() *physics.Transform
+	AllTransforms() []*physics.Transform
 }
 
 type Renderable interface {

@@ -58,7 +58,10 @@ func (m *Mesh) SetVertices(vertices []Vertex) {
 	gl.BindVertexArray(0)
 }
 
-func (m *Mesh) Draw() {
+func (m *Mesh) Prepare() {
 	gl.BindVertexArray(m.vao)
+}
+
+func (m *Mesh) Draw() {
 	gl.DrawArrays(gl.TRIANGLES, 0, m.numVertices)
 }

@@ -161,19 +161,19 @@ func (e *Engine) Render(object components.Renderable) {
 	debugger.Clear()
 	//gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 	//gl.Viewport(0, 0, e.width, e.height)
-	for _, light := range e.lights {
-		if !light.ShadowCaster() {
-			continue
-		}
-		e.activeLight = light
-		light.SetCamera(e.MainCamera().Pos(), e.mainCamera.Rot())
-		idx := light.ShadowInfo().SizeAsPowerOfTwo()
-		e.shadowTextures[idx].BindAsRenderTarget()
-		e.shadowTextures[idx].SetViewPort()
-		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-		object.RenderAll(e.shadowShader, e)
-		//debugger.AddTexture(e.shadowTextures[idx], "shadow", e.applyFilter)
-	}
+	//for _, light := range e.lights {
+	//	if !light.ShadowCaster() {
+	//		continue
+	//	}
+	//	e.activeLight = light
+	//	light.SetCamera(e.MainCamera().Pos(), e.mainCamera.Rot())
+	//	idx := light.ShadowInfo().SizeAsPowerOfTwo()
+	//	e.shadowTextures[idx].BindAsRenderTarget()
+	//	e.shadowTextures[idx].SetViewPort()
+	//	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+	//	object.RenderAll(e.shadowShader, e)
+	//	debugger.AddTexture(e.shadowTextures[idx], "shadow", e.applyFilter)
+	//}
 
 	e.offScreenTexture.BindAsRenderTarget()
 	e.offScreenTexture.SetViewPort()
@@ -191,7 +191,7 @@ func (e *Engine) Render(object components.Renderable) {
 	gl.Disable(gl.DEPTH_TEST)
 	e.applyFilter(e.toneMapShader, e.offScreenTexture, e.fullScreenTemp)
 	e.applyFilter(e.fxaaShader, e.fullScreenTemp, nil)
-	//e.applyFilter(e.overlayShader, debugger.Texture(), nil)
+	e.applyFilter(e.overlayShader, debugger.Texture(), nil)
 	debug.CheckForError("renderer.Engine.Render [end]")
 }
 
@@ -231,7 +231,7 @@ func (e *Engine) applyFilter(filter components.Shader, in, out components.Textur
 	e.SetInteger("x_w", in.Width())
 	e.SetInteger("x_h", in.Height())
 	filter.Bind()
-	filter.UpdateUniforms(nil, nil, e)
+	filter.UpdateUniforms(nil, e)
 	primitives.DrawQuad()
 }
 

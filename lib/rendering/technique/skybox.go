@@ -29,6 +29,6 @@ func (e *SkyBox) Draw(r components.RenderingEngine) {
 	e.shader.Bind()
 	r.SetTexture("x_skybox", e.cubemapTexture)
 	r.SetSamplerSlot("x_skybox", 0)
-	e.shader.UpdateUniforms(nil, nil, r)
+	e.shader.UpdateUniforms(nil, r)
 	primitives.DrawCube()
 }

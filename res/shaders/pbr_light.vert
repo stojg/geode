@@ -7,7 +7,6 @@ layout (location = 3) in vec3 aTangent;
 
 uniform mat4 MVP;
 uniform mat4 MV;
-//uniforx mat4 InverseMV;
 uniform mat4 view;
 uniform mat4 InvView;
 uniform mat4 model;
@@ -19,7 +18,6 @@ uniform int numLights;
 out VS_OUT
 {
     vec3 Normal;
-//    vec3 V_Normal;
     vec2 TexCoord;
     vec3 V_LightPositions[8];
     vec3 V_Pos;
@@ -36,9 +34,6 @@ void main() {
     vs_out.V_Pos = vec3(MV * vec4(aPosition, 1.0));
 
     vs_out.TexCoord = aTexCoord;
-
-    // transform normals into view space
-//    vs_out.V_Normal = normalize(mat3(InverseMV) * aNormal);
 
     //surface normal in the world space, used for lookup env map coordinates
     vs_out.Normal = mat3(model) * aNormal;

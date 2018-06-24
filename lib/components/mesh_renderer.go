@@ -16,6 +16,8 @@ type MeshRenderer struct {
 
 func (m *MeshRenderer) Render(shader Shader, engine RenderingEngine) {
 	shader.Bind()
-	shader.UpdateUniforms(m.Transform(), m.material, engine)
+	shader.UpdateUniforms(m.material, engine)
+	shader.UpdateTransform(m.Transform(), engine)
+	m.mesh.Prepare()
 	m.mesh.Draw()
 }

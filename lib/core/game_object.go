@@ -75,6 +75,14 @@ func (g *GameObject) Transform() *physics.Transform {
 	return g.transform
 }
 
+func (g *GameObject) AllTransforms() []*physics.Transform {
+	var l []*physics.Transform
+	for _, c := range g.children {
+		l = append(l, c.Transform())
+	}
+	return l
+}
+
 func (g *GameObject) SetEngine(engine *Engine) {
 	if g.engine != engine {
 		g.engine = engine

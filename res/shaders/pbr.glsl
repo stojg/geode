@@ -106,11 +106,13 @@ vec3 CalcSpot(vec3 F0, vec3 lightPosition, Light light, Mtrl material, vec3 N, v
     vec3 L = normalize(lightPosition - viewPos);
     vec3 H = normalize(V + L);
 
-    if (light.cutoff > 0) {
+//    if (light.cutoff > 0) {
         float theta = dot(L, normalize(-viewLightDirection));
         if (theta < light.cutoff) { return vec3(0); }
-    }
+//    }
     float attenuation = 1.0 / (light.constant + light.linear * dist + light.quadratic * (dist * dist));
+
+
 
     return calcCookTorrance(H, V, N, material,F0, L, light.color * attenuation);
 }

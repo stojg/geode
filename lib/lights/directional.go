@@ -1,6 +1,7 @@
 package lights
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/go-gl/mathgl/mgl32"
@@ -8,7 +9,7 @@ import (
 )
 
 func NewDirectional(shadowSize int, r, g, b, intensity float32) *Directional {
-	var halfSize float32 = 30 / 2
+	var halfSize float32 = 10 / 2
 
 	light := &Directional{
 		BaseLight: BaseLight{
@@ -20,8 +21,7 @@ func NewDirectional(shadowSize int, r, g, b, intensity float32) *Directional {
 	}
 
 	if shadowSize != 0 {
-		projection := mgl32.Ortho(-halfSize, halfSize, -halfSize, halfSize, 0.01, 20)
-		//projection := mgl32.Ortho(-halfSize, halfSize, -halfSize, halfSize, -halfSize, halfSize)
+		projection := mgl32.Ortho(-halfSize, halfSize, -halfSize, halfSize, -halfSize, halfSize)
 		light.shadowInfo = NewShadowInfo(shadowSize, projection, false)
 		light.shadowInfo.halfSize = halfSize
 		light.shadowInfo.shadowVarianceMin = 0.00002
@@ -41,6 +41,8 @@ func (b *Directional) AddToEngine(e components.Engine) {
 }
 
 func (b *Directional) SetCamera(inPos mgl32.Vec3, inRot mgl32.Quat) {
+
+	fmt.Println(inPos)
 	resultPos := inPos.Mul(-1).Add(inRot.Rotate(mgl32.Vec3{0, 0, b.shadowInfo.halfSize}))
 	resultRot := b.Transform().TransformedRot().Conjugate()
 
@@ -56,16 +58,19 @@ func (b *Directional) SetCamera(inPos mgl32.Vec3, inRot mgl32.Quat) {
 	b.matrix = resultRot.Mat4().Mul4(translation)
 }
 
+func (b *Directional) Direction() mgl32.Vec3 {
+	return b.Parent().Transform().TransformedPos().Normalize()
+}
+
 func (b *Directional) GetView() mgl32.Mat4 {
 	//This comes from the conjugate rotation because the world should appear to rotate opposite to the camera's rotation.
-	cameraRotation := b.Transform().TransformedRot().Conjugate().Mat4()
+	rotation := b.Transform().TransformedRot().Conjugate().Mat4()
 	//Similarly, the translation is inverted because the world appears to move opposite to the camera's movement.
-	cameraPos := b.Transform().TransformedPos().Mul(-1)
-	cameraTranslation := mgl32.Translate3D(cameraPos[0], cameraPos[1], cameraPos[2])
-	return cameraRotation.Mul4(cameraTranslation)
+	position := b.Transform().TransformedPos().Mul(-1)
+	translation := mgl32.Translate3D(position[0], position[1], position[2])
+	return rotation.Mul4(translation)
 }
 
 func (b *Directional) ViewProjection() mgl32.Mat4 {
-	return b.Projection().Mul4(b.GetView())
-	//return b.Projection().Mul4(b.matrix)
+	return b.Projection().Mul4(b.matrix)
 }
