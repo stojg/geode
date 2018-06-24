@@ -17,8 +17,9 @@ func NewGame() *Game {
 }
 
 type Game struct {
-	root  *GameObject
-	vsync bool
+	root    *GameObject
+	terrain *GameObject
+	vsync   bool
 }
 
 func (g *Game) SetEngine(engine *Engine) {
@@ -27,6 +28,10 @@ func (g *Game) SetEngine(engine *Engine) {
 
 func (g *Game) AddObject(object *GameObject) {
 	g.RootObject().AddChild(object)
+}
+
+func (g *Game) AddTerrain(object *GameObject) {
+	g.RootTerrain().AddChild(object)
 }
 
 func (g *Game) Input(elapsed time.Duration) {
@@ -45,10 +50,12 @@ func (g *Game) Input(elapsed time.Duration) {
 
 func (g *Game) Update(elapsed time.Duration) {
 	g.RootObject().UpdateAll(elapsed)
+	g.RootTerrain().UpdateAll(elapsed)
 }
 
 func (g *Game) Render(r *rendering.Engine) {
-	r.Render(g.RootObject())
+	r.Render(g.RootObject(), g.RootTerrain())
+
 }
 
 func (g *Game) RootObject() *GameObject {
@@ -56,4 +63,11 @@ func (g *Game) RootObject() *GameObject {
 		g.root = NewGameObject()
 	}
 	return g.root
+}
+
+func (g *Game) RootTerrain() *GameObject {
+	if g.terrain == nil {
+		g.terrain = NewGameObject()
+	}
+	return g.terrain
 }

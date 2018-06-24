@@ -33,7 +33,7 @@ void main() {
     // the position of the camara relative to the fragment
     vs_out.V_Pos = vec3(MV * vec4(aPosition, 1.0));
 
-    vs_out.TexCoord = aTexCoord;
+    vs_out.TexCoord = aTexCoord ;
 
     //surface normal in the world space, used for lookup env map coordinates
     vs_out.Normal = mat3(model) * aNormal;

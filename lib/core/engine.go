@@ -50,6 +50,10 @@ func (m *Engine) AddObject(object *GameObject) {
 	m.game.AddObject(object)
 }
 
+func (m *Engine) AddTerrain(object *GameObject) {
+	m.game.AddTerrain(object)
+}
+
 func (m *Engine) Stop() {
 	if !m.isRunning {
 		return

@@ -82,7 +82,7 @@ func (t *Transform) LookAtRotation(point mgl32.Vec3, up mgl32.Vec3) mgl32.Quat {
 func (t *Transform) HasChanged() bool {
 	if !t.hasUpdated {
 		fmt.Println("changed")
-		return true
+		return false
 	}
 	if t.parent != nil && t.parent.HasChanged() {
 		return true

@@ -11,6 +11,7 @@ import (
 	"github.com/stojg/graphics/lib/lights"
 	"github.com/stojg/graphics/lib/rendering"
 	"github.com/stojg/graphics/lib/rendering/loader"
+	"github.com/stojg/graphics/lib/rendering/terrain"
 )
 
 var models map[string][]*rendering.Mesh
@@ -59,31 +60,31 @@ func run() error {
 	dirLight.Transform().SetScale(vec3(0.5, 0.1, 0.5))
 	dirLight.AddComponent(directionalLight)
 	engine.AddObject(dirLight)
-	//
-	//spotLight := lights.NewSpot(8, 0.9, 0.4, 0.1, 30, 65)
-	//spot := core.NewGameObject()
-	//spot.Transform().SetPos(vec3(3, 3.5, 4.6))
-	//spot.Transform().SetScale(vec3(0.05, 0.05, 0.3))
-	//spot.Transform().LookAt(vec3(0, 1, 0), up())
-	//spot.AddComponent(spotLight)
-	//engine.AddObject(spot)
-	//
-	//pointLight := core.NewGameObject()
-	//pointLight.Transform().SetPos(vec3(-2, 0.6, 2))
-	//pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
-	//pointLight.AddComponent(lights.NewPoint(0, 0.5, 1.0, 50))
-	//engine.AddObject(pointLight)
-	//
-	//{
-	//	pointLight := core.NewGameObject()
-	//	pointLight.Transform().SetPos(vec3(-10, 0.3, 0))
-	//	pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
-	//	pointLight.AddComponent(lights.NewPoint(0.0, 0.5, 1.0, 50))
-	//	lightMaterial := rendering.NewMaterial()
-	//	lightMaterial.SetAlbedo(mgl32.Vec3{0.1, 0.05, 0.98})
-	//	engine.AddObject(pointLight)
-	//}
-	//
+
+	spotLight := lights.NewSpot(8, 0.9, 0.4, 0.1, 30, 65)
+	spot := core.NewGameObject()
+	spot.Transform().SetPos(vec3(3, 3.5, 4.6))
+	spot.Transform().SetScale(vec3(0.05, 0.05, 0.3))
+	spot.Transform().LookAt(vec3(0, 1, 0), up())
+	spot.AddComponent(spotLight)
+	engine.AddObject(spot)
+
+	pointLight := core.NewGameObject()
+	pointLight.Transform().SetPos(vec3(-2, 0.6, 2))
+	pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
+	pointLight.AddComponent(lights.NewPoint(0, 0.5, 1.0, 50))
+	engine.AddObject(pointLight)
+
+	{
+		pointLight := core.NewGameObject()
+		pointLight.Transform().SetPos(vec3(-10, 0.3, 0))
+		pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
+		pointLight.AddComponent(lights.NewPoint(0.0, 0.5, 1.0, 50))
+		lightMaterial := rendering.NewMaterial()
+		lightMaterial.SetAlbedo(mgl32.Vec3{0.1, 0.05, 0.98})
+		engine.AddObject(pointLight)
+	}
+
 	//{
 	//	pointLight := core.NewGameObject()
 	//	pointLight.Transform().SetPos(vec3(2, 0.4, 4))
@@ -105,58 +106,76 @@ func run() error {
 	plasticMtrl.AddTexture("normal", rendering.NewTexture("res/textures/scuffed-plastic/scuffed-plastic-normal.png", false))
 	whiteMaterial = append(whiteMaterial, plasticMtrl)
 
-	//for i := -5; i < 5; i++ {
-	//	for j := -5; j < 5; j++ {
-	//		floor := core.NewGameObject()
-	//		floor.Transform().SetScale(vec3(1, 0.001, 1))
-	//		floor.Transform().SetPos(vec3(float32(i)*2, 0, float32(j)*2))
-	//		setMeshRenderer(floor, "res/meshes/cube/model.obj", whiteMaterial)
-	//		engine.AddObject(floor)
-	//	}
-	//}
-
-	cubes := core.NewGameObject()
-	setMeshInstanceRenderer(cubes, "res/meshes/cube/model.obj", whiteMaterial)
 	for i := 0; i < 100; i++ {
-		floor := core.NewGameObject()
-		floor.Transform().SetScale(vec3(1, 1, 1))
-		floor.Transform().SetPos(vec3(rand.Float32()*100-50, rand.Float32()*10-5, rand.Float32()*100-50))
-		cubes.AddChild(floor)
+		cube := core.NewGameObject()
+		cube.Transform().SetScale(vec3(1, 1, 1))
+		cube.Transform().SetPos(vec3(rand.Float32()*100-50, 1, rand.Float32()*100-50))
+		setMeshRenderer(cube, "res/meshes/cube/model.obj", whiteMaterial)
+		engine.AddObject(cube)
+
 	}
-	engine.AddObject(cubes)
 
-	//{
-	//	floor := core.NewGameObject()
-	//	floor.Transform().SetScale(vec3(0.1, 0.1, 0.1))
-	//	floor.Transform().SetPos(vec3(1, 2.5, 0))
-	//	setMeshRenderer(floor, "res/meshes/cube/model.obj", whiteMaterial)
-	//	engine.AddObject(floor)
-	//}
+	var dryDirt []*rendering.Material
+	dryDirtMtrl := rendering.NewMaterial()
+	dryDirtMtrl.AddTexture("albedo", rendering.NewTexture("res/textures/dry-dirt/albedo.png", true))
+	dryDirtMtrl.AddTexture("metallic", rendering.NewMetallicTexture("res/textures/dry-dirt/metalness.png"))
+	dryDirtMtrl.AddTexture("roughness", rendering.NewRoughnessTexture("res/textures/dry-dirt/roughness.png"))
+	dryDirtMtrl.AddTexture("normal", rendering.NewTexture("res/textures/dry-dirt/normal2.png", false))
+	dryDirt = append(dryDirt, dryDirtMtrl)
 
-	//{
-	//	bot := core.NewGameObject()
-	//	bot.Transform().SetPos(vec3(0, 0, 0))
-	//	bot.AddComponent(components.NewRotator(vec3(0, -1, 0), 15))
-	//
-	//	var mtrls []*rendering.Material
-	//	outer := rendering.NewMaterial()
-	//	outer.AddTexture("albedo", rendering.NewTexture("res/textures/sphere_bot/Robot_outerbody_Albedo.png", true))
-	//	outer.AddTexture("metallic", rendering.NewMetallicTexture("res/textures/sphere_bot/Robot_outerbody_Metallic.png"))
-	//	outer.AddTexture("roughness", rendering.NewRoughnessTexture("res/textures/sphere_bot/Robot_outerbody_Roughness.png"))
-	//	outer.AddTexture("normal", rendering.NewTexture("res/textures/sphere_bot/Robot_outerbody_Normal.png", false))
-	//	mtrls = append(mtrls, outer)
-	//
-	//	inner := rendering.NewMaterial()
-	//	inner.AddTexture("albedo", rendering.NewTexture("res/textures/sphere_bot/Robot_innerbody_Albedo.png", true))
-	//	inner.AddTexture("metallic", rendering.NewMetallicTexture("res/textures/sphere_bot/Robot_innerbody_Metallic.png"))
-	//	inner.AddTexture("roughness", rendering.NewRoughnessTexture("res/textures/sphere_bot/Robot_innerbody_Roughness.png"))
-	//	inner.AddTexture("normal", rendering.NewTexture("res/textures/sphere_bot/Robot_innerbody_Normal.png", false))
-	//
-	//	mtrls = append(mtrls, inner)
-	//
-	//	setMeshRenderer(bot, "res/meshes/sphere_bot/model.obj", mtrls)
-	//	engine.AddObject(bot)
-	//}
+	t := terrain.New(0, 0)
+	test := core.NewGameObject()
+	test.AddComponent(components.NewMeshRenderer(t.Mesh(), dryDirt[0]))
+	engine.AddTerrain(test)
+
+	{
+		t := terrain.New(-1, 0)
+		test := core.NewGameObject()
+		test.Transform().SetPos(vec3(t.X(), 0, t.Z()))
+		test.AddComponent(components.NewMeshRenderer(t.Mesh(), dryDirt[0]))
+		engine.AddTerrain(test)
+	}
+
+	{
+		t := terrain.New(-1, -1)
+		test := core.NewGameObject()
+		test.Transform().SetPos(vec3(t.X(), 0, t.Z()))
+		test.AddComponent(components.NewMeshRenderer(t.Mesh(), dryDirt[0]))
+		engine.AddTerrain(test)
+	}
+
+	{
+		t := terrain.New(0, -1)
+		test := core.NewGameObject()
+		test.Transform().SetPos(vec3(t.X(), 0, t.Z()))
+		test.AddComponent(components.NewMeshRenderer(t.Mesh(), dryDirt[0]))
+		engine.AddTerrain(test)
+	}
+
+	{
+		bot := core.NewGameObject()
+		bot.Transform().SetPos(vec3(6, 0, 0))
+		bot.AddComponent(components.NewRotator(vec3(0, -1, 0), 15))
+
+		var mtrls []*rendering.Material
+		outer := rendering.NewMaterial()
+		outer.AddTexture("albedo", rendering.NewTexture("res/textures/sphere_bot/Robot_outerbody_Albedo.png", true))
+		outer.AddTexture("metallic", rendering.NewMetallicTexture("res/textures/sphere_bot/Robot_outerbody_Metallic.png"))
+		outer.AddTexture("roughness", rendering.NewRoughnessTexture("res/textures/sphere_bot/Robot_outerbody_Roughness.png"))
+		outer.AddTexture("normal", rendering.NewTexture("res/textures/sphere_bot/Robot_outerbody_Normal.png", false))
+		mtrls = append(mtrls, outer)
+
+		inner := rendering.NewMaterial()
+		inner.AddTexture("albedo", rendering.NewTexture("res/textures/sphere_bot/Robot_innerbody_Albedo.png", true))
+		inner.AddTexture("metallic", rendering.NewMetallicTexture("res/textures/sphere_bot/Robot_innerbody_Metallic.png"))
+		inner.AddTexture("roughness", rendering.NewRoughnessTexture("res/textures/sphere_bot/Robot_innerbody_Roughness.png"))
+		inner.AddTexture("normal", rendering.NewTexture("res/textures/sphere_bot/Robot_innerbody_Normal.png", false))
+
+		mtrls = append(mtrls, inner)
+
+		setMeshRenderer(bot, "res/meshes/sphere_bot/model.obj", mtrls)
+		engine.AddObject(bot)
+	}
 
 	engine.Start()
 	return nil

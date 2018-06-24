@@ -58,6 +58,7 @@ func NewEngine(width, height int) *Engine {
 		ambientShader: shader.NewShader("forward_ambient"),
 		shadowShader:  shader.NewShader("shadow_vsm"),
 		lightShader:   shader.NewShader("pbr_light"),
+		terrainShader: shader.NewShader("pbr_terrain"),
 
 		offScreenTexture: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGBA, gl.FLOAT, gl.LINEAR, false),
 		toneMapShader:    shader.NewShader("filter_tonemap"),
@@ -129,6 +130,7 @@ type Engine struct {
 	fxaaShader    *shader.Shader
 	overlayShader *shader.Shader
 	lightShader   *shader.Shader
+	terrainShader *shader.Shader
 
 	offScreenTexture *framebuffer.Texture
 
@@ -152,7 +154,7 @@ func (e *Engine) Disable(cap string) {
 	e.capabilities[cap] = false
 }
 
-func (e *Engine) Render(object components.Renderable) {
+func (e *Engine) Render(object components.Renderable, terrains components.Renderable) {
 	if e.mainCamera == nil {
 		panic("mainCamera not found, the game cannot render")
 	}
@@ -182,6 +184,7 @@ func (e *Engine) Render(object components.Renderable) {
 
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	object.RenderAll(e.lightShader, e)
+	terrains.RenderAll(e.terrainShader, e)
 
 	if e.Integer("x_enable_skybox") == 1 {
 		e.skybox.Draw(e)
