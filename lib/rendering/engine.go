@@ -163,19 +163,21 @@ func (e *Engine) Render(object components.Renderable, terrains components.Render
 	debugger.Clear()
 	//gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 	//gl.Viewport(0, 0, e.width, e.height)
-	//for _, light := range e.lights {
-	//	if !light.ShadowCaster() {
-	//		continue
-	//	}
-	//	e.activeLight = light
-	//	light.SetCamera(e.MainCamera().Pos(), e.mainCamera.Rot())
-	//	idx := light.ShadowInfo().SizeAsPowerOfTwo()
-	//	e.shadowTextures[idx].BindAsRenderTarget()
-	//	e.shadowTextures[idx].SetViewPort()
-	//	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-	//	object.RenderAll(e.shadowShader, e)
-	//	debugger.AddTexture(e.shadowTextures[idx], "shadow", e.applyFilter)
-	//}
+	for _, light := range e.lights {
+		if !light.ShadowCaster() {
+			continue
+		}
+		e.activeLight = light
+		light.SetCamera(e.MainCamera().Pos(), e.mainCamera.Rot())
+		idx := light.ShadowInfo().SizeAsPowerOfTwo()
+		e.shadowTextures[idx].BindAsRenderTarget()
+		e.shadowTextures[idx].SetViewPort()
+		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+		object.RenderAll(e.shadowShader, e)
+		terrains.RenderAll(e.shadowShader, e)
+		//debugger.AddTexture(e.shadowTextures[idx], "shadow", e.applyFilter)
+		e.blurShadowMap(idx, 2)
+	}
 
 	e.offScreenTexture.BindAsRenderTarget()
 	e.offScreenTexture.SetViewPort()
@@ -183,6 +185,12 @@ func (e *Engine) Render(object components.Renderable, terrains components.Render
 	//gl.Viewport(0, 0, e.width, e.height)
 
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+	info := e.lights[0].ShadowInfo()
+	e.SetFloat("x_varianceMin", 0.0000001)
+	e.SetFloat("x_lightBleedReductionAmount", 0.2)
+	e.SetTexture("x_shadowMap", e.shadowTextures[info.SizeAsPowerOfTwo()])
+
 	object.RenderAll(e.lightShader, e)
 	terrains.RenderAll(e.terrainShader, e)
 

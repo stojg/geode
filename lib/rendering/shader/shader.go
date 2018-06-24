@@ -159,6 +159,8 @@ func (s *Shader) UpdateTransform(transform *physics.Transform, engine components
 		switch name {
 		case "LightMVP":
 			s.UpdateUniform(name, engine.ActiveLight().ViewProjection().Mul4(transform.Transformation()))
+		case "LightVP":
+			s.UpdateUniform(name, engine.ActiveLight().ViewProjection())
 		case "MVP":
 			s.UpdateUniform(name, engine.MainCamera().Projection().Mul4(engine.MainCamera().View().Mul4(transform.Transformation())))
 		case "MV":

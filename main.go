@@ -43,6 +43,14 @@ func run() error {
 		return err
 	}
 
+	var whiteMaterial []*rendering.Material
+	plasticMtrl := rendering.NewMaterial()
+	plasticMtrl.AddTexture("albedo", rendering.NewTexture("res/textures/scuffed-plastic/scuffed-plastic5-alb.png", true))
+	plasticMtrl.AddTexture("metallic", rendering.NewMetallicTexture("res/textures/scuffed-plastic/scuffed-plastic-metal.png"))
+	plasticMtrl.AddTexture("roughness", rendering.NewRoughnessTexture("res/textures/scuffed-plastic/scuffed-plastic-rough.png"))
+	plasticMtrl.AddTexture("normal", rendering.NewTexture("res/textures/scuffed-plastic/scuffed-plastic-normal.png", false))
+	whiteMaterial = append(whiteMaterial, plasticMtrl)
+
 	cameraObject := core.NewGameObject()
 	cameraObject.Transform().SetPos(vec3(0, 1.8, 6))
 	cameraObject.Transform().SetScale(vec3(0.1, 0.1, 0.1))
@@ -50,40 +58,41 @@ func run() error {
 	cameraObject.AddComponent(&components.FreeMove{})
 	cameraObject.AddComponent(components.NewFreelook(width, height))
 	//cameraObject.AddComponent(&components.HeadHeight{})
-	//setMeshRenderer(cameraObject, "res/meshes/sphere/model.obj", whiteMaterial)
+	setMeshRenderer(cameraObject, "res/meshes/sphere/model.obj", whiteMaterial)
 	engine.AddObject(cameraObject)
 
-	directionalLight := lights.NewDirectional(8, 0.9, 0.9, 0.9, 1)
-	dirLight := core.NewGameObject()
-	dirLight.Transform().SetPos(vec3(1, 1, 0))
-	dirLight.Transform().LookAt(vec3(0, 0, 0), up())
-	dirLight.Transform().SetScale(vec3(0.5, 0.1, 0.5))
-	dirLight.AddComponent(directionalLight)
-	engine.AddObject(dirLight)
+	//directionalLight := lights.NewDirectional(8, 0.9, 0.9, 0.9, 5)
+	//dirLight := core.NewGameObject()
+	//dirLight.Transform().SetPos(vec3(0, 0.99, 0))
+	//dirLight.Transform().LookAt(vec3(0, 0, 0), up())
+	//dirLight.Transform().SetScale(vec3(0.5, 0.1, 0.5))
+	//dirLight.AddComponent(directionalLight)
+	//setMeshRenderer(dirLight, "res/meshes/cube/model.obj", whiteMaterial)
+	//engine.AddObject(dirLight)
 
-	spotLight := lights.NewSpot(8, 0.9, 0.4, 0.1, 30, 65)
+	spotLight := lights.NewSpot(9, 0.9, 0.4, 0.1, 500, 65)
 	spot := core.NewGameObject()
 	spot.Transform().SetPos(vec3(3, 3.5, 4.6))
 	spot.Transform().SetScale(vec3(0.05, 0.05, 0.3))
 	spot.Transform().LookAt(vec3(0, 1, 0), up())
 	spot.AddComponent(spotLight)
 	engine.AddObject(spot)
-
-	pointLight := core.NewGameObject()
-	pointLight.Transform().SetPos(vec3(-2, 0.6, 2))
-	pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
-	pointLight.AddComponent(lights.NewPoint(0, 0.5, 1.0, 50))
-	engine.AddObject(pointLight)
-
-	{
-		pointLight := core.NewGameObject()
-		pointLight.Transform().SetPos(vec3(-10, 0.3, 0))
-		pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
-		pointLight.AddComponent(lights.NewPoint(0.0, 0.5, 1.0, 50))
-		lightMaterial := rendering.NewMaterial()
-		lightMaterial.SetAlbedo(mgl32.Vec3{0.1, 0.05, 0.98})
-		engine.AddObject(pointLight)
-	}
+	//
+	//pointLight := core.NewGameObject()
+	//pointLight.Transform().SetPos(vec3(-2, 0.6, 2))
+	//pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
+	//pointLight.AddComponent(lights.NewPoint(0, 0.5, 1.0, 50))
+	//engine.AddObject(pointLight)
+	//
+	//{
+	//	pointLight := core.NewGameObject()
+	//	pointLight.Transform().SetPos(vec3(-10, 0.3, 0))
+	//	pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
+	//	pointLight.AddComponent(lights.NewPoint(0.0, 0.5, 1.0, 50))
+	//	lightMaterial := rendering.NewMaterial()
+	//	lightMaterial.SetAlbedo(mgl32.Vec3{0.1, 0.05, 0.98})
+	//	engine.AddObject(pointLight)
+	//}
 
 	//{
 	//	pointLight := core.NewGameObject()
@@ -98,22 +107,15 @@ func run() error {
 	//	engine.AddObject(pointLight)
 	//}
 
-	var whiteMaterial []*rendering.Material
-	plasticMtrl := rendering.NewMaterial()
-	plasticMtrl.AddTexture("albedo", rendering.NewTexture("res/textures/scuffed-plastic/scuffed-plastic5-alb.png", true))
-	plasticMtrl.AddTexture("metallic", rendering.NewMetallicTexture("res/textures/scuffed-plastic/scuffed-plastic-metal.png"))
-	plasticMtrl.AddTexture("roughness", rendering.NewRoughnessTexture("res/textures/scuffed-plastic/scuffed-plastic-rough.png"))
-	plasticMtrl.AddTexture("normal", rendering.NewTexture("res/textures/scuffed-plastic/scuffed-plastic-normal.png", false))
-	whiteMaterial = append(whiteMaterial, plasticMtrl)
-
+	cubes := core.NewGameObject()
+	setMeshInstanceRenderer(cubes, "res/meshes/cube/model.obj", whiteMaterial)
 	for i := 0; i < 100; i++ {
 		cube := core.NewGameObject()
 		cube.Transform().SetScale(vec3(1, 1, 1))
 		cube.Transform().SetPos(vec3(rand.Float32()*100-50, 1, rand.Float32()*100-50))
-		setMeshRenderer(cube, "res/meshes/cube/model.obj", whiteMaterial)
-		engine.AddObject(cube)
-
+		cubes.AddChild(cube)
 	}
+	engine.AddObject(cubes)
 
 	var dryDirt []*rendering.Material
 	dryDirtMtrl := rendering.NewMaterial()
@@ -123,10 +125,12 @@ func run() error {
 	dryDirtMtrl.AddTexture("normal", rendering.NewTexture("res/textures/dry-dirt/normal2.png", false))
 	dryDirt = append(dryDirt, dryDirtMtrl)
 
-	t := terrain.New(0, 0)
-	test := core.NewGameObject()
-	test.AddComponent(components.NewMeshRenderer(t.Mesh(), dryDirt[0]))
-	engine.AddTerrain(test)
+	{
+		t := terrain.New(0, 0)
+		test := core.NewGameObject()
+		test.AddComponent(components.NewMeshRenderer(t.Mesh(), dryDirt[0]))
+		engine.AddTerrain(test)
+	}
 
 	{
 		t := terrain.New(-1, 0)
@@ -154,7 +158,7 @@ func run() error {
 
 	{
 		bot := core.NewGameObject()
-		bot.Transform().SetPos(vec3(6, 0, 0))
+		bot.Transform().SetPos(vec3(0, 0, 0))
 		bot.AddComponent(components.NewRotator(vec3(0, -1, 0), 15))
 
 		var mtrls []*rendering.Material

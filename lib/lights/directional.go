@@ -1,7 +1,6 @@
 package lights
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/go-gl/mathgl/mgl32"
@@ -9,14 +8,13 @@ import (
 )
 
 func NewDirectional(shadowSize int, r, g, b, intensity float32) *Directional {
-	var halfSize float32 = 10 / 2
+	var halfSize float32 = 30 / 2
 
 	light := &Directional{
 		BaseLight: BaseLight{
-			color:       mgl32.Vec3{r, g, b}.Mul(intensity),
-			constant:    0,
-			maxDistance: 10,
-			intensity:   intensity,
+			color:    mgl32.Vec3{r, g, b}.Mul(intensity),
+			constant: 0,
+			//shader: shader.NewShader("forward_directional"),
 		},
 	}
 
@@ -41,8 +39,6 @@ func (b *Directional) AddToEngine(e components.Engine) {
 }
 
 func (b *Directional) SetCamera(inPos mgl32.Vec3, inRot mgl32.Quat) {
-
-	fmt.Println(inPos)
 	resultPos := inPos.Mul(-1).Add(inRot.Rotate(mgl32.Vec3{0, 0, b.shadowInfo.halfSize}))
 	resultRot := b.Transform().TransformedRot().Conjugate()
 

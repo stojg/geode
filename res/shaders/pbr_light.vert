@@ -14,6 +14,7 @@ uniform mat4 model;
 #include "pbr_lights.glsl"
 uniform Light lights[16];
 uniform int numLights;
+uniform mat4 LightVP;
 
 out VS_OUT
 {
@@ -23,6 +24,7 @@ out VS_OUT
     vec3 V_Pos;
     vec3 Reflection;
     mat3 TBN;
+    vec4 FragPosLightSpace;
 } vs_out;
 
 void main() {
@@ -44,6 +46,8 @@ void main() {
     vec3 N = normalize(vec3(MV * vec4(aNormal, 0.0)));
     vec3 T = normalize(vec3(MV * vec4(aTangent, 0.0)));
     vs_out.TBN = mat3(T, cross(N, T), N);
+
+    vs_out.FragPosLightSpace = LightVP * vec4(vec3(model * vec4(aPosition, 1.0)), 1.0);
 
     // transform light positions into view space
     for (int i = 0; i < numLights; i++ ) {

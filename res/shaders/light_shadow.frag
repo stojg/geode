@@ -23,7 +23,7 @@ float sampleVarianceShadowMap(sampler2D shadowMap, vec2 coords, float compare, f
 	return min(max(p, pMax), 1.0);
 }
 
-float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir, float varianceMin, float lightBleedReductionAmount)
+float ShadowCalculation(vec4 fragPosLightSpace)
 {
     // perform perspective divide, since it's not done automatically for us
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
@@ -35,5 +35,5 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir, floa
         return 1.0;
     }
 
-    return sampleVarianceShadowMap(x_shadowMap, projCoords.xy, projCoords.z, varianceMin, lightBleedReductionAmount);
+    return sampleVarianceShadowMap(x_shadowMap, projCoords.xy, projCoords.z, x_varianceMin, x_lightBleedReductionAmount);
 }

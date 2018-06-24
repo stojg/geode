@@ -25,10 +25,12 @@ in VS_OUT
     vec3 V_Pos;
     vec3 Reflection;
     mat3 TBN;
+    vec4 FragPosLightSpace;
 } vs_in;
 
 #include "pbr_lights.glsl"
 #include "pbr.glsl"
+#include "light_shadow.frag"
 
 void main() {
 
@@ -86,6 +88,8 @@ void main() {
     // sum up all ambient
     vec3 ambient = (kD * diffuse + specular);
 
+    float shadow = ShadowCalculation(vs_in.FragPosLightSpace);
+    Lo = (shadow) * Lo;
     // combine with lights
     vec3 color = Lo + ambient;
 
