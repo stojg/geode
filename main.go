@@ -61,51 +61,50 @@ func run() error {
 	setMeshRenderer(cameraObject, "res/meshes/sphere/model.obj", whiteMaterial)
 	engine.AddObject(cameraObject)
 
-	//directionalLight := lights.NewDirectional(8, 0.9, 0.9, 0.9, 5)
-	//dirLight := core.NewGameObject()
-	//dirLight.Transform().SetPos(vec3(0, 0.99, 0))
-	//dirLight.Transform().LookAt(vec3(0, 0, 0), up())
-	//dirLight.Transform().SetScale(vec3(0.5, 0.1, 0.5))
-	//dirLight.AddComponent(directionalLight)
-	//setMeshRenderer(dirLight, "res/meshes/cube/model.obj", whiteMaterial)
-	//engine.AddObject(dirLight)
+	directionalLight := lights.NewDirectional(10, 0.9, 0.9, 0.9, 1)
+	dirLight := core.NewGameObject()
+	dirLight.Transform().SetPos(vec3(1, 1, 0))
+	dirLight.Transform().LookAt(vec3(0, 0, 0), up())
+	dirLight.Transform().SetScale(vec3(0.5, 0.1, 0.5))
+	dirLight.AddComponent(directionalLight)
+	engine.AddObject(dirLight)
 
-	spotLight := lights.NewSpot(9, 0.9, 0.4, 0.1, 500, 65)
+	spotLight := lights.NewSpot(0.9, 0.4, 0.1, 500, 65)
 	spot := core.NewGameObject()
 	spot.Transform().SetPos(vec3(3, 3.5, 4.6))
 	spot.Transform().SetScale(vec3(0.05, 0.05, 0.3))
 	spot.Transform().LookAt(vec3(0, 1, 0), up())
 	spot.AddComponent(spotLight)
 	engine.AddObject(spot)
-	//
-	//pointLight := core.NewGameObject()
-	//pointLight.Transform().SetPos(vec3(-2, 0.6, 2))
-	//pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
-	//pointLight.AddComponent(lights.NewPoint(0, 0.5, 1.0, 50))
-	//engine.AddObject(pointLight)
-	//
-	//{
-	//	pointLight := core.NewGameObject()
-	//	pointLight.Transform().SetPos(vec3(-10, 0.3, 0))
-	//	pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
-	//	pointLight.AddComponent(lights.NewPoint(0.0, 0.5, 1.0, 50))
-	//	lightMaterial := rendering.NewMaterial()
-	//	lightMaterial.SetAlbedo(mgl32.Vec3{0.1, 0.05, 0.98})
-	//	engine.AddObject(pointLight)
-	//}
 
-	//{
-	//	pointLight := core.NewGameObject()
-	//	pointLight.Transform().SetPos(vec3(2, 0.4, 4))
-	//	pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
-	//	pointLight.AddComponent(lights.NewPoint(1.0, 1.0, 1.0, 50))
-	//	pointLight.AddComponent(components.NewTimeMove(mgl32.Vec3{-1, 0, 0}, func(elapsed float64) float64 {
-	//		return math.Sin(glfw.GetTime())
-	//	}))
-	//	lightMaterial := rendering.NewMaterial()
-	//	lightMaterial.SetAlbedo(mgl32.Vec3{50, 50, 50})
-	//	engine.AddObject(pointLight)
-	//}
+	pointLight := core.NewGameObject()
+	pointLight.Transform().SetPos(vec3(-2, 0.6, 2))
+	pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
+	pointLight.AddComponent(lights.NewPoint(0, 0.5, 1.0, 50))
+	engine.AddObject(pointLight)
+
+	{
+		pointLight := core.NewGameObject()
+		pointLight.Transform().SetPos(vec3(-10, 0.3, 0))
+		pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
+		pointLight.AddComponent(lights.NewPoint(0.0, 0.5, 1.0, 50))
+		lightMaterial := rendering.NewMaterial()
+		lightMaterial.SetAlbedo(mgl32.Vec3{0.1, 0.05, 0.98})
+		engine.AddObject(pointLight)
+	}
+
+	{
+		pointLight := core.NewGameObject()
+		pointLight.Transform().SetPos(vec3(2, 0.4, 4))
+		pointLight.Transform().SetScale(vec3(0.05, 0.05, 0.05))
+		pointLight.AddComponent(lights.NewPoint(1.0, 1.0, 1.0, 50))
+		//pointLight.AddComponent(components.NewTimeMove(mgl32.Vec3{-1, 0, 0}, func(elapsed float64) float64 {
+		//	return math.Sin(glfw.GetTime())
+		//}))
+		lightMaterial := rendering.NewMaterial()
+		lightMaterial.SetAlbedo(mgl32.Vec3{50, 50, 50})
+		engine.AddObject(pointLight)
+	}
 
 	cubes := core.NewGameObject()
 	setMeshInstanceRenderer(cubes, "res/meshes/cube/model.obj", whiteMaterial)

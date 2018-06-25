@@ -8,13 +8,12 @@ import (
 )
 
 func NewDirectional(shadowSize int, r, g, b, intensity float32) *Directional {
-	var halfSize float32 = 30 / 2
+	var halfSize float32 = 40 / 2
 
 	light := &Directional{
 		BaseLight: BaseLight{
 			color:    mgl32.Vec3{r, g, b}.Mul(intensity),
 			constant: 0,
-			//shader: shader.NewShader("forward_directional"),
 		},
 	}
 
@@ -23,7 +22,7 @@ func NewDirectional(shadowSize int, r, g, b, intensity float32) *Directional {
 		light.shadowInfo = NewShadowInfo(shadowSize, projection, false)
 		light.shadowInfo.halfSize = halfSize
 		light.shadowInfo.shadowVarianceMin = 0.00002
-		light.shadowInfo.lightBleedReduction = 0.8
+		light.shadowInfo.lightBleedReduction = 0.5
 	}
 
 	return light

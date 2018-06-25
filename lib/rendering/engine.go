@@ -102,7 +102,7 @@ func NewEngine(width, height int) *Engine {
 	e.SetTexture("x_shadowMap", e.shadowTextures[0])
 
 	e.SetInteger("x_enable_env_map", 1)
-	e.SetInteger("x_enable_skybox", 1)
+	e.SetInteger("x_enable_skybox", 0)
 
 	debug.CheckForError("rendering.NewEngine end")
 	return e
@@ -161,8 +161,7 @@ func (e *Engine) Render(object components.Renderable, terrains components.Render
 	gl.Enable(gl.DEPTH_TEST)
 
 	debugger.Clear()
-	//gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-	//gl.Viewport(0, 0, e.width, e.height)
+
 	for _, light := range e.lights {
 		if !light.ShadowCaster() {
 			continue
@@ -175,21 +174,22 @@ func (e *Engine) Render(object components.Renderable, terrains components.Render
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 		object.RenderAll(e.shadowShader, e)
 		terrains.RenderAll(e.shadowShader, e)
-		//debugger.AddTexture(e.shadowTextures[idx], "shadow", e.applyFilter)
-		e.blurShadowMap(idx, 2)
+		//e.blurShadowMap(idx, 1)
 	}
 
 	e.offScreenTexture.BindAsRenderTarget()
 	e.offScreenTexture.SetViewPort()
-	//gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-	//gl.Viewport(0, 0, e.width, e.height)
 
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-	info := e.lights[0].ShadowInfo()
-	e.SetFloat("x_varianceMin", 0.0000001)
-	e.SetFloat("x_lightBleedReductionAmount", 0.2)
-	e.SetTexture("x_shadowMap", e.shadowTextures[info.SizeAsPowerOfTwo()])
+	for _, light := range e.lights {
+		if light.ShadowCaster() {
+			e.SetFloat("x_varianceMin", light.ShadowInfo().ShadowVarianceMin())
+			e.SetFloat("x_lightBleedReductionAmount", light.ShadowInfo().LightBleedReduction())
+			e.SetTexture("x_shadowMap", e.shadowTextures[light.ShadowInfo().SizeAsPowerOfTwo()])
+			break
+		}
+	}
 
 	object.RenderAll(e.lightShader, e)
 	terrains.RenderAll(e.terrainShader, e)
@@ -200,9 +200,10 @@ func (e *Engine) Render(object components.Renderable, terrains components.Render
 
 	gl.Viewport(0, 0, e.width, e.height)
 	gl.Disable(gl.DEPTH_TEST)
-	e.applyFilter(e.toneMapShader, e.offScreenTexture, e.fullScreenTemp)
-	e.applyFilter(e.fxaaShader, e.fullScreenTemp, nil)
-	e.applyFilter(e.overlayShader, debugger.Texture(), nil)
+	e.applyFilter(e.toneMapShader, e.offScreenTexture, nil)
+	//e.applyFilter(e.toneMapShader, e.offScreenTexture, e.fullScreenTemp)
+	//e.applyFilter(e.fxaaShader, e.fullScreenTemp, nil)
+	//e.applyFilter(e.overlayShader, debugger.Texture(), nil)
 	debug.CheckForError("renderer.Engine.Render [end]")
 }
 

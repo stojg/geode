@@ -57,6 +57,7 @@ void main() {
     for (int i = 0; i < numLights; i++) {
         if (lights[i].constant == 0) {
             Lo += CalcDirectional(F0, vs_in.V_LightPositions[i], lights[i], mtrl, normal, vs_in.V_Pos, V);
+            Lo *= ShadowCalculation(vs_in.FragPosLightSpace);
         } else if (lights[i].cutoff > 0) {
             Lo += CalcSpot(F0, vs_in.V_LightPositions[i], lights[i], mtrl, normal, vs_in.V_Pos, V);
         } else {
@@ -88,8 +89,6 @@ void main() {
     // sum up all ambient
     vec3 ambient = (kD * diffuse + specular);
 
-    float shadow = ShadowCalculation(vs_in.FragPosLightSpace);
-    Lo = (shadow) * Lo;
     // combine with lights
     vec3 color = Lo + ambient;
 

@@ -7,7 +7,7 @@ import (
 	"github.com/stojg/graphics/lib/components"
 )
 
-func NewSpot(shadowSize int, r, g, b, intensity, viewAngle float32) *Spot {
+func NewSpot(r, g, b, intensity, viewAngle float32) *Spot {
 	color := mgl32.Vec3{r, g, b}
 	fov := mgl32.DegToRad(viewAngle)
 	cutoff := float32(math.Cos(float64(fov / 2)))
@@ -17,25 +17,13 @@ func NewSpot(shadowSize int, r, g, b, intensity, viewAngle float32) *Spot {
 			color:       color.Mul(intensity),
 			maxDistance: 1,
 			intensity:   intensity,
-
-			constant: 1,
-			linear:   0.35,
-			exponent: 0.44,
-
-			cutoff: cutoff,
+			constant:    1,
+			linear:      0.35,
+			exponent:    0.44,
+			cutoff:      cutoff,
 		},
 	}
-
 	calcRange(&light.BaseLight)
-
-	const nearPlane float32 = 0.1
-	if shadowSize != 0 {
-		projection := mgl32.Perspective(fov, float32(1), nearPlane, light.BaseLight.maxDistance)
-		light.shadowInfo = NewShadowInfo(shadowSize, projection, false)
-		light.shadowInfo.shadowVarianceMin = 0.00002
-		light.shadowInfo.lightBleedReduction = 0.8
-	}
-
 	return light
 }
 
@@ -49,15 +37,6 @@ func (spot *Spot) AddToEngine(e components.Engine) {
 
 func (spot *Spot) Direction() mgl32.Vec3 {
 	return spot.Transform().TransformedRot().Rotate(mgl32.Vec3{0, 0, -1})
-}
-
-func (spot *Spot) GetView() mgl32.Mat4 {
-	//This comes from the conjugate rotation because the world should appear to rotate opposite to the camera's rotation.
-	cameraRotation := spot.Transform().TransformedRot().Conjugate().Mat4()
-	//Similarly, the translation is inverted because the world appears to move opposite to the camera's movement.
-	cameraPos := spot.Transform().TransformedPos().Mul(-1)
-	cameraTranslation := mgl32.Translate3D(cameraPos[0], cameraPos[1], cameraPos[2])
-	return cameraRotation.Mul4(cameraTranslation)
 }
 
 func (spot *Spot) ViewProjection() mgl32.Mat4 {
