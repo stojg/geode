@@ -14,7 +14,7 @@ func NewTexture(filename string, srgb bool) *Texture {
 	}
 	resource, err := loadLDRTexture(filename, srgb)
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	} else {
 		t.resource = resource
 	}

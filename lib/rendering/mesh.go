@@ -4,6 +4,8 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
+// @todo check http://ogldev.atspace.co.uk/www/tutorial33/tutorial33.html for proper instanced rendering
+// @todo Would be nice to have Model that has one or many meshes and textures
 func NewMesh() *Mesh {
 	m := &Mesh{}
 
@@ -28,6 +30,14 @@ func (m *Mesh) SetVertices(vertices []Vertex, indices []uint32) {
 
 	gl.BindVertexArray(m.vao)
 
+	// these values must match the ones in the shader code
+	const (
+		positions uint32 = iota
+		normals
+		textures
+		tangents
+	)
+
 	// load data into vertex buffers
 	gl.BindBuffer(gl.ARRAY_BUFFER, m.vbo)
 	gl.BufferData(gl.ARRAY_BUFFER, len(vertices)*int(sizeOfVertex), gl.Ptr(vertices), gl.STATIC_DRAW)
@@ -37,23 +47,23 @@ func (m *Mesh) SetVertices(vertices []Vertex, indices []uint32) {
 
 	offset := 0
 	// vertex position
-	gl.VertexAttribPointer(0, numVertexPositions, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
-	gl.EnableVertexAttribArray(0)
+	gl.VertexAttribPointer(positions, numVertexPositions, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
+	gl.EnableVertexAttribArray(positions)
 	offset += numVertexPositions
 
 	// normals
-	gl.VertexAttribPointer(1, numVertexNormals, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
-	gl.EnableVertexAttribArray(1)
+	gl.VertexAttribPointer(normals, numVertexNormals, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
+	gl.EnableVertexAttribArray(normals)
 	offset += numVertexNormals
 
 	// texture coordinates
-	gl.VertexAttribPointer(2, numVertexTexCoords, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
-	gl.EnableVertexAttribArray(2)
+	gl.VertexAttribPointer(textures, numVertexTexCoords, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
+	gl.EnableVertexAttribArray(textures)
 	offset += numVertexTexCoords
 
 	// tangents
-	gl.VertexAttribPointer(3, 3, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
-	gl.EnableVertexAttribArray(3)
+	gl.VertexAttribPointer(tangents, 3, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
+	gl.EnableVertexAttribArray(tangents)
 
 	// reset the current bound vertex array so that no one else mistakenly changes the VAO
 	gl.BindVertexArray(0)

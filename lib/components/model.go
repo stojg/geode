@@ -1,6 +1,6 @@
 package components
 
-func NewMeshRenderer(mesh Drawable, material Material) *MeshRenderer {
+func NewModel(mesh Drawable, material Material) *MeshRenderer {
 	return &MeshRenderer{
 		mesh:     mesh,
 		material: material,

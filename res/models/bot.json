@@ -1,0 +1,7 @@
+{
+    "mesh": "sphere_bot",
+    "textures": [
+        "sphere_bot/outer",
+        "sphere_bot/inner"
+    ]
+}
