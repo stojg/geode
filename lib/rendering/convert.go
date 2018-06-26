@@ -12,26 +12,26 @@ func ConvertToVertices(meshdata []float32, indices []uint32) []Vertex {
 	const stride = 8
 
 	if len(meshdata)%stride != 0 {
-		panic("the graph data is not a multiple of 8, want [3]Pos, [3]Normals, [2]TexCoords")
+		panic("the mesh data is not a multiple of 8, want [3]Pos, [3]Normals, [2]TexCoords")
 	}
-	var vertices []Vertex
+	vertices := make([]Vertex, len(meshdata)/stride, len(meshdata)/stride)
 
 	// 1. Add Pos, Normal and TexCoords to all Vertices
 	for i := 0; i < len(meshdata); i += stride {
-		var vertex Vertex
-		// position
-		copy(vertex.Pos[:], meshdata[i:i+3])
-		// normals
-		copy(vertex.Normal[:], meshdata[i+3:i+6])
-		// uv
-		copy(vertex.TexCoords[:], meshdata[i+6:i+8])
-		vertices = append(vertices, vertex)
+		copy(vertices[i/stride].Pos[:], meshdata[i:i+3])
+		copy(vertices[i/stride].Normal[:], meshdata[i+3:i+6])
+		copy(vertices[i/stride].TexCoords[:], meshdata[i+6:i+8])
 	}
 
 	// 2. calculate tangents from the texture UVs so we can properly use bumpmap texture on meshes (we can calculate the bi-tangents
 	// in the vertex shader when we need it)
 
 	for indexPos := 0; indexPos < len(indices); indexPos += 3 {
+		// check if we already have calculated the tangents
+		if sqrLength(vertices[indices[indexPos]].Tangent) != 0 {
+			continue
+		}
+
 		v0 := vertices[indices[indexPos]]
 		v1 := vertices[indices[indexPos+1]]
 		v2 := vertices[indices[indexPos+2]]
@@ -46,11 +46,11 @@ func ConvertToVertices(meshdata []float32, indices []uint32) []Vertex {
 		edge1 := edge(v1, v0)
 		edge2 := edge(v2, v0)
 
-		var tangent [3]float32
-		tangent[0] = f * (deltaV2*edge1[0] - deltaV1*edge2[0])
-		tangent[1] = f * (deltaV2*edge1[1] - deltaV1*edge2[1])
-		tangent[2] = f * (deltaV2*edge1[2] - deltaV1*edge2[2])
-
+		tangent := [3]float32{
+			f * (deltaV2*edge1[0] - deltaV1*edge2[0]),
+			f * (deltaV2*edge1[1] - deltaV1*edge2[1]),
+			f * (deltaV2*edge1[2] - deltaV1*edge2[2]),
+		}
 		tangent = normalise(tangent)
 
 		copy(vertices[indices[indexPos]].Tangent[:], tangent[:])
@@ -61,14 +61,14 @@ func ConvertToVertices(meshdata []float32, indices []uint32) []Vertex {
 }
 
 func edge(a, b Vertex) [3]float32 {
-	return [3]float32{
-		a.Pos[0] - b.Pos[0],
-		a.Pos[1] - b.Pos[1],
-		a.Pos[2] - b.Pos[2],
-	}
+	return [3]float32{a.Pos[0] - b.Pos[0], a.Pos[1] - b.Pos[1], a.Pos[2] - b.Pos[2]}
 }
 
 func normalise(vec [3]float32) [3]float32 {
-	l := 1.0 / float32(math.Sqrt(float64(vec[0]*vec[0]+vec[1]*vec[1]+vec[2]*vec[2])))
+	l := 1.0 / float32(math.Sqrt(float64(sqrLength(vec))))
 	return [3]float32{vec[0] * l, vec[1] * l, vec[2] * l}
+}
+
+func sqrLength(vec [3]float32) float32 {
+	return vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]
 }
