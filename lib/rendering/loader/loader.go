@@ -9,36 +9,61 @@ import (
 	"os"
 )
 
-func Load(filename string) ([][]float32, error) {
+func Load(filename string) ([][]float32, [][]uint32, error) {
 	f, err := os.Open(filename)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer f.Close()
 
 	obj, num, err := parse(f)
 
 	if err != nil {
-		return nil, fmt.Errorf("error in '%s' at line: %d", filename, num)
+		return nil, nil, fmt.Errorf("error in '%s' at line: %d", filename, num)
 	}
 
-	var result [][]float32
+	var perObjectVertices [][]float32
+	var perObjectIndices [][]uint32
 	for _, object := range obj.Objects {
-		var data []float32
-		// convert the face data into actual data ready for openGL loading
+		vertexCombinations := make(map[[3]int]uint32)
+		var indices []uint32
+		var nextIndex uint32 = 0
+		var vertices []float32
+		// convert the face vertices into actual vertices ready for openGL loading
 		for _, vert := range object.VertexData {
-			data = add(data, vert.Declarations[0])
-			data = add(data, vert.Declarations[1])
-			data = add(data, vert.Declarations[2])
+			indices, vertices = dosomeThing2(vert.Declarations[0], vertexCombinations, &nextIndex, indices, vertices)
+			indices, vertices = dosomeThing2(vert.Declarations[1], vertexCombinations, &nextIndex, indices, vertices)
+			indices, vertices = dosomeThing2(vert.Declarations[2], vertexCombinations, &nextIndex, indices, vertices)
 			for i := 3; i < len(vert.Declarations); i++ {
-				data = add(data, vert.Declarations[i-3])
-				data = add(data, vert.Declarations[i-1])
-				data = add(data, vert.Declarations[i])
+				indices, vertices = dosomeThing2(vert.Declarations[i-3], vertexCombinations, &nextIndex, indices, vertices)
+				indices, vertices = dosomeThing2(vert.Declarations[i-1], vertexCombinations, &nextIndex, indices, vertices)
+				indices, vertices = dosomeThing2(vert.Declarations[i], vertexCombinations, &nextIndex, indices, vertices)
 			}
 		}
-		result = append(result, data)
+		perObjectVertices = append(perObjectVertices, vertices)
+		perObjectIndices = append(perObjectIndices, indices)
 	}
-	return result, nil
+	return perObjectVertices, perObjectIndices, nil
+}
+
+func dosomeThing2(decl *declaration, vertexCombinations map[[3]int]uint32, nextIndex *uint32, indices []uint32, data []float32) ([]uint32, []float32) {
+	idx, exists := getSomething(decl, vertexCombinations, nextIndex)
+	indices = append(indices, idx)
+	if !exists {
+		data = add(data, decl)
+	}
+	return indices, data
+}
+
+func getSomething(in *declaration, indexLookup map[[3]int]uint32, nextIndex *uint32) (uint32, bool) {
+	key := [3]int{in.vertex, in.normal, in.uv}
+	index, ok := indexLookup[key]
+	if !ok {
+		index = *nextIndex
+		indexLookup[key] = index
+		*nextIndex++
+	}
+	return index, ok
 }
 
 func add(data []float32, in *declaration) []float32 {

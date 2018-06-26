@@ -7,7 +7,7 @@ import (
 // ConvertToVertices takes an slice of float32 and turnes them into nice Vertexes.
 // It requires that the indata is packed in this order: [3] position, [3] normals, [2] texture coordinates. If the
 // in data doesn't follow this convention, there will be tears and possibly your GPU will implode.
-func ConvertToVertices(meshdata []float32) []Vertex {
+func ConvertToVertices(meshdata []float32, indices []uint32) []Vertex {
 
 	const stride = 8
 
@@ -30,10 +30,11 @@ func ConvertToVertices(meshdata []float32) []Vertex {
 
 	// 2. calculate tangents from the texture UVs so we can properly use bumpmap texture on meshes (we can calculate the bi-tangents
 	// in the vertex shader when we need it)
-	for i := 0; i < len(vertices); i += 3 {
-		v0 := vertices[i]
-		v1 := vertices[i+1]
-		v2 := vertices[i+2]
+
+	for indexPos := 0; indexPos < len(indices); indexPos += 3 {
+		v0 := vertices[indices[indexPos]]
+		v1 := vertices[indices[indexPos+1]]
+		v2 := vertices[indices[indexPos+2]]
 
 		deltaU1 := v1.TexCoords[0] - v0.TexCoords[0]
 		deltaV1 := v1.TexCoords[1] - v0.TexCoords[1]
@@ -52,9 +53,9 @@ func ConvertToVertices(meshdata []float32) []Vertex {
 
 		tangent = normalise(tangent)
 
-		copy(vertices[i].Tangent[:], tangent[:])
-		copy(vertices[i+1].Tangent[:], tangent[:])
-		copy(vertices[i+2].Tangent[:], tangent[:])
+		copy(vertices[indices[indexPos]].Tangent[:], tangent[:])
+		copy(vertices[indices[indexPos+1]].Tangent[:], tangent[:])
+		copy(vertices[indices[indexPos+2]].Tangent[:], tangent[:])
 	}
 	return vertices
 }

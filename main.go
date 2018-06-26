@@ -207,18 +207,18 @@ func setMeshInstanceRenderer(g *core.GameObject, modelFile string, material []*r
 }
 
 func loadObject(obj string, material []*rendering.Material) []*rendering.Mesh {
-	objData, err := loader.Load(obj)
+	objVert, objInd, err := loader.Load(obj)
 	if err != nil {
 		fmt.Printf("Model loading failed: %v", err)
 		os.Exit(1)
 	}
-	if len(objData) != len(material) {
-		fmt.Printf("Have %d meshes in object, but only %d materials\n", len(objData), len(material))
+	if len(objVert) != len(material) {
+		fmt.Printf("Have %d meshes in object, but only %d materials\n", len(objVert), len(material))
 	}
 	var meshes []*rendering.Mesh
-	for _, data := range objData {
+	for i, data := range objVert {
 		mesh := rendering.NewMesh()
-		mesh.SetVertices(rendering.ConvertToVertices(data))
+		mesh.SetVertices(rendering.ConvertToVertices(data, objInd[i]), objInd[i])
 		meshes = append(meshes, mesh)
 	}
 	return meshes

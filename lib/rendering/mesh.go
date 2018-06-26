@@ -10,29 +10,30 @@ func NewMesh() *Mesh {
 	// Create buffers/arrays
 	gl.GenBuffers(1, &m.vbo)
 	gl.GenVertexArrays(1, &m.vao)
+	gl.GenBuffers(1, &m.ebo)
 
 	return m
 }
 
 type Mesh struct {
-	vbo         uint32
-	vao         uint32
-	numVertices int32
+	vbo uint32
+	vao uint32
+	ebo uint32
+	num int32
 }
 
-func (m *Mesh) NumVertices() int32 {
-	return m.numVertices
-}
+func (m *Mesh) SetVertices(vertices []Vertex, indices []uint32) {
 
-func (m *Mesh) SetVertices(vertices []Vertex) {
-
-	m.numVertices = int32(len(vertices))
+	m.num = int32(len(indices))
 
 	gl.BindVertexArray(m.vao)
 
 	// load data into vertex buffers
 	gl.BindBuffer(gl.ARRAY_BUFFER, m.vbo)
 	gl.BufferData(gl.ARRAY_BUFFER, len(vertices)*int(sizeOfVertex), gl.Ptr(vertices), gl.STATIC_DRAW)
+
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.ebo)
+	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(indices)*int(sizeOfUint32), gl.Ptr(indices), gl.STATIC_DRAW)
 
 	offset := 0
 	// vertex position
@@ -63,5 +64,5 @@ func (m *Mesh) Prepare() {
 }
 
 func (m *Mesh) Draw() {
-	gl.DrawArrays(gl.TRIANGLES, 0, m.numVertices)
+	gl.DrawElements(gl.TRIANGLES, m.num, gl.UNSIGNED_INT, gl.PtrOffset(0))
 }

@@ -13,6 +13,9 @@ const sizeOfVertex = unsafe.Sizeof(Vertex{})
 /* #nosec */
 const sizeOfFloat32 = int(unsafe.Sizeof(float32(1)))
 
+/* #nosec */
+const sizeOfUint32 = unsafe.Sizeof(uint32(0))
+
 type Vertex struct {
 	Pos       [3]float32
 	Normal    [3]float32

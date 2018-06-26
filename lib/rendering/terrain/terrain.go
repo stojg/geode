@@ -8,9 +8,9 @@ const Size float32 = 800
 const VertexCount int = 128
 
 func New(gridX, gridZ float32) *Terrain {
-	data := generateTerrain()
+	v, i := generateTerrain()
 	mesh := rendering.NewMesh()
-	mesh.SetVertices(rendering.ConvertToVertices(data))
+	mesh.SetVertices(rendering.ConvertToVertices(v, i), i)
 
 	return &Terrain{
 		x:    gridX * Size,
@@ -38,61 +38,38 @@ func (t *Terrain) Mesh() *rendering.Mesh {
 	return t.mesh
 }
 
-func generateTerrain() []float32 {
+func generateTerrain() ([]float32, []uint32) {
 	// https://www.youtube.com/watch?v=yNYwZMmgTJk&list=PLRIWtICgwaX0u7Rf9zkZhLoLuZVfUksDP&index=14
-	const count = VertexCount * VertexCount
-	var vertices [count * 3]float32
-	var normals [count * 3]float32
-	var textureCoords [count * 2]float32
-
-	vertexPointer := 0
+	var vertices []float32
 	for i := 0; i < VertexCount; i++ {
 		for j := 0; j < VertexCount; j++ {
-			vertices[vertexPointer*3] = float32(j) / (float32(VertexCount) - 1) * Size
-			vertices[vertexPointer*3+1] = 0
-			vertices[vertexPointer*3+2] = float32(i) / (float32(VertexCount) - 1) * Size
-			normals[vertexPointer*3] = 0
-			normals[vertexPointer*3+1] = 1
-			normals[vertexPointer*3+2] = 0
-			textureCoords[vertexPointer*2] = float32(j) / (float32(VertexCount) - 1)
-			textureCoords[vertexPointer*2+1] = float32(i) / (float32(VertexCount) - 1)
-			vertexPointer++
+			vertices = append(vertices, float32(j)/(float32(VertexCount)-1)*Size)
+			vertices = append(vertices, 0)
+			vertices = append(vertices, float32(i)/(float32(VertexCount)-1)*Size)
+			vertices = append(vertices, 0)
+			vertices = append(vertices, 1)
+			vertices = append(vertices, 0)
+			vertices = append(vertices, float32(j)/(float32(VertexCount)-1))
+			vertices = append(vertices, float32(i)/(float32(VertexCount)-1))
 		}
 	}
 
-	var indices [(VertexCount - 1) * (VertexCount - 1) * 6]int
-	pointer := 0
+	var indices []uint32
 	for gz := 0; gz < VertexCount-1; gz++ {
 		for gx := 0; gx < VertexCount-1; gx++ {
-			topLeft := (gz * VertexCount) + gx
-			topRight := topLeft + 1
-			bottomLeft := ((gz + 1) * VertexCount) + gx
-			bottomRight := bottomLeft + 1
-			indices[pointer] = topLeft
-			pointer++
-			indices[pointer] = bottomLeft
-			pointer++
-			indices[pointer] = topRight
-			pointer++
-			indices[pointer] = topRight
-			pointer++
-			indices[pointer] = bottomLeft
-			pointer++
-			indices[pointer] = bottomRight
-			pointer++
+			topLeft := uint32((gz * VertexCount) + gx)
+			topRight := uint32(topLeft + 1)
+			bottomLeft := uint32(((gz + 1) * VertexCount) + gx)
+			bottomRight := uint32(bottomLeft + 1)
+
+			indices = append(indices, topLeft)
+			indices = append(indices, bottomLeft)
+			indices = append(indices, topRight)
+			indices = append(indices, topRight)
+			indices = append(indices, bottomLeft)
+			indices = append(indices, bottomRight)
 		}
 	}
 
-	var result []float32
-	for _, i := range indices {
-		result = append(result, vertices[i*3])
-		result = append(result, vertices[i*3+1])
-		result = append(result, vertices[i*3+2])
-		result = append(result, normals[i*3])
-		result = append(result, normals[i*3+1])
-		result = append(result, normals[i*3+2])
-		result = append(result, textureCoords[i*2])
-		result = append(result, textureCoords[i*2+1])
-	}
-	return result
+	return vertices, indices
 }
