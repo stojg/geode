@@ -42,7 +42,7 @@ func loadModel(modelName string) (*core.GameObject, error) {
 
 	modelFile := fmt.Sprintf("res/meshes/%s/model.obj", mi.Mesh)
 	if _, ok := meshes[modelFile]; !ok {
-		meshes[modelFile] = loadObject(modelFile, mtrls)
+		meshes[modelFile] = loadMeshesFromObj(modelFile, mtrls)
 	}
 
 	gameObject := core.NewGameObject()
@@ -91,7 +91,7 @@ func loadMaterial(texture string) *rendering.Material {
 	return material
 }
 
-func loadObject(obj string, material []*rendering.Material) []*rendering.Mesh {
+func loadMeshesFromObj(obj string, material []*rendering.Material) []*rendering.Mesh {
 	objVert, objInd, err := loader.Load(obj)
 	if err != nil {
 		fmt.Printf("Model loading failed: %v", err)

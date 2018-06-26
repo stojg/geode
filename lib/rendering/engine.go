@@ -102,7 +102,7 @@ func NewEngine(width, height int) *Engine {
 	e.SetTexture("x_shadowMap", e.shadowTextures[0])
 
 	e.SetInteger("x_enable_env_map", 1)
-	e.SetInteger("x_enable_skybox", 0)
+	e.SetInteger("x_enable_skybox", 1)
 
 	debug.CheckForError("rendering.NewEngine end")
 	return e

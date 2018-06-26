@@ -46,8 +46,7 @@ func run() error {
 	cameraObject.AddComponent(components.NewCamera(75, width, height, 0.1, 2000))
 	cameraObject.AddComponent(&components.FreeMove{})
 	cameraObject.AddComponent(components.NewFreelook(width, height))
-	//cameraObject.AddComponent(&components.HeadHeight{})
-	//setMeshRenderer(cameraObject, "res/meshes/sphere/model.obj", whiteMaterial)
+	cameraObject.AddComponent(&components.HeadHeight{})
 	engine.AddObject(cameraObject)
 
 	directionalLight := lights.NewDirectional(10, 0.9, 0.9, 0.9, 1)
