@@ -77,17 +77,7 @@ func run() error {
 		engine.AddObject(pointLight)
 	}
 
-	{
-		pointLight := core.NewGameObject()
-		pointLight.Transform().SetPos(vec3(2, 0.4, 4))
-		pointLight.AddComponent(lights.NewPoint(1.0, 1.0, 1.0, 50))
-		//pointLight.AddComponent(components.NewTimeMove(mgl32.Vec3{-1, 0, 0}, func(elapsed float64) float64 {
-		//	return math.Sin(glfw.GetTime())
-		//}))
-		engine.AddObject(pointLight)
-	}
-
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 40; i++ {
 		cube, err := loadModel("cube")
 		handleError(err)
 		engine.AddObject(cube)
