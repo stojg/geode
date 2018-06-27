@@ -46,10 +46,10 @@ func run() error {
 	cameraObject.AddComponent(components.NewCamera(75, width, height, 0.1, 2000))
 	cameraObject.AddComponent(&components.FreeMove{})
 	cameraObject.AddComponent(components.NewFreelook(width, height))
-	cameraObject.AddComponent(&components.HeadHeight{})
+	//cameraObject.AddComponent(&components.HeadHeight{})
 	engine.AddObject(cameraObject)
 
-	directionalLight := lights.NewDirectional(10, 0.9, 0.9, 0.9, 1)
+	directionalLight := lights.NewDirectional(10, 0.9, 0.9, 0.9, 10)
 	dirLight := core.NewGameObject()
 	dirLight.Transform().SetPos(vec3(1, 1, 0))
 	dirLight.Transform().LookAt(vec3(0, 0, 0), up())
@@ -84,15 +84,21 @@ func run() error {
 		cube.Transform().SetPos(vec3(rand.Float32()*100-50, 1, rand.Float32()*100-50))
 	}
 
-	for i := -1; i < 1; i++ {
-		for j := -1; j < 1; j++ {
-			t := terrain.New(float32(i), float32(j))
-			to, err := loadModelFromMesh(t.Mesh(), "dry-dirt")
-			to.Transform().SetPos(vec3(t.X(), 0, t.Z()))
-			handleError(err)
-			engine.AddTerrain(to)
-		}
-	}
+	t := terrain.New(float32(-.5), float32(-0.5))
+	to, err := loadModelFromMesh(t.Mesh(), "dry-dirt")
+	to.Transform().SetPos(vec3(t.X(), 0, t.Z()))
+	handleError(err)
+	engine.AddTerrain(to)
+
+	//for i := -1; i < 1; i++ {
+	//	for j := -1; j < 1; j++ {
+	//		t := terrain.New(float32(i), float32(j))
+	//		to, err := loadModelFromMesh(t.Mesh(), "dry-dirt")
+	//		to.Transform().SetPos(vec3(t.X(), 0, t.Z()))
+	//		handleError(err)
+	//		engine.AddTerrain(to)
+	//	}
+	//}
 
 	{
 		bot, err := loadModel("bot")
