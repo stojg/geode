@@ -84,7 +84,7 @@ func loadLDRTexture(filename string, srgb bool) (*TextureResource, error) {
 	if err != nil {
 		return nil, err
 	}
-	rgba = loaders.Flip(rgba)
+	loaders.Flip(rgba)
 
 	if srgb {
 		return createTextureResource(rgba.Rect.Size().X, rgba.Rect.Size().Y, gl.SRGB_ALPHA, gl.UNSIGNED_BYTE, rgba.Pix), nil
@@ -98,7 +98,7 @@ func loadMetallicTexture(filename string) (*TextureResource, error) {
 	if err != nil {
 		return nil, err
 	}
-	rgba = loaders.Flip(rgba)
+	loaders.Flip(rgba)
 	return createTextureResource(rgba.Rect.Size().X, rgba.Rect.Size().Y, gl.R8, gl.UNSIGNED_BYTE, rgba.Pix), nil
 }
 
@@ -107,7 +107,7 @@ func loadRoughnessTexture(filename string) (*TextureResource, error) {
 	if err != nil {
 		return nil, err
 	}
-	rgba = loaders.Flip(rgba)
+	loaders.Flip(rgba)
 	return createTextureResource(rgba.Rect.Size().X, rgba.Rect.Size().Y, gl.R8, gl.UNSIGNED_BYTE, rgba.Pix), nil
 }
 

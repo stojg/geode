@@ -6,6 +6,7 @@ import (
 	"image/draw"
 	_ "image/jpeg"
 	_ "image/png"
+	"log"
 	"os"
 )
 
@@ -39,37 +40,40 @@ func RGBEImagedata(filename string) (int, int, []float32, error) {
 }
 
 // Flip the image upside down so that OpenGL can use it as a texture properly
-func Flip(src *image.RGBA) *image.RGBA {
-	maxX := src.Bounds().Max.X
-	maxY := src.Bounds().Max.Y
+func Flip(src *image.RGBA) {
+	height := src.Bounds().Dy()
 
-	dst := image.NewRGBA(src.Bounds())
-
-	for y := 0; y < maxY; y++ {
-		for x := 0; x < maxX; x++ {
-			srcY := maxY - y - 1
-			srcRow := srcY*src.Stride + x*4
-			destRow := y*src.Stride + x*4
-			copy(dst.Pix[destRow:destRow+4], src.Pix[srcRow:srcRow+4])
-		}
+	stride := src.Stride
+	scratchBuffer := make([]uint8, stride)
+	for y := 0; y < height/2; y++ {
+		top := y * stride
+		bottom := (height - y - 1) * stride
+		// copy bottom row to buffer
+		copy(scratchBuffer[:], src.Pix[bottom:bottom+stride])
+		// copy top row to bottom row
+		copy(src.Pix[bottom:bottom+stride], src.Pix[top:top+stride])
+		// copy buffer (bottom) to top row
+		copy(src.Pix[top:top+stride], scratchBuffer[:])
 	}
-
-	return dst
 }
 
-func FlipRaw(width, height int, src []float32) []float32 {
-	dst := make([]float32, len(src))
+func FlipRaw(width, height int, src []float32) {
+	const valuesPerPixel = 3
 
-	rowSize := width * 3
-
-	for y := 0; y < height; y++ {
-		srcStart := y * rowSize
-		srcEnd := srcStart + rowSize
-
-		dstStart := (height - y - 1) * rowSize
-		dstEnd := dstStart + rowSize
-
-		copy(dst[dstStart:dstEnd], src[srcStart:srcEnd])
+	if width*height*valuesPerPixel != len(src) {
+		log.Fatalf("width * height (%d) doesn't add up length of src (%d)", width*height*valuesPerPixel, len(src))
 	}
-	return dst
+
+	stride := width * valuesPerPixel
+	scratchBuffer := make([]float32, stride)
+	for y := 0; y < height/2; y++ {
+		top := y * stride
+		bottom := (height - y - 1) * stride
+		// copy bottom row to buffer
+		copy(scratchBuffer[:], src[bottom:bottom+stride])
+		// copy top row to bottom row
+		copy(src[bottom:bottom+stride], src[top:top+stride])
+		// copy buffer (bottom) to top row
+		copy(src[top:top+stride], scratchBuffer[:])
+	}
 }

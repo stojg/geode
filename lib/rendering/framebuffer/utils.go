@@ -98,6 +98,6 @@ func loadHDRTextureResource(filename string) (*TextureResource, error) {
 	if err != nil {
 		return nil, err
 	}
-	data = loaders.FlipRaw(width, height, data)
+	loaders.FlipRaw(width, height, data)
 	return createTextureResource(width, height, gl.RGB32F, gl.FLOAT, data), nil
 }
