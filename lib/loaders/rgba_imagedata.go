@@ -35,7 +35,7 @@ func RGBEImagedata(filename string) (int, int, []float32, error) {
 		return 0, 0, nil, fmt.Errorf("texture %q not found on disk: %v", filename, err)
 	}
 	defer imgFile.Close()
-	return RGBEDecoder(imgFile)
+	return DecodeRGBE(imgFile)
 }
 
 // Flip the image upside down so that OpenGL can use it as a texture properly

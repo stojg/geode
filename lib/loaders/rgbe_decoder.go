@@ -11,7 +11,7 @@ import (
 	"math"
 )
 
-func RGBEDecoder(r io.Reader) (int, int, []float32, error) {
+func DecodeRGBE(r io.Reader) (int, int, []float32, error) {
 	br := bufio.NewReader(r)
 
 	width, height, err := readHeader(br)
