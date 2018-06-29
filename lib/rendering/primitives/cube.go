@@ -16,56 +16,31 @@ func DrawCube() {
 		setupCube()
 	}
 	gl.BindVertexArray(cubeVao)
-	gl.DrawArrays(gl.TRIANGLES, 0, 36)
-
+	gl.DrawElements(gl.TRIANGLES, 36, gl.UNSIGNED_INT, gl.PtrOffset(0))
+	gl.BindVertexArray(0)
 }
 
 func setupCube() {
-	quadVertices := []float32{
-		1, -1, -1,
-		1, -1, 1,
-		-1, -1, 1,
-		1, -1, -1,
-		-1, -1, 1,
-		-1, -1, -1,
-		1, 1, -1,
-		-1, 1, -1,
-		-1, 1, 1,
-		1, 1, -1,
-		-1, 1, 1,
-		1, 1, 1,
-		1, -1, -1,
-		1, 1, -1,
-		1, 1, 1,
-		1, -1, -1,
-		1, 1, 1,
-		1, -1, 1,
-		1, -1, 1,
-		1, 1, 1,
-		-1, 1, 1,
-		1, -1, 1,
-		-1, 1, 1,
-		-1, -1, 1,
-		-1, -1, 1,
-		-1, 1, 1,
-		-1, 1, -1,
-		-1, -1, 1,
-		-1, 1, -1,
-		-1, -1, -1,
-		1, 1, -1,
-		1, -1, -1,
-		-1, -1, -1,
-		1, 1, -1,
-		-1, -1, -1,
-		-1, 1, -1,
-	}
+	inds := []uint32{0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 0, 4, 7, 0, 7, 1, 1, 7, 6, 1, 6, 2, 2, 6, 5, 2, 5, 3, 4, 0, 3, 4, 3, 5}
+	verts := []float32{1, -1, -1, 1, -1, 1, -1, -1, 1, -1, -1, -1, 1, 1, -1, -1, 1, -1, -1, 1, 1, 1, 1, 1}
 
 	var vbo uint32
+	var ebo uint32
 	gl.GenVertexArrays(1, &cubeVao)
+
 	gl.GenBuffers(1, &vbo)
+	gl.GenBuffers(1, &ebo)
+
 	gl.BindVertexArray(cubeVao)
+
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, len(quadVertices)*sizeOfFloat32, gl.Ptr(quadVertices), gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, len(verts)*sizeOfFloat32, gl.Ptr(verts), gl.STATIC_DRAW)
+
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
+	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(inds)*4, gl.Ptr(inds), gl.STATIC_DRAW)
+
 	gl.EnableVertexAttribArray(0)
 	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, int32(3*sizeOfFloat32), gl.PtrOffset(0))
+
+	gl.BindVertexArray(0)
 }
