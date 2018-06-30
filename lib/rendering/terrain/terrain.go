@@ -7,7 +7,7 @@ import (
 	"github.com/stojg/graphics/lib/rendering"
 )
 
-const Size float32 = 1024
+const Size float32 = 512
 const VertexCount = 128
 
 func New(gridX, gridZ float32) *Terrain {
@@ -17,7 +17,10 @@ func New(gridX, gridZ float32) *Terrain {
 		gridSizeSquare: Size / (float32(VertexCount) - 1),
 	}
 
-	t.v, t.i = t.generateTerrain(gridX, gridZ)
+	v, i := t.generateTerrain(gridX, gridZ)
+	mesh := rendering.NewMesh()
+	mesh.SetVertices(rendering.ConvertToVertices(v, i), i)
+	t.mesh = mesh
 	return t
 }
 
@@ -25,8 +28,6 @@ type Terrain struct {
 	worldX, worldZ float32
 	heights        [VertexCount][VertexCount]float32
 	gridSizeSquare float32
-	v              []float32
-	i              []uint32
 	mesh           *rendering.Mesh
 	texture        interface{}
 }
@@ -36,22 +37,24 @@ func (t *Terrain) generateTerrain(gridX, gridZ float32) ([]float32, []uint32) {
 	zOffset = float64(gridZ * float32(VertexCount-1))
 
 	hg := NewHeightGenerator(22)
+	const stride = 8
 
 	// https://www.youtube.com/watch?v=yNYwZMmgTJk&list=PLRIWtICgwaX0u7Rf9zkZhLoLuZVfUksDP&index=14
-	// @todo calculate size
-	var vertices []float32
-	for i := 0; i < VertexCount; i++ {
-		for j := 0; j < VertexCount; j++ {
-			height := hg.Height(float64(i)+xOffset, float64(j)+zOffset)
-			t.heights[j][i] = height
-			vertices = append(vertices, float32(j)/(float32(VertexCount)-1)*Size)
-			vertices = append(vertices, float32(height))
-			vertices = append(vertices, float32(i)/(float32(VertexCount)-1)*Size)
-			vertices = append(vertices, -66)
-			vertices = append(vertices, -66)
-			vertices = append(vertices, -66)
-			vertices = append(vertices, float32(j)/(float32(VertexCount)-1))
-			vertices = append(vertices, float32(i)/(float32(VertexCount)-1))
+	vertices := make([]float32, VertexCount*VertexCount*stride)
+
+	for z := 0; z < VertexCount; z++ {
+		for x := 0; x < VertexCount; x++ {
+			t.heights[x][z] = hg.Height(float64(x)+xOffset, float64(z)+zOffset)
+			mapSquares := float32(VertexCount) - 1
+			v := []float32{
+				float32(x) / mapSquares * Size,
+				t.heights[x][z],
+				float32(z) / mapSquares * Size,
+				0, 0, 0,
+				float32(x) / mapSquares,
+				float32(z) / mapSquares,
+			}
+			copy(vertices[z*VertexCount*stride+x*stride:], v)
 		}
 	}
 
@@ -114,11 +117,6 @@ func (t *Terrain) X() float32 {
 }
 
 func (t *Terrain) Mesh() *rendering.Mesh {
-	if t.mesh == nil {
-		mesh := rendering.NewMesh()
-		mesh.SetVertices(rendering.ConvertToVertices(t.v, t.i), t.i)
-		t.mesh = mesh
-	}
 	return t.mesh
 }
 

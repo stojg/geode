@@ -47,10 +47,9 @@ func run() error {
 	engine.AddTerrain(to)
 
 	cameraObject := core.NewGameObject()
-	//cameraObject.Transform().SetPos(vec3(0, 1.8, 0))
 	cameraObject.Transform().SetPos(vec3(10, 0, 0))
 	cameraObject.Transform().SetScale(vec3(0.1, 0.1, 0.1))
-	cameraObject.AddComponent(components.NewCamera(75, width, height, 0.1, 2000))
+	cameraObject.AddComponent(components.NewCamera(75, width, height, 0.1, 512))
 	cameraObject.AddComponent(&components.FreeMove{})
 	cameraObject.AddComponent(components.NewFreelook(width, height))
 	cameraObject.AddComponent(&components.HeadHeight{Terrain: t})
@@ -63,12 +62,12 @@ func run() error {
 	dirLight.AddComponent(directionalLight)
 	engine.AddObject(dirLight)
 
-	spotLight := lights.NewSpot(0.9, 0.4, 0.1, 500, 65)
-	spot := core.NewGameObject()
-	spot.Transform().SetPos(vec3(3, 3.5, 4.6))
-	spot.Transform().LookAt(vec3(0, 1, 0), up())
-	spot.AddComponent(spotLight)
-	engine.AddObject(spot)
+	//spotLight := lights.NewSpot(0.9, 0.4, 0.1, 500, 65)
+	//spot := core.NewGameObject()
+	//spot.Transform().SetPos(vec3(3, 3.5, 4.6))
+	//spot.Transform().LookAt(vec3(0, 1, 0), up())
+	//spot.AddComponent(spotLight)
+	//engine.AddObject(spot)
 
 	pointLight := core.NewGameObject()
 	pointLight.Transform().SetPos(vec3(-2, t.Height(-2, 2)+0.2, 2))
@@ -84,9 +83,10 @@ func run() error {
 		engine.AddObject(pointLight)
 	}
 
-	tSize := t.Z()
+	tSize := float32(512)
+	fmt.Println(tSize)
 	tHalfSize := tSize / 2
-	for i := 0; i < 40; i++ {
+	for i := 0; i < 100; i++ {
 		cube, err := loadModel("cube")
 		handleError(err)
 		engine.AddObject(cube)
@@ -95,16 +95,6 @@ func run() error {
 		cube.Transform().SetPos(vec3(x, t.Height(x, z)+0.5, z))
 		cube.Transform().SetScale(vec3(0.5, 0.5, 0.5))
 	}
-
-	//for i := -1; i < 1; i++ {
-	//	for j := -1; j < 1; j++ {
-	//		t := terrain.New(float32(i), float32(j))
-	//		to, err := loadModelFromMesh(t.Mesh(), "dry-dirt")
-	//		to.Transform().SetPos(vec3(t.X(), 0, t.Z()))
-	//		handleError(err)
-	//		engine.AddTerrain(to)
-	//	}
-	//}
 
 	{
 		bot, err := loadModel("bot")
