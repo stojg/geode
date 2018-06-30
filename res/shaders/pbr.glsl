@@ -7,6 +7,8 @@ struct Mtrl {
     float roughness;
 };
 
+uniform mat4 view;
+
 // The Fresnel-Schlick approximation expects a F0 parameter which is known as the surface reflection at zero incidence
 // or how much the surface reflects if looking directly at the surface, ie it calculates the ratio between specular and
 // diffuse reflection, or how much the surface reflects light versus how much it refracts light.
@@ -106,14 +108,9 @@ vec3 CalcSpot(vec3 F0, vec3 lightPosition, Light light, Mtrl material, vec3 N, v
     vec3 L = normalize(lightPosition - viewPos);
     vec3 H = normalize(V + L);
 
-//    if (light.cutoff > 0) {
-        float theta = dot(L, normalize(-viewLightDirection));
-        if (theta < light.cutoff) { return vec3(0); }
-//    }
+    float theta = dot(L, normalize(-viewLightDirection));
+    if (theta < light.cutoff) { return vec3(0); }
     float attenuation = 1.0 / (light.constant + light.linear * dist + light.quadratic * (dist * dist));
-
-
-
     return calcCookTorrance(H, V, N, material,F0, L, light.color * attenuation);
 }
 

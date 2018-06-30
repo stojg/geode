@@ -184,7 +184,7 @@ func (s *Shader) loadShader(filepath string) (string, error) {
 
 func (s *Shader) addIncludes(shaderText string) (string, error) {
 
-	var re = regexp.MustCompile(`#include\s"([^"]*)"`)
+	var re = regexp.MustCompile(`^#include\s"([^"]*)"`)
 
 	var result string
 
@@ -266,7 +266,7 @@ func (s *Shader) addFragmentShader(shader string) uint32 {
 var isArray = regexp.MustCompile(`(\w+)\[(\d+)\]`)
 
 func (s *Shader) findAllUniforms(shaderText string) {
-	isUniform := regexp.MustCompile(`uniform\s+(\S*)\s+(\S*);`)
+	isUniform := regexp.MustCompile(`^uniform\s+(\S*)\s+(\S*);`)
 
 	uniformStructs := s.findUniformStructs(shaderText)
 

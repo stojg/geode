@@ -11,7 +11,7 @@ uniform mat4 view;
 uniform mat4 InvView;
 uniform mat4 model;
 
-#include "pbr_lights.glsl"
+#include "light_struct.glsl"
 uniform Light lights[16];
 uniform int numLights;
 uniform mat4 LightVP;
@@ -35,7 +35,7 @@ void main() {
     // the position of the camara relative to the fragment
     vs_out.V_Pos = vec3(MV * vec4(aPosition, 1.0));
 
-    vs_out.TexCoord = aTexCoord * 128;
+    vs_out.TexCoord = aTexCoord ;
 
     //surface normal in the world space, used for lookup env map coordinates
     vs_out.Normal = mat3(model) * aNormal;

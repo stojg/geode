@@ -12,6 +12,7 @@ import (
 	"github.com/stojg/graphics/lib/rendering/primitives"
 	"github.com/stojg/graphics/lib/rendering/shader"
 	"github.com/stojg/graphics/lib/rendering/technique"
+	"github.com/stojg/graphics/lib/rendering/terrain"
 )
 
 func NewEngine(width, height int) *Engine {
@@ -55,19 +56,17 @@ func NewEngine(width, height int) *Engine {
 		overlayShader: shader.NewShader("filter_overlay"),
 		fxaaShader:    shader.NewShader("filter_fxaa"),
 		gaussShader:   shader.NewShader("filter_gauss"),
-		ambientShader: shader.NewShader("forward_ambient"),
 		shadowShader:  shader.NewShader("shadow_vsm"),
-		lightShader:   shader.NewShader("pbr_light"),
-		terrainShader: shader.NewShader("pbr_terrain"),
+		lightShader:   shader.NewShader("default"),
 
 		offScreenTexture: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGBA, gl.FLOAT, gl.LINEAR, false),
 		toneMapShader:    shader.NewShader("filter_tonemap"),
 
 		fullScreenTemp: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, gl.NEAREST, false),
 	}
+	e.terrainRenderer = terrain.NewRenderer(e)
 
 	envMap := framebuffer.NewHDRCubeMap(1024, 1024, "res/textures/sky0016.hdr")
-
 	e.skybox = technique.NewSkyBox(envMap)
 
 	irradianceMap := framebuffer.NewCubeMap(32, 32, false)
@@ -94,11 +93,6 @@ func NewEngine(width, height int) *Engine {
 
 	debugger.New(width, height)
 
-	// set defaults
-	e.SetFloat("x_varianceMin", 0.0)
-	e.SetFloat("x_lightBleedReductionAmount", 0.0)
-	e.SetTexture("x_shadowMap", e.shadowTextures[0])
-
 	e.SetInteger("x_enable_env_map", 1)
 	e.SetInteger("x_enable_skybox", 1)
 
@@ -122,13 +116,13 @@ type Engine struct {
 
 	nullShader    *shader.Shader
 	gaussShader   *shader.Shader
-	ambientShader *shader.Shader
 	toneMapShader *shader.Shader
 	shadowShader  *shader.Shader
 	fxaaShader    *shader.Shader
 	overlayShader *shader.Shader
 	lightShader   *shader.Shader
-	terrainShader *shader.Shader
+
+	terrainRenderer *terrain.Renderer
 
 	offScreenTexture *framebuffer.Texture
 
@@ -180,7 +174,8 @@ func (e *Engine) Render(object components.Renderable, terrains components.Render
 	}
 
 	object.RenderAll(e.lightShader, e)
-	terrains.RenderAll(e.terrainShader, e)
+
+	e.terrainRenderer.Render(terrains)
 
 	if e.Integer("x_enable_skybox") == 1 {
 		e.skybox.Draw(e)
@@ -277,10 +272,10 @@ func (e *Engine) SetVector3f(name string, v mgl32.Vec3) {
 
 func (e *Engine) Vector3f(name string) mgl32.Vec3 {
 	// @todo set value, regardless, this might be an array that isn't used
-	v := e.uniforms3f[name]
-	//if !ok {
-	//	fmt.Printf("Vector3f, no value found for uniform '%s'\n", name)
-	//}
+	v, ok := e.uniforms3f[name]
+	if !ok {
+		fmt.Printf("Vector3f, no value found for uniform '%s'\n", name)
+	}
 	return v
 }
 

@@ -92,16 +92,16 @@ type Spotlight interface {
 	PointLight
 }
 
-type RenderingEngine interface {
-	AddLight(light Light)
-	Lights() []Light
-	ActiveLight() Light
-
+type RenderState interface {
 	AddCamera(camera Viewable)
 	MainCamera() Viewable
 
-	SamplerSlot(string) uint32
-	SetSamplerSlot(string, uint32)
+	SamplerSlot(name string) uint32
+	SetSamplerSlot(name string, slot uint32)
+
+	AddLight(light Light)
+	Lights() []Light
+	ActiveLight() Light
 
 	Texture(string) Texture
 	SetTexture(string, Texture)
@@ -114,6 +114,10 @@ type RenderingEngine interface {
 
 	Float(string) float32
 	SetFloat(string, float32)
+}
+
+type RenderingEngine interface {
+	RenderState
 }
 
 type Engine interface {
