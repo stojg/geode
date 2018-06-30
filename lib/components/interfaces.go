@@ -24,6 +24,10 @@ type Material interface {
 	Roughness() float32
 }
 
+type Terrain interface {
+	Height(x, z float32) float32
+}
+
 type Drawable interface {
 	Prepare()
 	Draw()

@@ -40,13 +40,20 @@ func run() error {
 		return err
 	}
 
+	t := terrain.New(float32(-0.5), float32(-0.5))
+	to, err := loadModelFromMesh(t.Mesh(), "dry-dirt")
+	to.Transform().SetPos(vec3(t.X(), 0, t.Z()))
+	handleError(err)
+	engine.AddTerrain(to)
+
 	cameraObject := core.NewGameObject()
-	cameraObject.Transform().SetPos(vec3(0, 1.8, 6))
+	//cameraObject.Transform().SetPos(vec3(0, 1.8, 0))
+	cameraObject.Transform().SetPos(vec3(10, 0, 0))
 	cameraObject.Transform().SetScale(vec3(0.1, 0.1, 0.1))
 	cameraObject.AddComponent(components.NewCamera(75, width, height, 0.1, 2000))
 	cameraObject.AddComponent(&components.FreeMove{})
 	cameraObject.AddComponent(components.NewFreelook(width, height))
-	//cameraObject.AddComponent(&components.HeadHeight{})
+	cameraObject.AddComponent(&components.HeadHeight{Terrain: t})
 	engine.AddObject(cameraObject)
 
 	directionalLight := lights.NewDirectional(10, 0.9, 0.9, 0.9, 10)
@@ -64,31 +71,30 @@ func run() error {
 	engine.AddObject(spot)
 
 	pointLight := core.NewGameObject()
-	pointLight.Transform().SetPos(vec3(-2, 0.6, 2))
+	pointLight.Transform().SetPos(vec3(-2, t.Height(-2, 2)+0.2, 2))
 	pointLight.AddComponent(lights.NewPoint(0, 0.5, 1.0, 50))
 	engine.AddObject(pointLight)
 
 	{
 		pointLight := core.NewGameObject()
-		pointLight.Transform().SetPos(vec3(-10, 0.3, 0))
+		pointLight.Transform().SetPos(vec3(-10, t.Height(-10, 0)+0.2, 0))
 		pointLight.AddComponent(lights.NewPoint(0.0, 0.5, 1.0, 50))
 		lightMaterial := rendering.NewMaterial()
 		lightMaterial.SetAlbedo(mgl32.Vec3{0.1, 0.05, 0.98})
 		engine.AddObject(pointLight)
 	}
 
+	tSize := t.Z()
+	tHalfSize := tSize / 2
 	for i := 0; i < 40; i++ {
 		cube, err := loadModel("cube")
 		handleError(err)
 		engine.AddObject(cube)
-		cube.Transform().SetPos(vec3(rand.Float32()*100-50, 1, rand.Float32()*100-50))
-	}
 
-	t := terrain.New(float32(-.5), float32(-0.5))
-	to, err := loadModelFromMesh(t.Mesh(), "dry-dirt")
-	to.Transform().SetPos(vec3(t.X(), 0, t.Z()))
-	handleError(err)
-	engine.AddTerrain(to)
+		x, z := rand.Float32()*tSize-tHalfSize, rand.Float32()*tSize-tHalfSize
+		cube.Transform().SetPos(vec3(x, t.Height(x, z)+0.5, z))
+		cube.Transform().SetScale(vec3(0.5, 0.5, 0.5))
+	}
 
 	//for i := -1; i < 1; i++ {
 	//	for j := -1; j < 1; j++ {
@@ -104,6 +110,7 @@ func run() error {
 		bot, err := loadModel("bot")
 		handleError(err)
 		bot.AddComponent(components.NewRotator(vec3(0, -1, 0), 15))
+		bot.Transform().SetPos(vec3(0, t.Height(0, 0), 0))
 		engine.AddObject(bot)
 	}
 

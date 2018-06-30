@@ -31,28 +31,32 @@ func Load(filename string) ([][]float32, [][]uint32, error) {
 	var perObjectIndices [][]uint32
 
 	for _, object := range obj.Objects {
-		// this is used as a lookup map to check if a vertex has been indexed
-		existing := make(map[[3]int]uint32)
-
-		var indices []uint32
-		var uniqueVertices []float32
-		// triangularize the wavefront .obj file data and calculate indices to reduce vertices
-		for _, v := range object.VertexData {
-			// first triangle in the face/n-gon
-			for i := 0; i < 3; i++ {
-				uniqueVertices, indices = getUniqueVertices(v.Declarations[i], existing, indices, uniqueVertices)
-			}
-			// calculate the other triangles in the face/n-gon
-			for i := 3; i < len(v.Declarations); i++ {
-				uniqueVertices, indices = getUniqueVertices(v.Declarations[i-3], existing, indices, uniqueVertices)
-				uniqueVertices, indices = getUniqueVertices(v.Declarations[i-1], existing, indices, uniqueVertices)
-				uniqueVertices, indices = getUniqueVertices(v.Declarations[i], existing, indices, uniqueVertices)
-			}
-		}
+		indices, uniqueVertices := calculateIndices(object)
 		perObjectVertices = append(perObjectVertices, uniqueVertices)
 		perObjectIndices = append(perObjectIndices, indices)
 	}
 	return perObjectVertices, perObjectIndices, nil
+}
+
+func calculateIndices(object *object) ([]uint32, []float32) {
+	// this is used as a lookup map to check if a vertex has been indexed
+	existing := make(map[[3]int]uint32)
+	var indices []uint32
+	var uniqueVertices []float32
+	// triangularize the wavefront .obj file data and calculate indices to reduce vertices
+	for _, v := range object.VertexData {
+		// first triangle in the face/n-gon
+		for i := 0; i < 3; i++ {
+			uniqueVertices, indices = getUniqueVertices(v.Declarations[i], existing, indices, uniqueVertices)
+		}
+		// calculate the other triangles in the face/n-gon
+		for i := 3; i < len(v.Declarations); i++ {
+			uniqueVertices, indices = getUniqueVertices(v.Declarations[i-3], existing, indices, uniqueVertices)
+			uniqueVertices, indices = getUniqueVertices(v.Declarations[i-1], existing, indices, uniqueVertices)
+			uniqueVertices, indices = getUniqueVertices(v.Declarations[i], existing, indices, uniqueVertices)
+		}
+	}
+	return indices, uniqueVertices
 }
 
 func getUniqueVertices(decl *declaration, lookupMap map[[3]int]uint32, indices []uint32, uniqueVertices []float32) ([]float32, []uint32) {

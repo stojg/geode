@@ -10,28 +10,17 @@ func TestCalculateIndices(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	verts, inds := calculateIndices(obj)
+	indices, verts := calculateIndices(obj.Objects[0])
 
-	if len(verts) != 1 {
-		t.Fatalf("expected 1 vertice group, got %d ", len(verts))
+	const stride = 8 // 3 pos, 3 normals, 2 uv
+
+	vertices := verts
+	if len(vertices)/stride != 24 {
+		t.Fatalf("expected 24 vertices in a cube, got %d ", len(vertices)/stride)
 	}
 
-	if len(inds) != 1 {
-		t.Fatalf("expected 1 indice group, got %d ", len(inds))
-	}
-
-	stride := 8 // 3 pos, 3 normals, 2 uv
-
-	verticesData := verts[0]
-	if len(verticesData)/stride != 24 {
-		t.Fatalf("expected 24 vertices in a cube, got %d ", len(verticesData)/stride)
-	}
-
-	//fmt.Println(unsafe.Sizeof(verticesData))
-
-	indices := inds[0]
 	if len(indices) != 36 {
-		t.Fatalf("expected 36 vertices in a cube, got %d ", len(indices))
+		t.Fatalf("expected 36 indices in a cube, got %d ", len(indices))
 	}
 }
 
@@ -45,7 +34,7 @@ func BenchmarkCalculateIndices(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		calculateIndices(obj)
+		calculateIndices(obj.Objects[0])
 	}
 }
 
@@ -66,5 +55,6 @@ func getObject(name string) (*objectFile, error) {
 	defer f.Close()
 
 	obj, _, err := parse(f)
+
 	return obj, err
 }
