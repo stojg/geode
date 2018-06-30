@@ -85,7 +85,7 @@ func run() error {
 
 	tSize := float32(512)
 	tHalfSize := tSize / 2
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 150; i++ {
 		cube, err := loadModel("cube")
 		handleError(err)
 		engine.AddObject(cube)

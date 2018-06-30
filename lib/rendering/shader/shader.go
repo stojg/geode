@@ -72,37 +72,13 @@ func (s *Shader) Bind() {
 	}
 }
 
-func (s *Shader) UpdateUniforms(mat components.Material, engine components.RenderingEngine) {
+func (s *Shader) UpdateUniforms(mtrl components.Material, engine components.RenderingEngine) {
 
 	for i, name := range s.resource.uniformNames {
 		uniformType := s.resource.uniformTypes[i]
 		// x_ means that the uniform is a engine uniform and should be fetch from the render engines storage
 		if strings.Index(name, "x_") == 0 {
-			if uniformType == "sampler2D" || uniformType == "samplerCube" {
-				samplerSlot := engine.SamplerSlot(name)
-				engine.Texture(name).Bind(samplerSlot)
-				gl.Uniform1i(s.resource.uniforms[name], int32(samplerSlot))
-			} else {
-				switch uniformType {
-				case "bool":
-					s.UpdateUniform(name, engine.Integer(name))
-				case "vec3":
-					s.UpdateUniform(name, engine.Vector3f(name))
-				case "float":
-					s.UpdateUniform(name, engine.Float(name))
-				case "int":
-					s.UpdateUniform(name, engine.Integer(name))
-				default:
-					panic(fmt.Sprintf("Shader.UpdateUniforms, dont know how to set uniformType '%s' with name '%s'", uniformType, name))
-				}
-			}
-			continue
-		}
-
-		if uniformType == "sampler2D" {
-			samplerSlot := engine.SamplerSlot(name)
-			mat.Texture(name).Bind(samplerSlot)
-			s.UpdateUniform(name, int32(samplerSlot))
+			s.updateUniformFromRenderer(uniformType, engine, name)
 			continue
 		}
 
@@ -118,21 +94,11 @@ func (s *Shader) UpdateUniforms(mat components.Material, engine components.Rende
 		case "skyboxView":
 			s.UpdateUniform(name, engine.MainCamera().View().Mat3().Mat4()) // remove rotation
 		case "material":
-			samplerSlot := engine.SamplerSlot("albedo")
-			mat.Texture("albedo").Bind(samplerSlot)
-			s.UpdateUniform(name+".albedo", int32(samplerSlot))
-
-			samplerSlot = engine.SamplerSlot("metallic")
-			mat.Texture("metallic").Bind(samplerSlot)
-			s.UpdateUniform(name+".metallic", int32(samplerSlot))
-
-			samplerSlot = engine.SamplerSlot("roughness")
-			mat.Texture("roughness").Bind(samplerSlot)
-			s.UpdateUniform(name+".roughness", int32(samplerSlot))
-
-			samplerSlot = engine.SamplerSlot("normal")
-			mat.Texture("normal").Bind(samplerSlot)
-			s.UpdateUniform(name+".normal", int32(samplerSlot))
+			for _, sn := range []string{"albedo", "metallic", "roughness", "normal"} {
+				samplerSlot := engine.SamplerSlot(sn)
+				mtrl.Texture(sn).Bind(samplerSlot)
+				s.UpdateUniform(name+"."+sn, int32(samplerSlot))
+			}
 		case "lights":
 			if len(engine.Lights()) > index {
 				light := engine.Lights()[index]
@@ -148,7 +114,28 @@ func (s *Shader) UpdateUniforms(mat components.Material, engine components.Rende
 		case "numLights":
 			s.UpdateUniform(name, int32(len(engine.Lights())))
 		}
+	}
+}
 
+func (s *Shader) updateUniformFromRenderer(uniformType string, engine components.RenderingEngine, name string) {
+	if uniformType == "sampler2D" || uniformType == "samplerCube" {
+		samplerSlot := engine.SamplerSlot(name)
+		engine.Texture(name).Bind(samplerSlot)
+		gl.Uniform1i(s.resource.uniforms[name], int32(samplerSlot))
+		return
+	}
+
+	switch uniformType {
+	case "bool":
+		s.UpdateUniform(name, engine.Integer(name))
+	case "vec3":
+		s.UpdateUniform(name, engine.Vector3f(name))
+	case "float":
+		s.UpdateUniform(name, engine.Float(name))
+	case "int":
+		s.UpdateUniform(name, engine.Integer(name))
+	default:
+		panic(fmt.Sprintf("Shader.UpdateUniforms() don't know how to set uniformType '%s' with name '%s'", uniformType, name))
 	}
 }
 

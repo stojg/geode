@@ -9,7 +9,7 @@ import (
 )
 
 const Size float32 = 512
-const VertexCount = 128
+const VertexCount = 64
 
 func New(gridX, gridZ float32) *Terrain {
 	t := &Terrain{
@@ -37,7 +37,7 @@ func (t *Terrain) generateTerrain(gridX, gridZ float32) ([]float32, []uint32) {
 	xOffset = float64(gridX * float32(VertexCount-1))
 	zOffset = float64(gridZ * float32(VertexCount-1))
 
-	hg := NewHeightGenerator(22)
+	hg := NewHeightGenerator(349)
 	const stride = 8
 
 	// https://www.youtube.com/watch?v=yNYwZMmgTJk&list=PLRIWtICgwaX0u7Rf9zkZhLoLuZVfUksDP&index=14
