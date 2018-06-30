@@ -101,6 +101,7 @@ type RenderState interface {
 
 	AddLight(light Light)
 	Lights() []Light
+	SetActiveLight(light Light)
 	ActiveLight() Light
 
 	Texture(string) Texture

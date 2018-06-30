@@ -14,10 +14,7 @@ func NewRenderer(s components.RenderState) *Renderer {
 
 type Renderer struct {
 	components.RenderState
-	shader     components.Shader
-	mainCamera components.Viewable
-	lights     []components.Light
-	samplerMap map[string]uint32
+	shader components.Shader
 }
 
 func (r *Renderer) Render(object components.Renderable) {

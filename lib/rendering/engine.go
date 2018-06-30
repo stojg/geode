@@ -11,6 +11,7 @@ import (
 	"github.com/stojg/graphics/lib/rendering/framebuffer"
 	"github.com/stojg/graphics/lib/rendering/primitives"
 	"github.com/stojg/graphics/lib/rendering/shader"
+	"github.com/stojg/graphics/lib/rendering/shadow"
 	"github.com/stojg/graphics/lib/rendering/technique"
 	"github.com/stojg/graphics/lib/rendering/terrain"
 )
@@ -55,8 +56,6 @@ func NewEngine(width, height int) *Engine {
 		nullShader:    shader.NewShader("filter_null"),
 		overlayShader: shader.NewShader("filter_overlay"),
 		fxaaShader:    shader.NewShader("filter_fxaa"),
-		gaussShader:   shader.NewShader("filter_gauss"),
-		shadowShader:  shader.NewShader("shadow_vsm"),
 		lightShader:   shader.NewShader("default"),
 
 		offScreenTexture: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGBA, gl.FLOAT, gl.LINEAR, false),
@@ -64,6 +63,7 @@ func NewEngine(width, height int) *Engine {
 
 		fullScreenTemp: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, gl.NEAREST, false),
 	}
+	e.shadowRenderer = shadow.NewRenderer(e)
 	e.terrainRenderer = terrain.NewRenderer(e)
 
 	envMap := framebuffer.NewHDRCubeMap(1024, 1024, "res/textures/sky0016.hdr")
@@ -82,14 +82,6 @@ func NewEngine(width, height int) *Engine {
 	brdfLutTexture := technique.BrdfLutTexture()
 	samplerMap["x_brdfLUT"] = 13
 	e.SetTexture("x_brdfLUT", brdfLutTexture)
-
-	e.shadowTextures = make([]components.Texture, 12)
-	e.tempShadowTextures = make([]components.Texture, 12)
-	for i := uint(0); i < 12; i++ {
-		size := 1 << i // power of two, 1, 2, 4, 8, 16 and so on
-		e.shadowTextures[i] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, size, size, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR, true)
-		e.tempShadowTextures[i] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, size, size, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR, true)
-	}
 
 	debugger.New(width, height)
 
@@ -122,21 +114,23 @@ type Engine struct {
 	overlayShader *shader.Shader
 	lightShader   *shader.Shader
 
+	shadowRenderer  *shadow.Renderer
 	terrainRenderer *terrain.Renderer
 
 	offScreenTexture *framebuffer.Texture
 
-	shadowTextures     []components.Texture
-	tempShadowTextures []components.Texture
-
 	fullScreenTemp *framebuffer.Texture
+}
+
+func (e *Engine) SetActiveLight(light components.Light) {
+	e.activeLight = light
 }
 
 func (e *Engine) ActiveLight() components.Light {
 	return e.activeLight
 }
 
-func (e *Engine) Render(object components.Renderable, terrains components.Renderable) {
+func (e *Engine) Render(object, terrains components.Renderable) {
 	if e.mainCamera == nil {
 		panic("mainCamera not found, the game cannot render")
 	}
@@ -144,35 +138,14 @@ func (e *Engine) Render(object components.Renderable, terrains components.Render
 
 	debugger.Clear()
 
-	for _, light := range e.lights {
-		if !light.ShadowCaster() {
-			continue
-		}
-		e.activeLight = light
-		light.SetCamera(e.MainCamera().Pos(), e.mainCamera.Rot())
-		idx := light.ShadowInfo().SizeAsPowerOfTwo()
-		e.shadowTextures[idx].BindAsRenderTarget()
-		e.shadowTextures[idx].SetViewPort()
-		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-		object.RenderAll(e.shadowShader, e)
-		terrains.RenderAll(e.shadowShader, e)
-		//e.blurShadowMap(idx, 1)
-	}
+	e.shadowRenderer.Render(object, terrains)
 
 	e.offScreenTexture.BindAsRenderTarget()
 	e.offScreenTexture.SetViewPort()
 
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-	for _, light := range e.lights {
-		if light.ShadowCaster() {
-			e.SetFloat("x_varianceMin", light.ShadowInfo().ShadowVarianceMin())
-			e.SetFloat("x_lightBleedReductionAmount", light.ShadowInfo().LightBleedReduction())
-			e.SetTexture("x_shadowMap", e.shadowTextures[light.ShadowInfo().SizeAsPowerOfTwo()])
-			break
-		}
-	}
-
+	e.shadowRenderer.Load()
 	object.RenderAll(e.lightShader, e)
 
 	e.terrainRenderer.Render(terrains)
@@ -196,20 +169,6 @@ func (e *Engine) Lights() []components.Light {
 
 func (e *Engine) AddLight(l components.Light) {
 	e.lights = append(e.lights, l)
-}
-
-func (e *Engine) blurShadowMap(sizeAsPowerOfTwo int, blurAmount float32) {
-	var size = 2 << uint(sizeAsPowerOfTwo)
-	src := e.shadowTextures[sizeAsPowerOfTwo]
-	tmp := e.tempShadowTextures[sizeAsPowerOfTwo]
-	gl.Disable(gl.DEPTH_TEST)
-	gl.Viewport(0, 0, src.Width(), src.Height())
-	e.SetVector3f("x_blurScale", mgl32.Vec3{1 / float32(size) * blurAmount, 0, 0})
-	e.applyFilter(e.gaussShader, src, tmp)
-	e.SetVector3f("x_blurScale", mgl32.Vec3{0, 1 / float32(size) * blurAmount, 0})
-	e.applyFilter(e.gaussShader, tmp, src)
-	gl.GenerateMipmap(gl.TEXTURE_2D)
-	gl.Enable(gl.DEPTH_TEST)
 }
 
 func (e *Engine) applyFilter(filter components.Shader, in, out components.Texture) {
