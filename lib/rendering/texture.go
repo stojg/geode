@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/stojg/graphics/lib/debug"
 	"github.com/stojg/graphics/lib/loaders"
 )
@@ -123,6 +124,12 @@ func createTextureResource(width, height int, internalFormat int32, dataType uin
 
 	gl.TexParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
 	gl.TexParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+
+	if glfw.ExtensionSupported("GL_EXT_texture_filter_anisotropic") {
+		var t float32
+		gl.GetFloatv(gl.MAX_TEXTURE_MAX_ANISOTROPY, &t)
+		gl.TexParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAX_ANISOTROPY, t)
+	}
 
 	if width == 0 || height == 0 {
 		panic("texture cannot have zero height or width")
