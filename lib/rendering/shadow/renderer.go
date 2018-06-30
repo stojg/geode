@@ -35,6 +35,7 @@ type Renderer struct {
 }
 
 func (r *Renderer) Render(objects, terrains components.Renderable) {
+	gl.Enable(gl.DEPTH_TEST)
 	for _, light := range r.RenderState.Lights() {
 		if light.ShadowCaster() {
 			r.shadowCaster = light

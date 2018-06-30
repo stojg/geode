@@ -3,32 +3,75 @@ package technique
 import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/stojg/graphics/lib/components"
+	"github.com/stojg/graphics/lib/rendering/framebuffer"
 	"github.com/stojg/graphics/lib/rendering/primitives"
 	"github.com/stojg/graphics/lib/rendering/shader"
 )
 
-func NewSkyBox(cubemap components.Texture) *SkyBox {
-	return &SkyBox{
-		shader:         shader.NewShader("skybox"),
-		cubemapTexture: cubemap,
+func NewSkyBox(filename string, s components.RenderState) *SkyBox {
+	b := &SkyBox{
+		RenderState: s,
+		shader:      shader.NewShader("skybox"),
+		cubeMap:     framebuffer.NewHDRCubeMap(1024, 1024, filename),
 	}
+
+	b.irradianceMap = framebuffer.NewCubeMap(32, 32, false)
+	Convolute(b.cubeMap, b.irradianceMap)
+
+	b.preFilterMap = framebuffer.NewCubeMap(128, 128, true)
+	Prefilter(b.cubeMap, b.preFilterMap)
+
+	b.brdfLut = BrdfLutTexture()
+
+	return b
 }
 
 type SkyBox struct {
-	cubemapTexture components.Texture
-	shader         components.Shader
+	components.RenderState
+	shader        components.Shader
+	cubeMap       *framebuffer.CubeMap
+	irradianceMap *framebuffer.CubeMap
+	preFilterMap  *framebuffer.CubeMap
+	brdfLut       *framebuffer.Texture
 }
 
-func (e *SkyBox) Draw(r components.RenderingEngine) {
+func (s *SkyBox) CubeMap() *framebuffer.CubeMap {
+	return s.cubeMap
+}
+
+func (s *SkyBox) IrradianceMap() *framebuffer.CubeMap {
+	return s.irradianceMap
+}
+
+func (s *SkyBox) PreFilterMap() *framebuffer.CubeMap {
+	return s.preFilterMap
+}
+
+func (s *SkyBox) BrdfLutTexture() *framebuffer.Texture {
+	return s.brdfLut
+}
+
+func (s *SkyBox) Load() {
+	s.SetSamplerSlot("x_irradianceMap", 11)
+	s.SetTexture("x_irradianceMap", s.irradianceMap)
+
+	s.SetSamplerSlot("x_prefilterMap", 12)
+	s.SetTexture("x_prefilterMap", s.preFilterMap)
+
+	s.SetSamplerSlot("x_brdfLUT", 13)
+	s.SetTexture("x_brdfLUT", s.brdfLut)
+}
+
+func (s *SkyBox) Render() {
 	gl.DepthFunc(gl.LEQUAL)
 	defer gl.DepthFunc(gl.LESS)
 
 	gl.CullFace(gl.FRONT)
 	defer gl.CullFace(gl.BACK)
 
-	e.shader.Bind()
-	r.SetTexture("x_skybox", e.cubemapTexture)
-	r.SetSamplerSlot("x_skybox", 0)
-	e.shader.UpdateUniforms(nil, r)
+	s.shader.Bind()
+	s.RenderState.SetTexture("x_skybox", s.cubeMap)
+	s.RenderState.SetSamplerSlot("x_skybox", 0)
+	s.shader.UpdateUniforms(nil, s.RenderState)
 	primitives.DrawCube()
 }

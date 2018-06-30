@@ -1,6 +1,7 @@
-package terrain
+package standard
 
 import (
+	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/rendering/shader"
 )
@@ -8,7 +9,7 @@ import (
 func NewRenderer(s components.RenderState) *Renderer {
 	return &Renderer{
 		RenderState: s,
-		shader:      shader.NewShader("terrain"),
+		shader:      shader.NewShader("default"),
 	}
 }
 
@@ -18,5 +19,6 @@ type Renderer struct {
 }
 
 func (r *Renderer) Render(object components.Renderable) {
+	gl.Enable(gl.DEPTH_TEST)
 	object.RenderAll(r.shader, r)
 }

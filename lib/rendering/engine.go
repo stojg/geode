@@ -12,6 +12,7 @@ import (
 	"github.com/stojg/graphics/lib/rendering/primitives"
 	"github.com/stojg/graphics/lib/rendering/shader"
 	"github.com/stojg/graphics/lib/rendering/shadow"
+	"github.com/stojg/graphics/lib/rendering/standard"
 	"github.com/stojg/graphics/lib/rendering/technique"
 	"github.com/stojg/graphics/lib/rendering/terrain"
 )
@@ -56,32 +57,17 @@ func NewEngine(width, height int) *Engine {
 		nullShader:    shader.NewShader("filter_null"),
 		overlayShader: shader.NewShader("filter_overlay"),
 		fxaaShader:    shader.NewShader("filter_fxaa"),
-		lightShader:   shader.NewShader("default"),
 
 		offScreenTexture: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGBA, gl.FLOAT, gl.LINEAR, false),
 		toneMapShader:    shader.NewShader("filter_tonemap"),
 
 		fullScreenTemp: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, gl.NEAREST, false),
 	}
-	e.shadowRenderer = shadow.NewRenderer(e)
+	e.standardRenderer = standard.NewRenderer(e)
+	e.shadowMap = shadow.NewRenderer(e)
 	e.terrainRenderer = terrain.NewRenderer(e)
 
-	envMap := framebuffer.NewHDRCubeMap(1024, 1024, "res/textures/sky0016.hdr")
-	e.skybox = technique.NewSkyBox(envMap)
-
-	irradianceMap := framebuffer.NewCubeMap(32, 32, false)
-	technique.Convolute(envMap, irradianceMap)
-	samplerMap["x_irradianceMap"] = 11
-	e.SetTexture("x_irradianceMap", irradianceMap)
-
-	preFilterMap := framebuffer.NewCubeMap(128, 128, true)
-	technique.Prefilter(envMap, preFilterMap)
-	samplerMap["x_prefilterMap"] = 12
-	e.SetTexture("x_prefilterMap", preFilterMap)
-
-	brdfLutTexture := technique.BrdfLutTexture()
-	samplerMap["x_brdfLUT"] = 13
-	e.SetTexture("x_brdfLUT", brdfLutTexture)
+	e.skybox = technique.NewSkyBox("res/textures/sky0016.hdr", e)
 
 	debugger.New(width, height)
 
@@ -98,8 +84,6 @@ type Engine struct {
 	lights        []components.Light
 	activeLight   components.Light
 
-	skybox *technique.SkyBox
-
 	samplerMap    map[string]uint32
 	textures      map[string]components.Texture
 	uniforms3f    map[string]mgl32.Vec3
@@ -109,13 +93,13 @@ type Engine struct {
 	nullShader    *shader.Shader
 	gaussShader   *shader.Shader
 	toneMapShader *shader.Shader
-	shadowShader  *shader.Shader
 	fxaaShader    *shader.Shader
 	overlayShader *shader.Shader
-	lightShader   *shader.Shader
 
-	shadowRenderer  *shadow.Renderer
-	terrainRenderer *terrain.Renderer
+	standardRenderer *standard.Renderer
+	shadowMap        *shadow.Renderer
+	terrainRenderer  *terrain.Renderer
+	skybox           *technique.SkyBox
 
 	offScreenTexture *framebuffer.Texture
 
@@ -134,25 +118,19 @@ func (e *Engine) Render(object, terrains components.Renderable) {
 	if e.mainCamera == nil {
 		panic("mainCamera not found, the game cannot render")
 	}
-	gl.Enable(gl.DEPTH_TEST)
-
 	debugger.Clear()
 
-	e.shadowRenderer.Render(object, terrains)
+	e.shadowMap.Render(object, terrains)
 
 	e.offScreenTexture.BindAsRenderTarget()
 	e.offScreenTexture.SetViewPort()
-
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-
-	e.shadowRenderer.Load()
-	object.RenderAll(e.lightShader, e)
-
+	e.shadowMap.Load()
+	e.skybox.Load()
 	e.terrainRenderer.Render(terrains)
+	e.standardRenderer.Render(object)
 
-	if e.Integer("x_enable_skybox") == 1 {
-		e.skybox.Draw(e)
-	}
+	e.skybox.Render()
 
 	gl.Viewport(0, 0, e.width, e.height)
 	gl.Disable(gl.DEPTH_TEST)
@@ -161,6 +139,10 @@ func (e *Engine) Render(object, terrains components.Renderable) {
 	//e.applyFilter(e.fxaaShader, e.fullScreenTemp, nil)
 	//e.applyFilter(e.overlayShader, debugger.Texture(), nil)
 	debug.CheckForError("renderer.Engine.Render [end]")
+}
+
+func (e *Engine) renderToScreen(t components.Texture) {
+	e.applyFilter(e.nullShader, t, nil)
 }
 
 func (e *Engine) Lights() []components.Light {
