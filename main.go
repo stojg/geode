@@ -9,8 +9,8 @@ import (
 	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/core"
 	"github.com/stojg/graphics/lib/lights"
-	"github.com/stojg/graphics/lib/rendering"
 	"github.com/stojg/graphics/lib/rendering/terrain"
+	"github.com/stojg/graphics/lib/resources"
 )
 
 func main() {
@@ -78,13 +78,12 @@ func run() error {
 		pointLight := core.NewGameObject()
 		pointLight.Transform().SetPos(vec3(-10, t.Height(-10, 0)+0.2, 0))
 		pointLight.AddComponent(lights.NewPoint(0.0, 0.5, 1.0, 50))
-		lightMaterial := rendering.NewMaterial()
+		lightMaterial := resources.NewMaterial()
 		lightMaterial.SetAlbedo(mgl32.Vec3{0.1, 0.05, 0.98})
 		engine.AddObject(pointLight)
 	}
 
 	tSize := float32(512)
-	fmt.Println(tSize)
 	tHalfSize := tSize / 2
 	for i := 0; i < 100; i++ {
 		cube, err := loadModel("cube")

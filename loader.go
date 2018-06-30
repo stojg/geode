@@ -8,16 +8,16 @@ import (
 
 	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/core"
-	"github.com/stojg/graphics/lib/rendering"
 	"github.com/stojg/graphics/lib/rendering/loader"
+	"github.com/stojg/graphics/lib/resources"
 )
 
-var meshes map[string][]*rendering.Mesh
-var modelTextures map[string]*rendering.Texture
+var meshes map[string][]*resources.Mesh
+var modelTextures map[string]*resources.Texture
 
 func init() {
-	meshes = make(map[string][]*rendering.Mesh)
-	modelTextures = make(map[string]*rendering.Texture)
+	meshes = make(map[string][]*resources.Mesh)
+	modelTextures = make(map[string]*resources.Texture)
 }
 
 func loadModel(modelName string) (*core.GameObject, error) {
@@ -35,7 +35,7 @@ func loadModel(modelName string) (*core.GameObject, error) {
 	}
 
 	textures := mi.Textures
-	var mtrls []*rendering.Material
+	var mtrls []*resources.Material
 	for _, texture := range textures {
 		mtrls = append(mtrls, loadMaterial(texture))
 	}
@@ -60,30 +60,30 @@ func loadModelFromMesh(mesh components.Drawable, texture string) (*core.GameObje
 	return gameObject, nil
 }
 
-func loadMaterial(texture string) *rendering.Material {
+func loadMaterial(texture string) *resources.Material {
 	texturePath := fmt.Sprintf("./res/textures/%s", texture)
-	material := rendering.NewMaterial()
+	material := resources.NewMaterial()
 	txt, ok := modelTextures[texturePath+"/albedo.png"]
 	if !ok {
-		txt = rendering.NewTexture(texturePath+"/albedo.png", true)
+		txt = resources.NewTexture(texturePath+"/albedo.png", true)
 		modelTextures[texturePath+"/albedo.png"] = txt
 	}
 	material.AddTexture("albedo", txt)
 	txt, ok = modelTextures[texturePath+"/metallic.png"]
 	if !ok {
-		txt = rendering.NewMetallicTexture(texturePath + "/metallic.png")
+		txt = resources.NewMetallicTexture(texturePath + "/metallic.png")
 		modelTextures[texturePath+"/metallic.png"] = txt
 	}
 	material.AddTexture("metallic", txt)
 	txt, ok = modelTextures[texturePath+"/roughness.png"]
 	if !ok {
-		txt = rendering.NewRoughnessTexture(texturePath + "/roughness.png")
+		txt = resources.NewRoughnessTexture(texturePath + "/roughness.png")
 		modelTextures[texturePath+"/roughness.png"] = txt
 	}
 	material.AddTexture("roughness", txt)
 	txt, ok = modelTextures[texturePath+"/normal.png"]
 	if !ok {
-		txt = rendering.NewTexture(texturePath+"/normal.png", false)
+		txt = resources.NewTexture(texturePath+"/normal.png", false)
 		modelTextures[texturePath+"/normal.png"] = txt
 	}
 	material.AddTexture("normal", txt)
@@ -91,7 +91,7 @@ func loadMaterial(texture string) *rendering.Material {
 	return material
 }
 
-func loadMeshesFromObj(obj string, material []*rendering.Material) []*rendering.Mesh {
+func loadMeshesFromObj(obj string, material []*resources.Material) []*resources.Mesh {
 	objVert, objInd, err := loader.Load(obj)
 	if err != nil {
 		fmt.Printf("Model loading failed: %v", err)
@@ -100,10 +100,10 @@ func loadMeshesFromObj(obj string, material []*rendering.Material) []*rendering.
 	if len(objVert) != len(material) {
 		fmt.Printf("Have %d meshes in object, but only %d materials\n", len(objVert), len(material))
 	}
-	var meshes []*rendering.Mesh
+	var meshes []*resources.Mesh
 	for i, data := range objVert {
-		mesh := rendering.NewMesh()
-		mesh.SetVertices(rendering.ConvertToVertices(data, objInd[i]), objInd[i])
+		mesh := resources.NewMesh()
+		mesh.SetVertices(resources.ConvertToVertices(data, objInd[i]), objInd[i])
 		meshes = append(meshes, mesh)
 	}
 	return meshes

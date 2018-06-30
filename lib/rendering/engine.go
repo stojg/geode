@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/debug"
@@ -65,8 +64,6 @@ func NewEngine(width, height int) *Engine {
 		toneMapShader:    shader.NewShader("filter_tonemap"),
 
 		fullScreenTemp: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, gl.NEAREST, false),
-
-		capabilities: make(map[string]bool),
 	}
 
 	envMap := framebuffer.NewHDRCubeMap(1024, 1024, "res/textures/sky0016.hdr")
@@ -93,12 +90,6 @@ func NewEngine(width, height int) *Engine {
 		size := 1 << i // power of two, 1, 2, 4, 8, 16 and so on
 		e.shadowTextures[i] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, size, size, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR, true)
 		e.tempShadowTextures[i] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, size, size, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR, true)
-	}
-
-	if glfw.ExtensionSupported("GL_EXT_texture_filter_anisotropic") {
-		var t float32
-		gl.GetFloatv(gl.MAX_TEXTURE_MAX_ANISOTROPY, &t)
-		fmt.Println("anisotropic filtering supported with", t, "levels")
 	}
 
 	debugger.New(width, height)
@@ -145,20 +136,10 @@ type Engine struct {
 	tempShadowTextures []components.Texture
 
 	fullScreenTemp *framebuffer.Texture
-
-	capabilities map[string]bool
 }
 
 func (e *Engine) ActiveLight() components.Light {
 	return e.activeLight
-}
-
-func (e *Engine) Enable(cap string) {
-	e.capabilities[cap] = true
-}
-
-func (e *Engine) Disable(cap string) {
-	e.capabilities[cap] = false
 }
 
 func (e *Engine) Render(object components.Renderable, terrains components.Renderable) {

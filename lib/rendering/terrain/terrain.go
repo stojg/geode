@@ -4,7 +4,8 @@ import (
 	"math"
 
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/stojg/graphics/lib/rendering"
+	"github.com/stojg/graphics/lib/components"
+	"github.com/stojg/graphics/lib/resources"
 )
 
 const Size float32 = 512
@@ -18,8 +19,8 @@ func New(gridX, gridZ float32) *Terrain {
 	}
 
 	v, i := t.generateTerrain(gridX, gridZ)
-	mesh := rendering.NewMesh()
-	mesh.SetVertices(rendering.ConvertToVertices(v, i), i)
+	mesh := resources.NewMesh()
+	mesh.SetVertices(resources.ConvertToVertices(v, i), i)
 	t.mesh = mesh
 	return t
 }
@@ -28,7 +29,7 @@ type Terrain struct {
 	worldX, worldZ float32
 	heights        [VertexCount][VertexCount]float32
 	gridSizeSquare float32
-	mesh           *rendering.Mesh
+	mesh           components.Drawable
 	texture        interface{}
 }
 
@@ -116,7 +117,7 @@ func (t *Terrain) X() float32 {
 	return t.worldX
 }
 
-func (t *Terrain) Mesh() *rendering.Mesh {
+func (t *Terrain) Mesh() components.Drawable {
 	return t.mesh
 }
 

@@ -1,4 +1,4 @@
-package rendering
+package resources
 
 import (
 	"math"
