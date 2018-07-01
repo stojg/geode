@@ -128,6 +128,9 @@ func createTextureResource(width, height int, internalFormat int32, dataType uin
 	if glfw.ExtensionSupported("GL_EXT_texture_filter_anisotropic") {
 		var t float32
 		gl.GetFloatv(gl.MAX_TEXTURE_MAX_ANISOTROPY, &t)
+		if t > 4 {
+			t = 4
+		}
 		gl.TexParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAX_ANISOTROPY, t)
 	}
 
