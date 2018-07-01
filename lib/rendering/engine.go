@@ -55,7 +55,6 @@ func NewEngine(width, height int) *Engine {
 
 		nullShader:    shader.NewShader("filter_null"),
 		overlayShader: shader.NewShader("filter_overlay"),
-		fxaaShader:    shader.NewShader("filter_fxaa"),
 
 		multiSampledTexture: framebuffer.NewMultiSampledTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGBA, gl.FLOAT, gl.LINEAR, false),
 		offScreenTexture:    framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGBA, gl.FLOAT, gl.LINEAR, false),
@@ -93,7 +92,6 @@ type Engine struct {
 	nullShader    *shader.Shader
 	gaussShader   *shader.Shader
 	toneMapShader *shader.Shader
-	fxaaShader    *shader.Shader
 	overlayShader *shader.Shader
 
 	standardRenderer *standard.Renderer
@@ -124,16 +122,13 @@ func (e *Engine) Render(object, terrains components.Renderable) {
 	e.shadowMap.Render(object, terrains)
 
 	e.multiSampledTexture.BindFrameBuffer()
-	//e.offScreenTexture.BindFrameBuffer()
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	e.shadowMap.Load()
 	e.skybox.Load()
 	e.terrainRenderer.Render(terrains)
 	e.standardRenderer.Render(object)
-
 	e.skybox.Render()
 	e.multiSampledTexture.UnbindFrameBuffer()
-	//e.offScreenTexture.UnbindFrameBuffer()
 
 	e.multiSampledTexture.ResolveToFBO(e.offScreenTexture)
 	debug.CheckForError("renderer.Engine.Draw [end]")
@@ -142,7 +137,6 @@ func (e *Engine) Render(object, terrains components.Renderable) {
 	gl.Disable(gl.DEPTH_TEST)
 	e.applyFilter(e.toneMapShader, e.offScreenTexture, nil)
 	//e.applyFilter(e.toneMapShader, e.offScreenTexture, e.fullScreenTemp)
-	//e.applyFilter(e.fxaaShader, e.fullScreenTemp, nil)
 	//e.applyFilter(e.overlayShader, debugger.Texture(), nil)
 }
 
