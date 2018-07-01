@@ -9,7 +9,8 @@ import (
 
 func NewGameObject() *GameObject {
 	return &GameObject{
-		transform: physics.NewTransform(),
+		transform:     physics.NewTransform(),
+		modelEntities: make(map[*components.Model][]*GameObject),
 	}
 }
 
@@ -18,12 +19,27 @@ type GameObject struct {
 	components []components.Component
 	transform  *physics.Transform
 	engine     *Engine
+
+	model         *components.Model
+	modelEntities map[*components.Model][]*GameObject
+}
+
+func (g *GameObject) Model() *components.Model {
+	return g.model
+}
+
+func (g *GameObject) SetModel(model *components.Model) {
+	g.model = model
 }
 
 func (g *GameObject) AddChild(child *GameObject) {
 	g.children = append(g.children, child)
 	child.SetEngine(g.engine)
 	child.Transform().SetParent(g.Transform())
+	if child.Model() != nil {
+		m := child.Model()
+		g.modelEntities[m] = append(g.modelEntities[m], child)
+	}
 }
 
 func (g *GameObject) AddComponent(component components.Component) {
@@ -51,6 +67,19 @@ func (g *GameObject) Update(elapsed time.Duration) {
 	}
 }
 
+func (g *GameObject) AllModels() map[*components.Model][]*GameObject {
+	a := make(map[*components.Model][]*GameObject)
+	for _, c := range g.children {
+		for k, v := range c.AllModels() {
+			a[k] = append(a[k], v...)
+		}
+	}
+	for k, v := range g.modelEntities {
+		a[k] = append(a[k], v...)
+	}
+	return a
+}
+
 func (g *GameObject) UpdateAll(elapsed time.Duration) {
 	g.Update(elapsed)
 	for _, o := range g.children {
@@ -59,15 +88,19 @@ func (g *GameObject) UpdateAll(elapsed time.Duration) {
 }
 
 func (g *GameObject) Render(shader components.Shader, renderingEngine components.RenderingEngine) {
-	for _, c := range g.components {
-		c.Render(shader, renderingEngine)
-	}
+	shader.UpdateTransform(g.Transform(), renderingEngine)
+	g.model.Draw()
 }
 
 func (g *GameObject) RenderAll(shader components.Shader, renderingEngine components.RenderingEngine) {
-	g.Render(shader, renderingEngine)
-	for _, o := range g.children {
-		o.RenderAll(shader, renderingEngine)
+	list := g.AllModels()
+	shader.Bind()
+	for model, objects := range list {
+		model.Bind(shader, renderingEngine)
+		for _, object := range objects {
+			object.Render(shader, renderingEngine)
+		}
+		model.Unbind()
 	}
 }
 

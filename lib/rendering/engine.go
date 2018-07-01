@@ -138,7 +138,7 @@ func (e *Engine) Render(object, terrains components.Renderable) {
 	//e.applyFilter(e.toneMapShader, e.offScreenTexture, e.fullScreenTemp)
 	//e.applyFilter(e.fxaaShader, e.fullScreenTemp, nil)
 	//e.applyFilter(e.overlayShader, debugger.Texture(), nil)
-	debug.CheckForError("renderer.Engine.Render [end]")
+	debug.CheckForError("renderer.Engine.Draw [end]")
 }
 
 func (e *Engine) renderToScreen(t components.Texture) {

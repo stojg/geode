@@ -3,7 +3,7 @@ package physics
 // https://github.com/BennyQBD/3DGameEngine/blob/225fa8baf6637756ba03ccbc0444bf7751d87dbb/src/com/base/engine/core/Transform.java
 
 import (
-	"fmt"
+	"math"
 
 	"github.com/go-gl/mathgl/mgl32"
 )
@@ -14,6 +14,7 @@ func NewTransform() *Transform {
 		rot:   mgl32.QuatIdent(),
 		scale: mgl32.Vec3{1, 1, 1},
 
+		oldPos:       mgl32.Vec3{math.MaxFloat32 - 1, math.MaxFloat32 - 1, math.MaxFloat32 - 1},
 		parentMatrix: mgl32.Ident4(),
 	}
 }
@@ -29,14 +30,9 @@ type Transform struct {
 	oldPos   mgl32.Vec3
 	oldRot   mgl32.Quat
 	oldScale mgl32.Vec3
-
-	hasUpdated bool
 }
 
 func (t *Transform) Update() {
-	if !t.hasUpdated {
-		t.hasUpdated = true
-	}
 	t.oldPos = t.pos
 	t.oldRot = t.rot
 	t.oldScale = t.scale
@@ -80,10 +76,6 @@ func (t *Transform) LookAtRotation(point mgl32.Vec3, up mgl32.Vec3) mgl32.Quat {
 }
 
 func (t *Transform) HasChanged() bool {
-	if !t.hasUpdated {
-		fmt.Println("changed")
-		return false
-	}
 	if t.parent != nil && t.parent.HasChanged() {
 		return true
 	}
@@ -110,7 +102,7 @@ func (t *Transform) Transformation() mgl32.Mat4 {
 }
 
 func (t *Transform) ParentMatrix() mgl32.Mat4 {
-	if t.parent != nil && t.parent.HasChanged() {
+	if t.parent != nil {
 		t.parentMatrix = t.parent.Transformation()
 	}
 	return t.parentMatrix

@@ -9,11 +9,6 @@ import (
 func NewMesh() *Mesh {
 	m := &Mesh{}
 
-	// Create buffers/arrays
-	gl.GenBuffers(1, &m.vbo)
-	gl.GenVertexArrays(1, &m.vao)
-	gl.GenBuffers(1, &m.ebo)
-
 	return m
 }
 
@@ -26,6 +21,10 @@ type Mesh struct {
 
 func (m *Mesh) SetVertices(vertices []Vertex, indices []uint32) {
 
+	// Create buffers/arrays
+	gl.GenBuffers(1, &m.vbo)
+	gl.GenVertexArrays(1, &m.vao)
+	gl.GenBuffers(1, &m.ebo)
 	m.num = int32(len(indices))
 
 	gl.BindVertexArray(m.vao)
@@ -69,10 +68,14 @@ func (m *Mesh) SetVertices(vertices []Vertex, indices []uint32) {
 	gl.BindVertexArray(0)
 }
 
-func (m *Mesh) Prepare() {
+func (m *Mesh) Bind() {
 	gl.BindVertexArray(m.vao)
 }
 
 func (m *Mesh) Draw() {
 	gl.DrawElements(gl.TRIANGLES, m.num, gl.UNSIGNED_INT, gl.PtrOffset(0))
+}
+
+func (m *Mesh) Unbind() {
+	gl.BindVertexArray(0)
 }

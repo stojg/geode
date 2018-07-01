@@ -29,8 +29,9 @@ type Terrain interface {
 }
 
 type Drawable interface {
-	Prepare()
+	Bind()
 	Draw()
+	Unbind()
 }
 
 type Shader interface {

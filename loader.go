@@ -12,52 +12,64 @@ import (
 	"github.com/stojg/graphics/lib/resources"
 )
 
+var models map[string][]*components.Model
 var meshes map[string][]*resources.Mesh
 var modelTextures map[string]*resources.Texture
 
 func init() {
+	models = make(map[string][]*components.Model)
+	meshes = make(map[string][]*resources.Mesh)
 	meshes = make(map[string][]*resources.Mesh)
 	modelTextures = make(map[string]*resources.Texture)
 }
 
 func loadModel(modelName string) (*core.GameObject, error) {
-	var mi struct {
-		Mesh     string   `json:"mesh"`
-		Textures []string `json:"textures"`
-	}
-	d, err := ioutil.ReadFile(fmt.Sprintf("res/models/%s.json", modelName))
-	if err != nil {
-		return nil, err
+	localModels, ok := models[modelName]
+	if !ok {
+
+		var mi struct {
+			Mesh     string   `json:"mesh"`
+			Textures []string `json:"textures"`
+		}
+		d, err := ioutil.ReadFile(fmt.Sprintf("res/models/%s.json", modelName))
+		if err != nil {
+			return nil, err
+		}
+
+		if err := json.Unmarshal(d, &mi); err != nil {
+			return nil, err
+		}
+
+		textures := mi.Textures
+		var mtrls []*resources.Material
+		for _, texture := range textures {
+			mtrls = append(mtrls, loadMaterial(texture))
+		}
+
+		modelFile := fmt.Sprintf("res/meshes/%s/model.obj", mi.Mesh)
+		if _, ok := meshes[modelFile]; !ok {
+			meshes[modelFile] = loadMeshesFromObj(modelFile, mtrls)
+		}
+
+		for idx, m := range meshes[modelFile] {
+			localModels = append(localModels, components.NewModel(m, mtrls[idx]))
+		}
+
+		models[modelName] = localModels
 	}
 
-	if err := json.Unmarshal(d, &mi); err != nil {
-		return nil, err
+	p := core.NewGameObject()
+	for _, model := range localModels {
+		g := core.NewGameObject()
+		g.SetModel(model)
+		p.AddChild(g)
 	}
-
-	textures := mi.Textures
-	var mtrls []*resources.Material
-	for _, texture := range textures {
-		mtrls = append(mtrls, loadMaterial(texture))
-	}
-
-	modelFile := fmt.Sprintf("res/meshes/%s/model.obj", mi.Mesh)
-	if _, ok := meshes[modelFile]; !ok {
-		meshes[modelFile] = loadMeshesFromObj(modelFile, mtrls)
-	}
-
-	gameObject := core.NewGameObject()
-	for idx, m := range meshes[modelFile] {
-		gameObject.AddComponent(components.NewModel(m, mtrls[idx]))
-	}
-
-	return gameObject, nil
+	return p, nil
 }
 
-func loadModelFromMesh(mesh components.Drawable, texture string) (*core.GameObject, error) {
+func loadModelFromMesh(mesh components.Drawable, texture string) (*components.Model, error) {
 	material := loadMaterial(texture)
-	gameObject := core.NewGameObject()
-	gameObject.AddComponent(components.NewModel(mesh, material))
-	return gameObject, nil
+	return components.NewModel(mesh, material), nil
 }
 
 func loadMaterial(texture string) *resources.Material {

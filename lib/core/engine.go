@@ -99,7 +99,11 @@ func (m *Engine) run() {
 		renderFrames++
 
 		if frameCounter >= time.Second*5 {
-			fmt.Printf("%0.4f\t%d\n", (time.Second * 5 / time.Duration(renderFrames)).Seconds(), renderFrames/5)
+			//fps := renderFrames/5)
+			secondsPerFrame := (time.Second * 5 / time.Duration(renderFrames)).Seconds()
+			msPerFrame := secondsPerFrame * 1000
+			percent := (msPerFrame / (1000 / 60)) * 100
+			fmt.Printf("%0.1fms - %0.0f%%\n", msPerFrame, percent)
 			renderFrames = 0
 			frameCounter = 0
 		}

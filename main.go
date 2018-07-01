@@ -10,7 +10,6 @@ import (
 	"github.com/stojg/graphics/lib/core"
 	"github.com/stojg/graphics/lib/lights"
 	"github.com/stojg/graphics/lib/rendering/terrain"
-	"github.com/stojg/graphics/lib/resources"
 )
 
 func main() {
@@ -40,11 +39,13 @@ func run() error {
 		return err
 	}
 
-	t := terrain.New(float32(-0.5), float32(-0.5))
-	to, err := loadModelFromMesh(t.Mesh(), "dry-dirt")
-	to.Transform().SetPos(vec3(t.X(), 0, t.Z()))
+	terrain1 := terrain.New(float32(-0.5), float32(-0.5))
+	terrainModel, err := loadModelFromMesh(terrain1.Mesh(), "dry-dirt")
 	handleError(err)
-	engine.AddTerrain(to)
+	terrainObj := core.NewGameObject()
+	terrainObj.SetModel(terrainModel)
+	terrainObj.Transform().SetPos(vec3(terrain1.X(), 0, terrain1.Z()))
+	engine.AddTerrain(terrainObj)
 
 	cameraObject := core.NewGameObject()
 	cameraObject.Transform().SetPos(vec3(10, 0, 0))
@@ -52,7 +53,7 @@ func run() error {
 	cameraObject.AddComponent(components.NewCamera(75, width, height, 0.1, 512))
 	cameraObject.AddComponent(&components.FreeMove{})
 	cameraObject.AddComponent(components.NewFreelook(width, height))
-	cameraObject.AddComponent(&components.HeadHeight{Terrain: t})
+	cameraObject.AddComponent(&components.HeadHeight{Terrain: terrain1})
 	engine.AddObject(cameraObject)
 
 	directionalLight := lights.NewDirectional(10, 0.9, 0.9, 0.9, 10)
@@ -70,36 +71,36 @@ func run() error {
 	//engine.AddObject(spot)
 
 	pointLight := core.NewGameObject()
-	pointLight.Transform().SetPos(vec3(-2, t.Height(-2, 2)+0.2, 2))
+	pointLight.Transform().SetPos(vec3(-2, terrain1.Height(-2, 2)+0.2, 2))
 	pointLight.AddComponent(lights.NewPoint(0, 0.5, 1.0, 50))
 	engine.AddObject(pointLight)
 
 	{
 		pointLight := core.NewGameObject()
-		pointLight.Transform().SetPos(vec3(-10, t.Height(-10, 0)+0.2, 0))
+		pointLight.Transform().SetPos(vec3(-10, terrain1.Height(-10, 0)+0.2, 0))
 		pointLight.AddComponent(lights.NewPoint(0.0, 0.5, 1.0, 50))
-		lightMaterial := resources.NewMaterial()
-		lightMaterial.SetAlbedo(mgl32.Vec3{0.1, 0.05, 0.98})
+		//lightMaterial := resources.NewMaterial()
+		//lightMaterial.SetAlbedo(mgl32.Vec3{0.1, 0.05, 0.98})
 		engine.AddObject(pointLight)
 	}
 
 	tSize := float32(512)
 	tHalfSize := tSize / 2
-	for i := 0; i < 150; i++ {
-		cube, err := loadModel("cube")
+	for i := 0; i < 320; i++ {
+		p := core.NewGameObject()
+		p, err := loadModel("cube")
 		handleError(err)
-		engine.AddObject(cube)
-
 		x, z := rand.Float32()*tSize-tHalfSize, rand.Float32()*tSize-tHalfSize
-		cube.Transform().SetPos(vec3(x, t.Height(x, z)+0.5, z))
-		cube.Transform().SetScale(vec3(0.5, 0.5, 0.5))
+		p.Transform().SetPos(vec3(x, terrain1.Height(x, z)+0.5, z))
+		p.Transform().SetScale(vec3(0.5, 0.5, 0.5))
+		engine.AddObject(p)
 	}
 
 	{
 		bot, err := loadModel("bot")
 		handleError(err)
 		bot.AddComponent(components.NewRotator(vec3(0, -1, 0), 15))
-		bot.Transform().SetPos(vec3(0, t.Height(0, 0), 0))
+		bot.Transform().SetPos(vec3(0, terrain1.Height(0, 0), 0))
 		engine.AddObject(bot)
 	}
 
