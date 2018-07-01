@@ -12,7 +12,7 @@ func NewMultiSampledTexture(attachment uint32, width int, height int, internalFo
 		height:      int32(height),
 		multiSample: true,
 	}
-	create(texture, filter, clamp, internalFormat, format, xtype, attachment, width, height)
+	create(texture, attachment, filter, clamp, internalFormat, format, xtype, width, height)
 	return texture
 }
 
@@ -21,7 +21,7 @@ func NewTexture(attachment uint32, width int, height int, internalFormat int32, 
 		width:  int32(width),
 		height: int32(height),
 	}
-	create(texture, filter, clamp, internalFormat, format, xtype, attachment, width, height)
+	create(texture, attachment, filter, clamp, internalFormat, format, xtype, width, height)
 	return texture
 }
 
@@ -107,7 +107,7 @@ func (t *Texture) CleanUp() {
 	gl.DeleteRenderbuffers(1, &t.colourBuffer)
 }
 
-func create(texture *Texture, filter int32, clamp bool, internalFormat int32, format uint32, xtype uint32, attachment uint32, width int, height int) {
+func create(texture *Texture, attachment uint32, filter int32, clamp bool, internalFormat int32, format uint32, xtype uint32, width int, height int) {
 	gl.GenFramebuffers(1, &texture.fbo)
 	gl.BindFramebuffer(gl.FRAMEBUFFER, texture.fbo)
 
@@ -128,8 +128,13 @@ func create(texture *Texture, filter int32, clamp bool, internalFormat int32, fo
 
 // Creates a texture and sets it as the colour buffer attachment for this FBO.
 func createTextureAttachment(texture *Texture, attachment uint32, filter int32, clamp bool, internalFormat int32, format uint32, xtype uint32) {
+	if texture.width == 0 || texture.height == 0 {
+		panic("texture cannot have zero height or width")
+	}
+
 	gl.GenTextures(1, &texture.colourTexture)
 	gl.BindTexture(gl.TEXTURE_2D, texture.colourTexture)
+
 	gl.TexImage2D(gl.TEXTURE_2D, 0, internalFormat, texture.width, texture.height, 0, format, xtype, nil)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
@@ -148,9 +153,7 @@ func createTextureAttachment(texture *Texture, attachment uint32, filter int32, 
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_BASE_LEVEL, 0)
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0)
 	}
-	if texture.width == 0 || texture.height == 0 {
-		panic("texture cannot have zero height or width")
-	}
+
 	gl.FramebufferTexture2D(gl.FRAMEBUFFER, attachment, gl.TEXTURE_2D, texture.colourTexture, 0)
 	gl.BindTexture(gl.TEXTURE_2D, 0)
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/stojg/graphics/lib/debug"
 	"github.com/stojg/graphics/lib/rendering/debugger"
 	"github.com/stojg/graphics/lib/rendering/framebuffer"
-	"github.com/stojg/graphics/lib/rendering/primitives"
+	"github.com/stojg/graphics/lib/rendering/postprocess"
 	"github.com/stojg/graphics/lib/rendering/shader"
 	"github.com/stojg/graphics/lib/rendering/shadow"
 	"github.com/stojg/graphics/lib/rendering/standard"
@@ -41,6 +41,9 @@ func NewEngine(width, height int) *Engine {
 	samplerMap["normal"] = 3
 	samplerMap["x_shadowMap"] = 9
 	samplerMap["x_filterTexture"] = 10
+	samplerMap["x_filterTexture2"] = 11
+	samplerMap["x_filterTexture3"] = 12
+	samplerMap["x_filterTexture4"] = 13
 
 	e := &Engine{
 		width:  int32(width),
@@ -57,14 +60,11 @@ func NewEngine(width, height int) *Engine {
 		overlayShader: shader.NewShader("filter_overlay"),
 
 		multiSampledTexture: framebuffer.NewMultiSampledTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGBA, gl.FLOAT, gl.LINEAR, false),
-		offScreenTexture:    framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGBA, gl.FLOAT, gl.LINEAR, false),
-		toneMapShader:       shader.NewShader("filter_tonemap"),
-
-		fullScreenTemp: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, gl.NEAREST, false),
 	}
 	e.standardRenderer = standard.NewRenderer(e)
 	e.shadowMap = shadow.NewRenderer(e)
 	e.terrainRenderer = terrain.NewRenderer(e)
+	e.postprocess = postprocess.New(e)
 
 	e.skybox = technique.NewSkyBox("res/textures/sky0016.hdr", e)
 
@@ -89,18 +89,17 @@ type Engine struct {
 	uniformsI     map[string]int32
 	uniformsFloat map[string]float32
 
-	nullShader    *shader.Shader
-	gaussShader   *shader.Shader
-	toneMapShader *shader.Shader
+	nullShader *shader.Shader
+
 	overlayShader *shader.Shader
 
 	standardRenderer *standard.Renderer
 	shadowMap        *shadow.Renderer
 	terrainRenderer  *terrain.Renderer
+	postprocess      *postprocess.Renderer
 	skybox           *technique.SkyBox
 
 	multiSampledTexture *framebuffer.Texture
-	offScreenTexture    *framebuffer.Texture
 
 	fullScreenTemp *framebuffer.Texture
 }
@@ -130,18 +129,10 @@ func (e *Engine) Render(object, terrains components.Renderable) {
 	e.skybox.Render()
 	e.multiSampledTexture.UnbindFrameBuffer()
 
-	e.multiSampledTexture.ResolveToFBO(e.offScreenTexture)
-	debug.CheckForError("renderer.Engine.Draw [end]")
-	//e.offScreenTexture.ResolveToScreen()
-	gl.Viewport(0, 0, e.width, e.height)
-	gl.Disable(gl.DEPTH_TEST)
-	e.applyFilter(e.toneMapShader, e.offScreenTexture, nil)
-	//e.applyFilter(e.toneMapShader, e.offScreenTexture, e.fullScreenTemp)
-	//e.applyFilter(e.overlayShader, debugger.Texture(), nil)
-}
+	e.postprocess.Render(e.multiSampledTexture)
 
-func (e *Engine) renderToScreen(t components.Texture) {
-	e.applyFilter(e.nullShader, t, nil)
+	//e.applyFilter(e.overlayShader, debugger.Texture(), nil)
+	debug.CheckForError("renderer.Engine.Draw [end]")
 }
 
 func (e *Engine) Lights() []components.Light {
@@ -150,24 +141,6 @@ func (e *Engine) Lights() []components.Light {
 
 func (e *Engine) AddLight(l components.Light) {
 	e.lights = append(e.lights, l)
-}
-
-func (e *Engine) applyFilter(shader components.Shader, in, out components.Texture) {
-	if in == out {
-		panic("Argh, can't apply shader where source and destination is the same")
-	}
-
-	if out == nil {
-		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-	} else {
-		out.BindFrameBuffer()
-	}
-	e.SetTexture("x_filterTexture", in)
-	e.SetInteger("x_w", in.Width())
-	e.SetInteger("x_h", in.Height())
-	shader.Bind()
-	shader.UpdateUniforms(nil, e)
-	primitives.DrawQuad()
 }
 
 func (e *Engine) SetTexture(name string, texture components.Texture) {
