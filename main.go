@@ -86,7 +86,7 @@ func run() error {
 
 	tSize := float32(512)
 	tHalfSize := tSize / 2
-	for i := 0; i < 320; i++ {
+	for i := 0; i < 200; i++ {
 		p := core.NewGameObject()
 		p, err := loadModel("cube")
 		handleError(err)
