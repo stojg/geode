@@ -40,10 +40,7 @@ func run() error {
 	}
 
 	terrain1 := terrain.New(float32(-0.5), float32(-0.5))
-	terrainModel, err := loadModelFromMesh(terrain1.Mesh(), "dry-dirt")
-	handleError(err)
-	terrainObj := core.NewGameObject()
-	terrainObj.SetModel(terrainModel)
+	terrainObj, _ := loadModelFromMesh(terrain1.Mesh(), "dry-dirt")
 	terrainObj.Transform().SetPos(vec3(terrain1.X(), 0, terrain1.Z()))
 	engine.AddTerrain(terrainObj)
 

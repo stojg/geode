@@ -28,7 +28,7 @@ func Prefilter(src, dest components.Texture) {
 
 	shad.UpdateUniform("projection", captureProjection)
 	shad.UpdateUniform("environmentMap", int32(0))
-	src.Bind(0)
+	src.Activate(0)
 
 	maxMipLevels := 5
 	gl.Disable(gl.CULL_FACE)
@@ -37,7 +37,7 @@ func Prefilter(src, dest components.Texture) {
 		mipWidth := int32(128 * math.Pow(0.5, float64(mip)))
 		mipHeight := int32(128 * math.Pow(0.5, float64(mip)))
 
-		dest.BindAsRenderTarget()
+		dest.BindFrameBuffer()
 
 		gl.Viewport(0, 0, mipWidth, mipHeight)
 

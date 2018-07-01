@@ -14,8 +14,7 @@ func BrdfLutTexture() *framebuffer.Texture {
 	shad := shader.NewShader("ibl_brdf")
 	shad.Bind()
 
-	texture.BindAsRenderTarget()
-	texture.SetViewPort()
+	texture.BindFrameBuffer()
 
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	gl.Disable(gl.DEPTH_TEST)

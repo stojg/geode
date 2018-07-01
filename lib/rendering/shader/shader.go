@@ -96,7 +96,7 @@ func (s *Shader) UpdateUniforms(mtrl components.Material, engine components.Rend
 		case "material":
 			for _, sn := range []string{"albedo", "metallic", "roughness", "normal"} {
 				samplerSlot := engine.SamplerSlot(sn)
-				mtrl.Texture(sn).Bind(samplerSlot)
+				mtrl.Texture(sn).Activate(samplerSlot)
 				s.UpdateUniform(name+"."+sn, int32(samplerSlot))
 			}
 		case "lights":
@@ -120,7 +120,7 @@ func (s *Shader) UpdateUniforms(mtrl components.Material, engine components.Rend
 func (s *Shader) updateUniformFromRenderer(uniformType string, engine components.RenderingEngine, name string) {
 	if uniformType == "sampler2D" || uniformType == "samplerCube" {
 		samplerSlot := engine.SamplerSlot(name)
-		engine.Texture(name).Bind(samplerSlot)
+		engine.Texture(name).Activate(samplerSlot)
 		gl.Uniform1i(s.resource.uniforms[name], int32(samplerSlot))
 		return
 	}

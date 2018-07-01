@@ -28,10 +28,9 @@ func Convolute(src, dest components.Texture) {
 
 	shad.UpdateUniform("projection", captureProjection)
 	shad.UpdateUniform("environmentMap", int32(0))
-	src.Bind(0)
+	src.Activate(0)
 
-	dest.SetViewPort()
-	dest.BindAsRenderTarget()
+	dest.BindFrameBuffer()
 
 	gl.Disable(gl.CULL_FACE)
 	for i := 0; i < 6; i++ {

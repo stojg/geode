@@ -67,9 +67,14 @@ func loadModel(modelName string) (*core.GameObject, error) {
 	return p, nil
 }
 
-func loadModelFromMesh(mesh components.Drawable, texture string) (*components.Model, error) {
+func loadModelFromMesh(mesh components.Drawable, texture string) (*core.GameObject, error) {
+
 	material := loadMaterial(texture)
-	return components.NewModel(mesh, material), nil
+	m := components.NewModel(mesh, material)
+	p := core.NewGameObject()
+	p.SetModel(m)
+	return p, nil
+
 }
 
 func loadMaterial(texture string) *resources.Material {

@@ -3,6 +3,7 @@ package core
 import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/stojg/graphics/lib/components"
 
 	"fmt"
 	"runtime"
@@ -28,6 +29,7 @@ func NewWindow(width, height int, title string) (*Window, error) {
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 	glfw.WindowHint(glfw.SRGBCapable, glfw.True)
+	//glfw.WindowHint(glfw.Samples, 0)
 
 	// request a window
 	window, err := glfw.CreateWindow(w.width, w.height, w.title, nil, nil)
@@ -42,8 +44,14 @@ func NewWindow(width, height int, title string) (*Window, error) {
 
 	// the actual size of the window might be different due to screen, for example retina screens
 	w.viewPortWidth, w.viewPortHeight = window.GetFramebufferSize()
+	components.Width = w.viewPortWidth
+	components.Height = w.viewPortHeight
 
-	return w, gl.Init()
+	if err := gl.Init(); err != nil {
+		return w, err
+	}
+	gl.Enable(gl.MULTISAMPLE)
+	return w, nil
 }
 
 type Window struct {

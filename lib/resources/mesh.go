@@ -29,14 +29,6 @@ func (m *Mesh) SetVertices(vertices []Vertex, indices []uint32) {
 
 	gl.BindVertexArray(m.vao)
 
-	// these values must match the ones in the shader code
-	const (
-		positions uint32 = iota
-		normals
-		textures
-		tangents
-	)
-
 	// load data into vertex buffers
 	gl.BindBuffer(gl.ARRAY_BUFFER, m.vbo)
 	gl.BufferData(gl.ARRAY_BUFFER, len(vertices)*int(sizeOfVertex), gl.Ptr(vertices), gl.STATIC_DRAW)
@@ -46,23 +38,19 @@ func (m *Mesh) SetVertices(vertices []Vertex, indices []uint32) {
 
 	offset := 0
 	// vertex position
-	gl.VertexAttribPointer(positions, numVertexPositions, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
-	gl.EnableVertexAttribArray(positions)
+	gl.VertexAttribPointer(0, numVertexPositions, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
 	offset += numVertexPositions
 
 	// normals
-	gl.VertexAttribPointer(normals, numVertexNormals, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
-	gl.EnableVertexAttribArray(normals)
+	gl.VertexAttribPointer(1, numVertexNormals, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
 	offset += numVertexNormals
 
 	// texture coordinates
-	gl.VertexAttribPointer(textures, numVertexTexCoords, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
-	gl.EnableVertexAttribArray(textures)
+	gl.VertexAttribPointer(2, numVertexTexCoords, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
 	offset += numVertexTexCoords
 
 	// tangents
-	gl.VertexAttribPointer(tangents, 3, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
-	gl.EnableVertexAttribArray(tangents)
+	gl.VertexAttribPointer(3, numVertexTangents, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*sizeOfFloat32))
 
 	// reset the current bound vertex array so that no one else mistakenly changes the VAO
 	gl.BindVertexArray(0)
@@ -70,6 +58,10 @@ func (m *Mesh) SetVertices(vertices []Vertex, indices []uint32) {
 
 func (m *Mesh) Bind() {
 	gl.BindVertexArray(m.vao)
+	gl.EnableVertexAttribArray(0)
+	gl.EnableVertexAttribArray(1)
+	gl.EnableVertexAttribArray(2)
+	gl.EnableVertexAttribArray(3)
 }
 
 func (m *Mesh) Draw() {
@@ -77,5 +69,13 @@ func (m *Mesh) Draw() {
 }
 
 func (m *Mesh) Unbind() {
+	gl.DisableVertexAttribArray(0)
+	gl.DisableVertexAttribArray(1)
+	gl.DisableVertexAttribArray(2)
+	gl.DisableVertexAttribArray(3)
 	gl.BindVertexArray(0)
+}
+
+func (m *Mesh) CleanUp() {
+	//gl.DeleteV
 }

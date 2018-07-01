@@ -68,16 +68,21 @@ func (t *Texture) Width() int32 {
 	return t.resource.width
 }
 
-func (t *Texture) Bind(slot uint32) {
-	gl.ActiveTexture(gl.TEXTURE0 + slot)
+func (t *Texture) Activate(textureSlot uint32) {
+	gl.ActiveTexture(gl.TEXTURE0 + textureSlot)
 	gl.BindTexture(gl.TEXTURE_2D, t.resource.ID())
+}
+
+func (t *Texture) BindFrameBuffer() {
+	panic("Cant write to material textures you mad lad!")
+}
+
+func (t *Texture) UnbindFrameBuffer() {
+	panic("Cant unbind non-FBO texture, you mad lad!")
 }
 
 func (t *Texture) SetViewPort() {
 	gl.Viewport(0, 0, t.Width(), t.Height())
-}
-func (t *Texture) BindAsRenderTarget() {
-	panic("Cant write to material textures you mad lad!")
 }
 
 func loadLDRTexture(filename string, srgb bool) (*TextureResource, error) {
@@ -123,7 +128,6 @@ func createTextureResource(width, height int, internalFormat int32, dataType uin
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
 
 	gl.TexParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
-	gl.TexParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
 	if glfw.ExtensionSupported("GL_EXT_texture_filter_anisotropic") {
 		var t float32

@@ -9,9 +9,9 @@ import (
 
 type Texture interface {
 	ID() uint32
-	Bind(samplerSlot uint32)
-	BindAsRenderTarget()
-	SetViewPort()
+	Activate(samplerSlot uint32)
+	BindFrameBuffer()
+	UnbindFrameBuffer()
 
 	Width() int32
 	Height() int32

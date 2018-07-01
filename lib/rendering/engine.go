@@ -32,7 +32,6 @@ func NewEngine(width, height int) *Engine {
 	gl.DepthFunc(gl.LESS)
 
 	gl.Enable(gl.TEXTURE_CUBE_MAP_SEAMLESS)
-	gl.Disable(gl.MULTISAMPLE)
 	gl.Disable(gl.FRAMEBUFFER_SRGB)
 
 	samplerMap := make(map[string]uint32)
@@ -58,8 +57,9 @@ func NewEngine(width, height int) *Engine {
 		overlayShader: shader.NewShader("filter_overlay"),
 		fxaaShader:    shader.NewShader("filter_fxaa"),
 
-		offScreenTexture: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGBA, gl.FLOAT, gl.LINEAR, false),
-		toneMapShader:    shader.NewShader("filter_tonemap"),
+		multiSampledTexture: framebuffer.NewMultiSampledTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGBA, gl.FLOAT, gl.LINEAR, false),
+		offScreenTexture:    framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGBA, gl.FLOAT, gl.LINEAR, false),
+		toneMapShader:       shader.NewShader("filter_tonemap"),
 
 		fullScreenTemp: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, gl.NEAREST, false),
 	}
@@ -101,7 +101,8 @@ type Engine struct {
 	terrainRenderer  *terrain.Renderer
 	skybox           *technique.SkyBox
 
-	offScreenTexture *framebuffer.Texture
+	multiSampledTexture *framebuffer.Texture
+	offScreenTexture    *framebuffer.Texture
 
 	fullScreenTemp *framebuffer.Texture
 }
@@ -122,8 +123,8 @@ func (e *Engine) Render(object, terrains components.Renderable) {
 
 	e.shadowMap.Render(object, terrains)
 
-	e.offScreenTexture.BindAsRenderTarget()
-	e.offScreenTexture.SetViewPort()
+	e.multiSampledTexture.BindFrameBuffer()
+	//e.offScreenTexture.BindFrameBuffer()
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	e.shadowMap.Load()
 	e.skybox.Load()
@@ -131,14 +132,18 @@ func (e *Engine) Render(object, terrains components.Renderable) {
 	e.standardRenderer.Render(object)
 
 	e.skybox.Render()
+	e.multiSampledTexture.UnbindFrameBuffer()
+	//e.offScreenTexture.UnbindFrameBuffer()
 
+	e.multiSampledTexture.ResolveToFBO(e.offScreenTexture)
+	debug.CheckForError("renderer.Engine.Draw [end]")
+	//e.offScreenTexture.ResolveToScreen()
 	gl.Viewport(0, 0, e.width, e.height)
 	gl.Disable(gl.DEPTH_TEST)
 	e.applyFilter(e.toneMapShader, e.offScreenTexture, nil)
 	//e.applyFilter(e.toneMapShader, e.offScreenTexture, e.fullScreenTemp)
 	//e.applyFilter(e.fxaaShader, e.fullScreenTemp, nil)
 	//e.applyFilter(e.overlayShader, debugger.Texture(), nil)
-	debug.CheckForError("renderer.Engine.Draw [end]")
 }
 
 func (e *Engine) renderToScreen(t components.Texture) {
@@ -153,21 +158,21 @@ func (e *Engine) AddLight(l components.Light) {
 	e.lights = append(e.lights, l)
 }
 
-func (e *Engine) applyFilter(filter components.Shader, in, out components.Texture) {
+func (e *Engine) applyFilter(shader components.Shader, in, out components.Texture) {
 	if in == out {
-		panic("Argh, can't apply filter where source and destination is the same")
+		panic("Argh, can't apply shader where source and destination is the same")
 	}
 
 	if out == nil {
 		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 	} else {
-		out.BindAsRenderTarget()
+		out.BindFrameBuffer()
 	}
 	e.SetTexture("x_filterTexture", in)
 	e.SetInteger("x_w", in.Width())
 	e.SetInteger("x_h", in.Height())
-	filter.Bind()
-	filter.UpdateUniforms(nil, e)
+	shader.Bind()
+	shader.UpdateUniforms(nil, e)
 	primitives.DrawQuad()
 }
 
