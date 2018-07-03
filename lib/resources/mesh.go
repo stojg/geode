@@ -2,6 +2,7 @@ package resources
 
 import (
 	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/stojg/graphics/lib/debug"
 )
 
 // @todo check http://ogldev.atspace.co.uk/www/tutorial33/tutorial33.html for proper instanced rendering
@@ -66,6 +67,7 @@ func (m *Mesh) Bind() {
 
 func (m *Mesh) Draw() {
 	gl.DrawElements(gl.TRIANGLES, m.num, gl.UNSIGNED_INT, gl.PtrOffset(0))
+	debug.Drawcall()
 }
 
 func (m *Mesh) Unbind() {

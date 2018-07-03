@@ -9,7 +9,7 @@ import (
 	"runtime"
 )
 
-func NewWindow(width, height int, title string) (*Window, error) {
+func NewWindow(width, height int, title string, vsync bool) (*Window, error) {
 	w := &Window{
 		width:  width,
 		height: height,
@@ -40,7 +40,11 @@ func NewWindow(width, height int, title string) (*Window, error) {
 
 	w.inst.MakeContextCurrent()
 	// disable or enable vertical refresh (vsync)
-	glfw.SwapInterval(1)
+	if vsync {
+		glfw.SwapInterval(1)
+	} else {
+		glfw.SwapInterval(0)
+	}
 
 	// the actual size of the window might be different due to screen, for example retina screens
 	w.viewPortWidth, w.viewPortHeight = window.GetFramebufferSize()

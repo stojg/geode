@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/debug"
@@ -17,11 +18,25 @@ import (
 	"github.com/stojg/graphics/lib/rendering/terrain"
 )
 
-func NewEngine(width, height int) *Engine {
+func NewEngine(width, height int, logger components.Logger) *Engine {
 
+	// @todo add more output
 	var nrAttributes int32
 	gl.GetIntegerv(gl.MAX_VERTEX_ATTRIBS, &nrAttributes)
-	fmt.Printf("maximum nr of vertex attributes supported: %d\n", nrAttributes)
+	logger.Printf("No vertex attributes supported: %d\n", nrAttributes)
+	if glfw.ExtensionSupported("GL_EXT_texture_filter_anisotropic") {
+		var t float32
+		gl.GetFloatv(gl.MAX_TEXTURE_MAX_ANISOTROPY, &t)
+		logger.Printf("Anisotropy supported with %0.0f levels\n", t)
+	} else {
+		logger.Println("Anisotropy not supported")
+	}
+
+	if glfw.ExtensionSupported("GL_KHR_debug") {
+		logger.Println("GL_KHR_debug supported")
+	} else {
+		logger.Println("GL_KHR_debug not supported")
+	}
 
 	gl.ClearColor(0.01, 0.01, 0.01, 1)
 
@@ -118,10 +133,11 @@ func (e *Engine) Render(object, terrains components.Renderable) {
 	}
 	debugger.Clear()
 
+	// @todo maybe only do this every other frame?
 	e.shadowMap.Render(object, terrains)
 
 	e.multiSampledTexture.BindFrameBuffer()
-	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT)
 	e.shadowMap.Load()
 	e.skybox.Load()
 	e.terrainRenderer.Render(terrains)

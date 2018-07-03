@@ -6,13 +6,14 @@ import (
 	"time"
 
 	"github.com/stojg/graphics/lib/components"
+	"github.com/stojg/graphics/lib/debug"
 	"github.com/stojg/graphics/lib/input"
 	"github.com/stojg/graphics/lib/rendering"
 )
 
-func NewEngine(width, height int, title string) (*Engine, error) {
+func NewEngine(width, height int, title string, l components.Logger) (*Engine, error) {
 
-	window, err := NewWindow(width, height, title)
+	window, err := NewWindow(width, height, title, false)
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +23,8 @@ func NewEngine(width, height int, title string) (*Engine, error) {
 	engine := &Engine{
 		game:            NewGame(),
 		window:          window,
-		renderingEngine: rendering.NewEngine(window.viewPortWidth, window.viewPortHeight),
+		renderingEngine: rendering.NewEngine(window.viewPortWidth, window.viewPortHeight, l),
+		logger:          l,
 	}
 	engine.game.SetEngine(engine)
 
@@ -37,6 +39,7 @@ type Engine struct {
 	isRunning       bool
 
 	skybox bool
+	logger components.Logger
 }
 
 func (m *Engine) Start() {
@@ -103,7 +106,11 @@ func (m *Engine) run() {
 			secondsPerFrame := (time.Second * 5 / time.Duration(renderFrames)).Seconds()
 			msPerFrame := secondsPerFrame * 1000
 			percent := (msPerFrame / (1000 / 60)) * 100
-			fmt.Printf("%0.1fms - %0.0f%%\n", msPerFrame, percent)
+
+			dc := debug.GetDrawcalls() / uint64(renderFrames)
+			ss := debug.GetShaderSwitches() / uint64(renderFrames)
+			fmt.Printf("%0.1fms - %0.0f%%, %d draw calls, %d shader switches\n", msPerFrame, percent, dc, ss)
+			m.logger.Printf("%0.1fms - %0.0f%%, %d draw calls, %d shader switches\n", msPerFrame, percent, dc, ss)
 			renderFrames = 0
 			frameCounter = 0
 		}

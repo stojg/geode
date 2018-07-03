@@ -12,6 +12,7 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
+	"github.com/stojg/graphics/lib/debug"
 	"github.com/stojg/graphics/lib/physics"
 )
 
@@ -69,6 +70,7 @@ func (s *Shader) Bind() {
 	if shaderInUse != s.resource.Program {
 		shaderInUse = s.resource.Program
 		gl.UseProgram(s.resource.Program)
+		debug.ShaderSwitch()
 	}
 }
 

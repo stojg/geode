@@ -10,11 +10,11 @@ import (
 
 type FreeMove struct {
 	GameComponent
+	Speed float32
 }
 
 func (c *FreeMove) Input(elapsed time.Duration) {
-	const speed float32 = 10
-	amount := float32(elapsed.Seconds()) * speed
+	amount := float32(elapsed.Seconds()) * c.Speed
 
 	if input.Key(glfw.KeyW) {
 		c.Move(c.Transform().Rot().Rotate(back()), amount)

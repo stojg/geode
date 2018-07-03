@@ -34,6 +34,12 @@ type Drawable interface {
 	Unbind()
 }
 
+type Logger interface {
+	Println(a ...interface{})
+	Printf(format string, a ...interface{})
+	ErrorLn(inError error)
+}
+
 type Shader interface {
 	Bind()
 	UpdateUniforms(Material, RenderingEngine)

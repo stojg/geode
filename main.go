@@ -16,10 +16,10 @@ func main() {
 	rand.Seed(19)
 	l := newLogger("gl.log")
 
-	err := run()
+	err := run(l)
 
 	if err != nil {
-		l.error(err)
+		l.ErrorLn(err)
 		if err := l.close(); err != nil {
 			fmt.Println(".. in addition the log file had problem closing", err)
 		}
@@ -30,11 +30,11 @@ func main() {
 	}
 }
 
-func run() error {
-	width := 1024
-	height := 800
+func run(l *logger) error {
+	width := 20
+	height := 20
 
-	engine, err := core.NewEngine(width, height, "graphics")
+	engine, err := core.NewEngine(width, height, "graphics", l)
 	if err != nil {
 		return err
 	}
@@ -45,11 +45,12 @@ func run() error {
 	engine.AddTerrain(terrainObj)
 
 	cameraObject := core.NewGameObject()
-	cameraObject.Transform().SetPos(vec3(10, 0, 0))
+	cameraObject.Transform().SetPos(vec3(10, 0, -10))
 	cameraObject.Transform().SetScale(vec3(0.1, 0.1, 0.1))
 	cameraObject.AddComponent(components.NewCamera(75, width, height, 0.1, 512))
-	cameraObject.AddComponent(&components.FreeMove{})
+	cameraObject.AddComponent(&components.FreeMove{Speed: 5})
 	cameraObject.AddComponent(components.NewFreelook(width, height))
+	cameraObject.Transform().LookAt(vec3(4, 1, 1), up())
 	cameraObject.AddComponent(&components.HeadHeight{Terrain: terrain1})
 	engine.AddObject(cameraObject)
 

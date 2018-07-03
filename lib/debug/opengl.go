@@ -29,3 +29,27 @@ func FramebufferComplete(debugName string) {
 		panic(fmt.Sprintf("%s Framebuffer creation failed, FBO isn't complete: 0x%x", debugName, e))
 	}
 }
+
+var drawcalls uint64 = 0
+
+func Drawcall() {
+	drawcalls++
+}
+
+func GetDrawcalls() uint64 {
+	t := drawcalls
+	drawcalls = 0
+	return t
+}
+
+var shaderSwitch uint64 = 0
+
+func ShaderSwitch() {
+	shaderSwitch++
+}
+
+func GetShaderSwitches() uint64 {
+	t := shaderSwitch
+	shaderSwitch = 0
+	return t
+}

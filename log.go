@@ -13,7 +13,7 @@ func newLogger(file string) *logger {
 		panic(err)
 	}
 	l.file = f
-	l.println("Program started")
+	l.Println("Program started")
 	return l
 }
 
@@ -22,11 +22,11 @@ type logger struct {
 }
 
 func (l *logger) close() error {
-	l.println("Program stopped")
+	l.Println("Program stopped")
 	return l.file.Close()
 }
 
-func (l *logger) println(a ...interface{}) {
+func (l *logger) Println(a ...interface{}) {
 	args := append([]interface{}{l.ts()}, a...)
 	_, err := fmt.Fprintln(l.file, args...)
 	if err != nil {
@@ -34,7 +34,7 @@ func (l *logger) println(a ...interface{}) {
 	}
 }
 
-func (l *logger) printf(format string, a ...interface{}) {
+func (l *logger) Printf(format string, a ...interface{}) {
 	args := append([]interface{}{l.ts()}, a...)
 	_, err := fmt.Fprintf(l.file, "%s "+format, args...)
 	if err != nil {
@@ -42,7 +42,7 @@ func (l *logger) printf(format string, a ...interface{}) {
 	}
 }
 
-func (l *logger) error(inError error) {
+func (l *logger) ErrorLn(inError error) {
 	_, err := fmt.Fprintf(l.file, "%s %v\n", l.ts(), inError)
 	fmt.Fprintf(os.Stderr, "%s %v\n", l.ts(), inError)
 	if err != nil {

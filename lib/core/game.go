@@ -11,7 +11,7 @@ import (
 
 func NewGame() *Game {
 	g := &Game{
-		vsync: true,
+		vsync: false,
 	}
 	return g
 }
