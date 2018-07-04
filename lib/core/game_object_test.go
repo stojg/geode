@@ -27,7 +27,8 @@ func TestGameObject_SetModel(t *testing.T) {
 	objB.SetModel(model)
 	first.AddChild(objB)
 
-	root.RenderAll(&FakeShader{}, &FakeEngine{})
+	cam := components.NewCamera(65, 10, 10, 0.1, 100)
+	root.RenderAll(cam, &FakeShader{}, &FakeEngine{})
 
 	modelObjects := root.AllModels()
 	objects, ok := modelObjects[model]

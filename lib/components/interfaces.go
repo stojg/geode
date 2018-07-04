@@ -28,10 +28,12 @@ type Terrain interface {
 	Height(x, z float32) float32
 }
 
+// ie mesh
 type Drawable interface {
 	Bind()
 	Draw()
 	Unbind()
+	HalfWidths() [3][2]float32
 }
 
 type Logger interface {
@@ -53,10 +55,11 @@ type Transformable interface {
 }
 
 type Renderable interface {
-	RenderAll(shader Shader, engine RenderingEngine)
+	RenderAll(camera Viewable, shader Shader, engine RenderingEngine)
 }
 
 type Viewable interface {
+	Planes() [6][4]float32
 	View() mgl32.Mat4
 	Projection() mgl32.Mat4
 	Pos() mgl32.Vec3

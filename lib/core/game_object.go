@@ -92,13 +92,15 @@ func (g *GameObject) Render(shader components.Shader, renderingEngine components
 	g.model.Draw()
 }
 
-func (g *GameObject) RenderAll(shader components.Shader, renderingEngine components.RenderingEngine) {
+func (g *GameObject) RenderAll(camera components.Viewable, shader components.Shader, renderingEngine components.RenderingEngine) {
 	list := g.AllModels()
 	shader.Bind()
 	for model, objects := range list {
 		model.Bind(shader, renderingEngine)
 		for _, object := range objects {
-			object.Render(shader, renderingEngine)
+			if IsVisible(camera.Planes(), object.model.AABB(), object.transform.Transformation()) {
+				object.Render(shader, renderingEngine)
+			}
 		}
 		model.Unbind()
 	}

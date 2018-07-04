@@ -1,6 +1,8 @@
 package resources
 
 import (
+	"math"
+
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/stojg/graphics/lib/debug"
 )
@@ -14,10 +16,11 @@ func NewMesh() *Mesh {
 }
 
 type Mesh struct {
-	vbo uint32
-	vao uint32
-	ebo uint32
-	num int32
+	vbo       uint32
+	vao       uint32
+	ebo       uint32
+	num       int32
+	halfWidth [3][2]float32
 }
 
 func (m *Mesh) SetVertices(vertices []Vertex, indices []uint32) {
@@ -55,6 +58,14 @@ func (m *Mesh) SetVertices(vertices []Vertex, indices []uint32) {
 
 	// reset the current bound vertex array so that no one else mistakenly changes the VAO
 	gl.BindVertexArray(0)
+
+	m.halfWidth[0] = HalfWidth(vertices, [3]float32{1, 0, 0})
+	m.halfWidth[1] = HalfWidth(vertices, [3]float32{0, 1, 0})
+	m.halfWidth[2] = HalfWidth(vertices, [3]float32{0, 0, 1})
+}
+
+func (m *Mesh) HalfWidths() [3][2]float32 {
+	return m.halfWidth
 }
 
 func (m *Mesh) Bind() {
@@ -80,4 +91,43 @@ func (m *Mesh) Unbind() {
 
 func (m *Mesh) CleanUp() {
 	//gl.DeleteV
+}
+
+func HalfWidth(in []Vertex, direction [3]float32) [2]float32 {
+	min, max := float32(math.MaxFloat32), float32(-math.MaxFloat32)
+	var proj float32
+	for i := 0; i < len(in); i++ {
+		dot(in[i].Pos, direction, &proj)
+		if proj < min {
+			min = proj
+		}
+		if proj > max {
+			max = proj
+		}
+	}
+	return [2]float32{(max - min) / 2, (max + min) / 2}
+
+}
+
+func CalcMinMax(in []Vertex, direction [3]float32) [2]float32 {
+	min, max := float32(math.MaxFloat32), float32(-math.MaxFloat32)
+	var proj float32
+	for i := 0; i < len(in); i++ {
+		dot(in[i].Pos, direction, &proj)
+		if proj < min {
+			min = proj
+		}
+		if proj > max {
+			max = proj
+		}
+	}
+
+	return [2]float32{min, max}
+}
+
+func dot(a [3]float32, b [3]float32, result *float32) {
+	x := a[0] * b[0]
+	y := a[1] * b[1]
+	z := a[2] * b[2]
+	*result = x + y + z
 }

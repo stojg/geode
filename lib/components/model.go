@@ -16,14 +16,6 @@ type Model struct {
 	numberOfRows uint32
 }
 
-func (m *Model) NumberOfRows() uint32 {
-	return m.numberOfRows
-}
-
-func (m *Model) SetNumberOfRows(numberOfRows uint32) {
-	m.numberOfRows = numberOfRows
-}
-
 func (m *Model) Bind(shader Shader, engine RenderingEngine) {
 	shader.UpdateUniforms(m.material, engine)
 	m.mesh.Bind()
@@ -35,4 +27,8 @@ func (m *Model) Draw() {
 
 func (m *Model) Unbind() {
 	m.mesh.Unbind()
+}
+
+func (m *Model) AABB() [3][2]float32 {
+	return m.mesh.HalfWidths()
 }

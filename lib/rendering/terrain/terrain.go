@@ -81,9 +81,9 @@ func (t *Terrain) generateTerrain(gridX, gridZ float32) ([]float32, []uint32) {
 	return vertices, indices
 }
 
-func (t *Terrain) Height(worldX, worldZ float32) float32 {
-	terrainX := worldX - t.worldX
-	terrainZ := worldZ - t.worldZ
+func (t *Terrain) Height(x, z float32) float32 {
+	terrainX := x - t.worldX
+	terrainZ := z - t.worldZ
 
 	gridX := int(math.Floor(float64(terrainX / t.gridSizeSquare)))
 	gridZ := int(math.Floor(float64(terrainZ / t.gridSizeSquare)))
