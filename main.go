@@ -61,12 +61,12 @@ func run(l *logger) error {
 	dirLight.AddComponent(directionalLight)
 	engine.AddObject(dirLight)
 
-	//spotLight := lights.NewSpot(0.9, 0.4, 0.1, 500, 65)
-	//spot := core.NewGameObject()
-	//spot.Transform().SetPos(vec3(3, 3.5, 4.6))
-	//spot.Transform().LookAt(vec3(0, 1, 0), up())
-	//spot.AddComponent(spotLight)
-	//engine.AddObject(spot)
+	spotLight := lights.NewSpot(0.9, 0.4, 0.1, 500, 65)
+	spot := core.NewGameObject()
+	spot.Transform().SetPos(vec3(3, 3.5, 4.6))
+	spot.Transform().LookAt(vec3(0, 1, 0), up())
+	spot.AddComponent(spotLight)
+	engine.AddObject(spot)
 
 	pointLight := core.NewGameObject()
 	pointLight.Transform().SetPos(vec3(-2, terrain1.Height(-2, 2)+0.2, 2))
@@ -82,9 +82,9 @@ func run(l *logger) error {
 		engine.AddObject(pointLight)
 	}
 
-	tSize := float32(512)
+	tSize := float32(terrain.Size)
 	tHalfSize := tSize / 2
-	for i := 0; i < 200; i++ {
+	for i := 0; i < 800; i++ {
 		p := core.NewGameObject()
 		p, err := loadModel("cube")
 		handleError(err)
