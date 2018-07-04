@@ -31,13 +31,13 @@ func main() {
 }
 
 func run(l *logger) error {
-	width := 20
-	height := 20
-
-	engine, err := core.NewEngine(width, height, "graphics", l)
+	w := 1024
+	h := int(float32(w) / (4.0 / 3.0))
+	engine, err := core.NewEngine(w, h, "graphics", l)
 	if err != nil {
 		return err
 	}
+	width, height := engine.Width(), engine.Height()
 
 	terrain1 := terrain.New(float32(-0.5), float32(-0.5))
 	terrainObj, _ := loadModelFromMesh(terrain1.Mesh(), "dry-dirt")

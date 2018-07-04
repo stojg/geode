@@ -67,6 +67,14 @@ type Window struct {
 	viewPortWidth  int
 }
 
+func (w *Window) ViewPortWidth() int {
+	return w.viewPortWidth
+}
+
+func (w *Window) ViewPortHeight() int {
+	return w.viewPortHeight
+}
+
 func (w *Window) Instance() *glfw.Window {
 	return w.inst
 }

@@ -49,6 +49,14 @@ func (m *Engine) Start() {
 	m.run()
 }
 
+func (m *Engine) Width() int {
+	return m.window.viewPortWidth
+}
+
+func (m *Engine) Height() int {
+	return m.window.viewPortHeight
+}
+
 func (m *Engine) AddObject(object *GameObject) {
 	m.game.AddObject(object)
 }
