@@ -48,11 +48,11 @@ func (FakeShader) Bind() {
 	panic("implement me")
 }
 
-func (FakeShader) UpdateUniforms(components.Material, components.RenderingEngine) {
+func (FakeShader) UpdateUniforms(components.Material, components.RenderState) {
 	panic("implement me")
 }
 
-func (FakeShader) UpdateTransform(*physics.Transform, components.RenderingEngine) {
+func (FakeShader) UpdateTransform(*physics.Transform, components.RenderState) {
 	panic("implement me")
 }
 

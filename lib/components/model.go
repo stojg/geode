@@ -16,7 +16,7 @@ type Model struct {
 	numberOfRows uint32
 }
 
-func (m *Model) Bind(shader Shader, engine RenderingEngine) {
+func (m *Model) Bind(shader Shader, engine RenderState) {
 	shader.UpdateUniforms(m.material, engine)
 	m.mesh.Bind()
 }

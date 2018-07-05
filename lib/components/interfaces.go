@@ -44,8 +44,8 @@ type Logger interface {
 
 type Shader interface {
 	Bind()
-	UpdateUniforms(Material, RenderingEngine)
-	UpdateTransform(*physics.Transform, RenderingEngine)
+	UpdateUniforms(Material Material, state RenderState)
+	UpdateTransform(*physics.Transform, RenderState)
 	UpdateUniform(name string, value interface{})
 }
 
@@ -55,7 +55,7 @@ type Transformable interface {
 }
 
 type Renderable interface {
-	RenderAll(camera Viewable, shader Shader, engine RenderingEngine)
+	RenderAll(camera Viewable, shader Shader, engine RenderState)
 }
 
 type Viewable interface {
@@ -128,7 +128,8 @@ type RenderState interface {
 }
 
 type RenderingEngine interface {
-	RenderState
+	Render(a, b Renderable)
+	State() RenderState
 }
 
 type Engine interface {
@@ -138,7 +139,7 @@ type Engine interface {
 type Component interface {
 	Update(time.Duration)
 	Input(time.Duration)
-	Render(Shader, RenderingEngine)
-	AddToEngine(Engine)
+	Render(Shader, state RenderState)
+	AddToEngine(engine Engine)
 	SetParent(Transformable)
 }

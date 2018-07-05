@@ -4,7 +4,6 @@ import (
 	"math"
 
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/stojg/graphics/lib/components"
 )
 
 func NewSpot(r, g, b, intensity, viewAngle float32) *Spot {
@@ -29,10 +28,6 @@ func NewSpot(r, g, b, intensity, viewAngle float32) *Spot {
 
 type Spot struct {
 	BaseLight
-}
-
-func (spot *Spot) AddToEngine(e components.Engine) {
-	e.RenderingEngine().AddLight(spot)
 }
 
 func (spot *Spot) Direction() mgl32.Vec3 {

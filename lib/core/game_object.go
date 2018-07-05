@@ -87,12 +87,12 @@ func (g *GameObject) UpdateAll(elapsed time.Duration) {
 	}
 }
 
-func (g *GameObject) Render(shader components.Shader, renderingEngine components.RenderingEngine) {
+func (g *GameObject) Render(shader components.Shader, renderingEngine components.RenderState) {
 	shader.UpdateTransform(g.Transform(), renderingEngine)
 	g.model.Draw()
 }
 
-func (g *GameObject) RenderAll(camera components.Viewable, shader components.Shader, renderingEngine components.RenderingEngine) {
+func (g *GameObject) RenderAll(camera components.Viewable, shader components.Shader, renderingEngine components.RenderState) {
 	list := g.AllModels()
 	shader.Bind()
 	for model, objects := range list {

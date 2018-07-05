@@ -74,7 +74,7 @@ func (s *Shader) Bind() {
 	}
 }
 
-func (s *Shader) UpdateUniforms(mtrl components.Material, engine components.RenderingEngine) {
+func (s *Shader) UpdateUniforms(mtrl components.Material, engine components.RenderState) {
 
 	for i, name := range s.resource.uniformNames {
 		uniformType := s.resource.uniformTypes[i]
@@ -119,7 +119,7 @@ func (s *Shader) UpdateUniforms(mtrl components.Material, engine components.Rend
 	}
 }
 
-func (s *Shader) updateUniformFromRenderer(uniformType string, engine components.RenderingEngine, name string) {
+func (s *Shader) updateUniformFromRenderer(uniformType string, engine components.RenderState, name string) {
 	if uniformType == "sampler2D" || uniformType == "samplerCube" {
 		samplerSlot := engine.SamplerSlot(name)
 		engine.Texture(name).Activate(samplerSlot)
@@ -141,7 +141,7 @@ func (s *Shader) updateUniformFromRenderer(uniformType string, engine components
 	}
 }
 
-func (s *Shader) UpdateTransform(transform *physics.Transform, engine components.RenderingEngine) {
+func (s *Shader) UpdateTransform(transform *physics.Transform, engine components.RenderState) {
 	for _, name := range s.resource.uniformNames {
 		name, _ := getArray(name)
 

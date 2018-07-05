@@ -25,6 +25,6 @@ func (m *GameComponent) Transform() *physics.Transform {
 func (m *GameComponent) AddToEngine(engine Engine) {
 }
 
-func (m *GameComponent) Render(Shader, RenderingEngine) {}
-func (m *GameComponent) Input(time.Duration)            {}
-func (m *GameComponent) Update(time.Duration)           {}
+func (m *GameComponent) Render(Shader, state RenderState) {}
+func (m *GameComponent) Input(time.Duration)              {}
+func (m *GameComponent) Update(time.Duration)             {}

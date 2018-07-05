@@ -42,6 +42,10 @@ type Engine struct {
 	logger components.Logger
 }
 
+func (e *Engine) RenderingEngine() components.RenderingEngine {
+	return e.renderingEngine
+}
+
 func (m *Engine) Start() {
 	if m.isRunning {
 		return
@@ -135,6 +139,6 @@ func (m *Engine) cleanup() {
 	m.window.Close()
 }
 
-func (m *Engine) RenderingEngine() components.RenderingEngine {
-	return m.renderingEngine
+func (m *Engine) State() components.RenderState {
+	return m.renderingEngine.State()
 }

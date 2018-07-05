@@ -30,7 +30,7 @@ func (l *BaseLight) MaxDistance() float32 {
 func (l *BaseLight) SetCamera(pos mgl32.Vec3, rot mgl32.Quat) {}
 
 func (l *BaseLight) AddToEngine(e components.Engine) {
-	e.RenderingEngine().AddLight(l)
+	e.RenderingEngine().State().AddLight(l)
 }
 
 func (l *BaseLight) Direction() mgl32.Vec3 {
