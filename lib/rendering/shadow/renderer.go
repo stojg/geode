@@ -21,6 +21,7 @@ func NewRenderer(s components.RenderState) *Renderer {
 		e.shadowTextures[i] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, size, size, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR, true)
 		e.tempShadowTextures[i] = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, size, size, gl.RG32F, gl.RG, gl.FLOAT, gl.LINEAR, true)
 	}
+	s.AddSamplerSlot("x_shadowMap")
 
 	return e
 }

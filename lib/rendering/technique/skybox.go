@@ -21,6 +21,11 @@ func NewSkyBox(filename string, s components.RenderState) *SkyBox {
 	b.preFilterMap = framebuffer.NewCubeMap(128, 128, true)
 	Prefilter(b.cubeMap, b.preFilterMap)
 
+	s.AddSamplerSlot("x_skybox")
+	s.AddSamplerSlot("x_irradianceMap")
+	s.AddSamplerSlot("x_prefilterMap")
+	s.AddSamplerSlot("x_brdfLUT")
+
 	b.brdfLut = BrdfLutTexture()
 
 	return b
@@ -52,13 +57,8 @@ func (s *SkyBox) BrdfLutTexture() *framebuffer.Texture {
 }
 
 func (s *SkyBox) Load() {
-	s.SetSamplerSlot("x_irradianceMap", 11)
 	s.SetTexture("x_irradianceMap", s.irradianceMap)
-
-	s.SetSamplerSlot("x_prefilterMap", 12)
 	s.SetTexture("x_prefilterMap", s.preFilterMap)
-
-	s.SetSamplerSlot("x_brdfLUT", 13)
 	s.SetTexture("x_brdfLUT", s.brdfLut)
 }
 
@@ -71,7 +71,6 @@ func (s *SkyBox) Render() {
 
 	s.shader.Bind()
 	s.RenderState.SetTexture("x_skybox", s.cubeMap)
-	s.RenderState.SetSamplerSlot("x_skybox", 0)
 	s.shader.UpdateUniforms(nil, s.RenderState)
 	primitives.DrawCube()
 }

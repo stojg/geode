@@ -46,17 +46,6 @@ func NewEngine(width, height int, logger components.Logger) *Engine {
 	gl.Enable(gl.TEXTURE_CUBE_MAP_SEAMLESS)
 	gl.Disable(gl.FRAMEBUFFER_SRGB)
 
-	samplerMap := make(map[string]uint32)
-	samplerMap["albedo"] = 0
-	samplerMap["metallic"] = 1
-	samplerMap["roughness"] = 2
-	samplerMap["normal"] = 3
-	samplerMap["x_shadowMap"] = 9
-	samplerMap["x_filterTexture"] = 10
-	samplerMap["x_filterTexture2"] = 11
-	samplerMap["x_filterTexture3"] = 12
-	samplerMap["x_filterTexture4"] = 13
-
 	e := &Engine{
 		width:               int32(width),
 		height:              int32(height),
@@ -65,6 +54,12 @@ func NewEngine(width, height int, logger components.Logger) *Engine {
 		overlayShader:       shader.NewShader("filter_overlay"),
 		multiSampledTexture: framebuffer.NewMultiSampledTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGBA, gl.FLOAT, gl.LINEAR, false),
 	}
+
+	e.state.AddSamplerSlot("albedo")
+	e.state.AddSamplerSlot("metallic")
+	e.state.AddSamplerSlot("roughness")
+	e.state.AddSamplerSlot("normal")
+
 	e.standardRenderer = standard.NewRenderer(e.state)
 	e.shadowMap = shadow.NewRenderer(e.state)
 	e.terrainRenderer = terrain.NewRenderer(e.state)

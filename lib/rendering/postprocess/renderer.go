@@ -11,6 +11,12 @@ import (
 func New(s components.RenderState) *Renderer {
 
 	const blurDownScale = 4
+
+	s.AddSamplerSlot("x_filterTexture")
+	s.AddSamplerSlot("x_filterTexture2")
+	s.AddSamplerSlot("x_filterTexture3")
+	s.AddSamplerSlot("x_filterTexture4")
+
 	return &Renderer{
 		RenderState:       s,
 		sourceTexture:     framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, components.Width, components.Height, gl.RGBA16F, gl.RGBA, gl.FLOAT, gl.NEAREST, false),

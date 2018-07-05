@@ -8,24 +8,25 @@ import (
 )
 
 func NewRenderState() *RenderState {
-	samplerMap := make(map[string]uint32)
-	samplerMap["albedo"] = 0
-	samplerMap["metallic"] = 1
-	samplerMap["roughness"] = 2
-	samplerMap["normal"] = 3
-	samplerMap["x_shadowMap"] = 9
-	samplerMap["x_filterTexture"] = 10
-	samplerMap["x_filterTexture2"] = 11
-	samplerMap["x_filterTexture3"] = 12
-	samplerMap["x_filterTexture4"] = 13
 
-	return &RenderState{
-		samplerMap:    samplerMap,
+	s := &RenderState{
+		samplerMap:    make(map[string]uint32),
 		textures:      make(map[string]components.Texture),
 		uniforms3f:    make(map[string]mgl32.Vec3),
 		uniformsI:     make(map[string]int32),
 		uniformsFloat: make(map[string]float32),
 	}
+
+	s.AddSamplerSlot("albedo")
+	s.AddSamplerSlot("metallic")
+	s.AddSamplerSlot("roughness")
+	s.AddSamplerSlot("normal")
+	s.AddSamplerSlot("x_filterTexture")
+	s.AddSamplerSlot("x_filterTexture2")
+	s.AddSamplerSlot("x_filterTexture3")
+	s.AddSamplerSlot("x_filterTexture4")
+
+	return s
 }
 
 type RenderState struct {
@@ -120,6 +121,8 @@ func (e *RenderState) SamplerSlot(samplerName string) uint32 {
 	return slot
 }
 
-func (e *RenderState) SetSamplerSlot(samplerName string, slot uint32) {
-	e.samplerMap[samplerName] = slot
+func (e *RenderState) AddSamplerSlot(samplerName string) {
+	if _, ok := e.samplerMap[samplerName]; !ok {
+		e.samplerMap[samplerName] = uint32(len(e.samplerMap))
+	}
 }

@@ -107,7 +107,7 @@ type RenderState interface {
 	MainCamera() Viewable
 
 	SamplerSlot(name string) uint32
-	SetSamplerSlot(name string, slot uint32)
+	AddSamplerSlot(name string)
 
 	AddLight(light Light)
 	Lights() []Light
