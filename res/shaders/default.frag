@@ -24,6 +24,7 @@ in VS_OUT
 #include "pbr.glsl"
 #include "pbr_ambient.glsl"
 #include "shadow.glsl"
+#include "fog.glsl"
 
 void main() {
 
@@ -58,6 +59,8 @@ void main() {
     if (x_enable_env_map == 1) {
         Lo += CalcAmbient(normal, V, F0, mtrl);
     }
+
+    Lo = fogCalc(Lo, vs_in.V_Pos);
 
     FragColor = vec4(Lo, 1);
 }
