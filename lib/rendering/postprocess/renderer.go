@@ -56,8 +56,14 @@ type Renderer struct {
 	pass              *shader.Shader
 }
 
-func (r *Renderer) Render(in *framebuffer.Texture) {
+func (r *Renderer) Render(in *framebuffer.Texture, bypass bool) {
 	gl.Disable(gl.DEPTH_TEST)
+	if bypass {
+		in.ResolveToFBO(r.sourceTexture)
+		r.applyFilter(r.toneMapShader, r.sourceTexture, nil)
+		return
+	}
+
 	in.ResolveToFBO(r.sourceTexture)
 
 	r.applyFilter(r.brightness, r.sourceTexture, r.brightPassTexture)

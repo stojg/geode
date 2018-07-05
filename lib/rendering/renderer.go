@@ -114,7 +114,7 @@ func (e *Engine) Render(object, terrains components.Renderable) {
 	e.skybox.Render()
 	e.multiSampledTexture.UnbindFrameBuffer()
 
-	e.postprocess.Render(e.multiSampledTexture)
+	e.postprocess.Render(e.multiSampledTexture, true)
 
 	//e.applyFilter(e.overlayShader, debugger.Texture(), nil)
 	debug.CheckForError("renderer.Engine.Draw [end]")
