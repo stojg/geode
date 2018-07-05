@@ -121,8 +121,10 @@ func (m *Engine) run() {
 
 			dc := debug.GetDrawcalls() / uint64(renderFrames)
 			ss := debug.GetShaderSwitches() / uint64(renderFrames)
-			fmt.Printf("%0.1fms - %0.0f%%, %d draw calls, %d shader switches\n", msPerFrame, percent, dc, ss)
-			m.logger.Printf("%0.1fms - %0.0f%%, %d draw calls, %d shader switches\n", msPerFrame, percent, dc, ss)
+			us := debug.GetUniformSet() / uint64(renderFrames)
+			logLine := fmt.Sprintf("%0.1fms - %0.0f%%, %d draw calls, %d shader switches, %d uniform updates", msPerFrame, percent, dc, ss, us)
+			fmt.Println(logLine)
+			m.logger.Println(logLine)
 			renderFrames = 0
 			frameCounter = 0
 		}

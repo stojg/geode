@@ -201,25 +201,6 @@ func (s *Shader) addIncludes(shaderText string) (string, error) {
 	return result, nil
 }
 
-func (s *Shader) UpdateUniform(uniformName string, value interface{}) {
-	loc, ok := s.resource.uniforms[uniformName]
-	if !ok {
-		panic(fmt.Sprintf("no shader location found for uniform: '%s' in shader '%s'", uniformName, s.filename))
-	}
-	switch v := value.(type) {
-	case float32:
-		gl.Uniform1f(loc, v)
-	case int32:
-		gl.Uniform1i(loc, v)
-	case mgl32.Mat4:
-		gl.UniformMatrix4fv(loc, 1, false, &v[0])
-	case mgl32.Vec3:
-		gl.Uniform3fv(loc, 1, &v[0])
-	default:
-		panic(fmt.Sprintf("unknown uniform type for '%s'", uniformName))
-	}
-}
-
 func (s *Shader) setUniformBaseLight(uniformName string, baseLight components.Light) {
 	s.UpdateUniform(uniformName+".color", baseLight.Color())
 	s.UpdateUniform(uniformName+".maxDistance", baseLight.MaxDistance())
@@ -242,6 +223,26 @@ func (s *Shader) updateUniformSpotLight(uniformName string, spotLight components
 	s.updateUniformPointLight(uniformName+".pointLight", spotLight)
 	s.UpdateUniform(uniformName+".direction", spotLight.Direction())
 	s.UpdateUniform(uniformName+".cutoff", spotLight.Cutoff())
+}
+
+func (s *Shader) UpdateUniform(uniformName string, value interface{}) {
+	loc, ok := s.resource.uniforms[uniformName]
+	if !ok {
+		panic(fmt.Sprintf("no shader location found for uniform: '%s' in shader '%s'", uniformName, s.filename))
+	}
+	debug.AddUniformSet()
+	switch v := value.(type) {
+	case float32:
+		gl.Uniform1f(loc, v)
+	case int32:
+		gl.Uniform1i(loc, v)
+	case mgl32.Mat4:
+		gl.UniformMatrix4fv(loc, 1, false, &v[0])
+	case mgl32.Vec3:
+		gl.Uniform3fv(loc, 1, &v[0])
+	default:
+		panic(fmt.Sprintf("unknown uniform type for '%s'", uniformName))
+	}
 }
 
 func (s *Shader) addVertexShader(shader string) uint32 {

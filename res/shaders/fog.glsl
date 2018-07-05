@@ -1,5 +1,5 @@
-const vec3 fogColor = vec3(0.9, 0.9,1);
-const float FogDensity = 0.003;
+const vec3 fogColor = vec3(0.8, 1,0.9);
+const float FogDensity = 0.001;
 
 vec3 fogCalc(vec3 Lo, vec3 vp) {
     float dist = 0;

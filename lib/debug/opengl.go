@@ -53,3 +53,15 @@ func GetShaderSwitches() uint64 {
 	shaderSwitch = 0
 	return t
 }
+
+var uniformSet uint64 = 0
+
+func AddUniformSet() {
+	uniformSet++
+}
+
+func GetUniformSet() uint64 {
+	t := uniformSet
+	uniformSet = 0
+	return t
+}
