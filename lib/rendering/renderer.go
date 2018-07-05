@@ -109,9 +109,9 @@ func (e *Engine) Render(object, terrains components.Renderable) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT)
 	e.shadowMap.Load()
 	e.skybox.Load()
-	e.terrainRenderer.Render(terrains)
+	//e.terrainRenderer.Render(terrains)
 	e.standardRenderer.Render(object)
-	e.skybox.Render()
+	//e.skybox.Render()
 	e.multiSampledTexture.UnbindFrameBuffer()
 
 	e.postprocess.Render(e.multiSampledTexture, true)
