@@ -7,8 +7,6 @@ struct Mtrl {
     float roughness;
 };
 
-uniform mat4 view;
-
 // The Fresnel-Schlick approximation expects a F0 parameter which is known as the surface reflection at zero incidence
 // or how much the surface reflects if looking directly at the surface, ie it calculates the ratio between specular and
 // diffuse reflection, or how much the surface reflects light versus how much it refracts light.

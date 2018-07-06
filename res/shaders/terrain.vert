@@ -5,12 +5,11 @@ layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoord;
 layout (location = 3) in vec3 aTangent;
 
-uniform mat4 MVP;
-uniform mat4 MV;
-uniform mat4 view;
-uniform mat4 InvView;
+//uniform mat4 MVP;
+//uniform mat4 MV;
 uniform mat4 model;
 
+#include "matrices.glsl"
 #include "light_struct.glsl"
 uniform Light lights[16];
 uniform int numLights;
@@ -28,6 +27,9 @@ out VS_OUT
 } vs_out;
 
 void main() {
+
+    mat4 MV = view * model;
+    mat4 MVP = projection * MV;
 
     // the position of the fragment in the perspective space
     gl_Position = MVP * vec4(aPosition, 1.0);

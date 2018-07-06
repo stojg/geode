@@ -34,7 +34,7 @@ func (c *Camera) Rot() mgl32.Quat {
 }
 
 func (c *Camera) AddToEngine(e Engine) {
-	e.RenderingEngine().State().AddCamera(c)
+	e.RenderingEngine().State().SetCamera(c)
 }
 
 func (c *Camera) Projection() mgl32.Mat4 {

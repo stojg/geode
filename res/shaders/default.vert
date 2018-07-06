@@ -5,12 +5,9 @@ layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoord;
 layout (location = 3) in vec3 aTangent;
 
-uniform mat4 MVP;
-uniform mat4 MV;
-uniform mat4 view;
-uniform mat4 InvView;
 uniform mat4 model;
 
+#include "matrices.glsl"
 #include "light_struct.glsl"
 uniform Light lights[16];
 uniform int numLights;
@@ -29,15 +26,18 @@ out VS_OUT
 
 void main() {
 
+    mat4 MV = view * model;
+    mat4 MVP = projection * MV;
+
     // the position of the fragment in the perspective space
     gl_Position = MVP * vec4(aPosition, 1.0);
 
     // the position of the camara relative to the fragment
     vs_out.V_Pos = vec3(MV * vec4(aPosition, 1.0));
 
-    vs_out.TexCoord = aTexCoord ;
+    vs_out.TexCoord = aTexCoord;
 
-    //surface normal in the world space, used for lookup env map coordinates
+    // surface normal in the world space, used for lookup env map coordinates
     vs_out.Normal = mat3(model) * aNormal;
 
     vec3 eyeDir = normalize(vec3(InvView * vec4(normalize(-vs_out.V_Pos), 0.0)));

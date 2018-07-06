@@ -73,6 +73,7 @@ func NewEngine(width, height int, logger components.Logger) *Engine {
 	e.state.SetInteger("x_enable_skybox", 1)
 
 	debug.CheckForError("rendering.NewEngine end")
+
 	return e
 }
 
@@ -97,10 +98,13 @@ func (e *Engine) State() components.RenderState {
 }
 
 func (e *Engine) Render(object, terrains components.Renderable) {
-	if e.state.MainCamera() == nil {
-		panic("mainCamera not found, the game cannot render")
+	if e.state.Camera() == nil {
+		panic("Camera not found, the game cannot render")
 	}
 	debugger.Clear()
+
+	// update all necessary UBOs etc
+	e.state.Update()
 
 	// @todo maybe only do this every other frame?
 	e.shadowMap.Render(object, terrains)
@@ -109,12 +113,12 @@ func (e *Engine) Render(object, terrains components.Renderable) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT)
 	e.shadowMap.Load()
 	e.skybox.Load()
-	//e.terrainRenderer.Render(terrains)
+	e.terrainRenderer.Render(terrains)
 	e.standardRenderer.Render(object)
-	//e.skybox.Render()
+	e.skybox.Render()
 	e.multiSampledTexture.UnbindFrameBuffer()
 
-	e.postprocess.Render(e.multiSampledTexture, true)
+	e.postprocess.Render(e.multiSampledTexture, false)
 
 	//e.applyFilter(e.overlayShader, debugger.Texture(), nil)
 	debug.CheckForError("renderer.Engine.Draw [end]")

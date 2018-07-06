@@ -20,6 +20,7 @@ in VS_OUT
     vec4 FragPosLightSpace;
 } vs_in;
 
+#include "matrices.glsl"
 #include "light_struct.glsl"
 #include "pbr.glsl"
 #include "pbr_ambient.glsl"

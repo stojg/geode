@@ -2,7 +2,9 @@ package rendering
 
 import (
 	"fmt"
+	"unsafe"
 
+	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
 )
@@ -26,11 +28,20 @@ func NewRenderState() *RenderState {
 	s.AddSamplerSlot("x_filterTexture3")
 	s.AddSamplerSlot("x_filterTexture4")
 
+	gl.GenBuffers(1, &s.uboMatrices)
+	index := uint32(0) // should be the same as in shader binding
+	size := int(3 * unsafe.Sizeof(mgl32.Ident4()))
+	gl.BindBuffer(gl.UNIFORM_BUFFER, s.uboMatrices)
+	gl.BufferData(gl.UNIFORM_BUFFER, size, nil, gl.STATIC_DRAW)
+	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
+	gl.BindBufferRange(gl.UNIFORM_BUFFER, index, s.uboMatrices, 0, size)
+
 	return s
 }
 
 type RenderState struct {
 	mainCamera    components.Viewable
+	uboMatrices   uint32
 	lights        []components.Light
 	activeLight   components.Light
 	samplerMap    map[string]uint32
@@ -38,6 +49,18 @@ type RenderState struct {
 	uniforms3f    map[string]mgl32.Vec3
 	uniformsI     map[string]int32
 	uniformsFloat map[string]float32
+}
+
+func (e *RenderState) Update() {
+	size := int(unsafe.Sizeof(mgl32.Ident4()))
+	view := e.Camera().View()
+	invView := view.Inv()
+	projection := e.Camera().Projection()
+	gl.BindBuffer(gl.UNIFORM_BUFFER, e.uboMatrices)
+	gl.BufferSubData(gl.UNIFORM_BUFFER, 0, size, gl.Ptr(&view[0]))
+	gl.BufferSubData(gl.UNIFORM_BUFFER, size, size, gl.Ptr(&invView[0]))
+	gl.BufferSubData(gl.UNIFORM_BUFFER, 2*size, size, gl.Ptr(&projection[0]))
+	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
 }
 
 func (e *RenderState) SetActiveLight(light components.Light) {
@@ -105,11 +128,11 @@ func (e *RenderState) Vector3f(name string) mgl32.Vec3 {
 	return v
 }
 
-func (e *RenderState) AddCamera(c components.Viewable) {
+func (e *RenderState) SetCamera(c components.Viewable) {
 	e.mainCamera = c
 }
 
-func (e *RenderState) MainCamera() components.Viewable {
+func (e *RenderState) Camera() components.Viewable {
 	return e.mainCamera
 }
 

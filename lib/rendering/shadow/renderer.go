@@ -44,12 +44,12 @@ func (r *Renderer) Render(objects, terrains components.Renderable) {
 		}
 	}
 	r.SetActiveLight(r.shadowCaster)
-	r.shadowCaster.SetCamera(r.RenderState.MainCamera().Pos(), r.RenderState.MainCamera().Rot())
+	r.shadowCaster.SetCamera(r.Camera().Pos(), r.Camera().Rot())
 	idx := r.shadowCaster.ShadowInfo().SizeAsPowerOfTwo()
 	r.shadowTextures[idx].BindFrameBuffer()
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-	objects.RenderAll(r.MainCamera(), r.shader, r)
-	terrains.RenderAll(r.MainCamera(), r.shader, r)
+	objects.RenderAll(r.Camera(), r.shader, r)
+	terrains.RenderAll(r.Camera(), r.shader, r)
 	//terrains.RenderAll(e.shadowShader, e)
 	//e.blurShadowMap(idx, 1)
 }

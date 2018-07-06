@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"os"
 	"regexp"
 	"strconv"
@@ -18,8 +19,11 @@ import (
 
 var loadedShaders = make(map[string]*ShaderResource)
 var shaderInUse uint32 = 2 ^ 32 - 1
-
 var shaderFolder = "./res/shaders/"
+
+func init() {
+
+}
 
 func NewShader(fileName string) *Shader {
 
@@ -56,6 +60,11 @@ func NewShader(fileName string) *Shader {
 	s.findAllUniforms(vertexShaderText)
 	s.findAllUniforms(fragmentShaderText)
 
+	// @todo, the information about which index this UBO is in the renderstate
+	uboID := gl.GetUniformBlockIndex(s.resource.Program, gl.Str("Matrices\x00"))
+	if uboID != math.MaxUint32 {
+		gl.UniformBlockBinding(s.resource.Program, uboID, 0)
+	}
 	loadedShaders[fileName] = s.resource
 
 	return s
@@ -87,14 +96,8 @@ func (s *Shader) UpdateUniforms(mtrl components.Material, engine components.Rend
 		name, index := getArray(name)
 
 		switch name {
-		case "projection":
-			s.UpdateUniform(name, engine.MainCamera().Projection())
-		case "view":
-			s.UpdateUniform(name, engine.MainCamera().View())
-		case "InvView":
-			s.UpdateUniform(name, engine.MainCamera().View().Inv())
 		case "skyboxView":
-			s.UpdateUniform(name, engine.MainCamera().View().Mat3().Mat4()) // remove rotation
+			s.UpdateUniform(name, engine.Camera().View().Mat3().Mat4()) // remove rotation
 		case "material":
 			for _, sn := range []string{"albedo", "metallic", "roughness", "normal"} {
 				samplerSlot := engine.SamplerSlot(sn)
@@ -150,12 +153,6 @@ func (s *Shader) UpdateTransform(transform *physics.Transform, engine components
 			s.UpdateUniform(name, engine.ActiveLight().ViewProjection().Mul4(transform.Transformation()))
 		case "LightVP":
 			s.UpdateUniform(name, engine.ActiveLight().ViewProjection())
-		case "MVP":
-			s.UpdateUniform(name, engine.MainCamera().Projection().Mul4(engine.MainCamera().View().Mul4(transform.Transformation())))
-		case "MV":
-			s.UpdateUniform(name, engine.MainCamera().View().Mul4(transform.Transformation()))
-		case "InverseMV":
-			s.UpdateUniform(name, engine.MainCamera().View().Mul4(transform.Transformation()).Inv().Transpose())
 		case "model":
 			s.UpdateUniform(name, transform.Transformation())
 		}

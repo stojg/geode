@@ -103,8 +103,10 @@ type Spotlight interface {
 }
 
 type RenderState interface {
-	AddCamera(camera Viewable)
-	MainCamera() Viewable
+	Update()
+
+	Camera() Viewable
+	SetCamera(camera Viewable)
 
 	SamplerSlot(name string) uint32
 	AddSamplerSlot(name string)
