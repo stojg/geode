@@ -2,7 +2,6 @@ package framebuffer
 
 import (
 	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/debug"
 )
 
@@ -62,7 +61,6 @@ func (t *CubeMap) BindFrameBuffer() {
 
 func (t *CubeMap) UnbindFrameBuffer() {
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-	gl.Viewport(0, 0, int32(components.Width), int32(components.Height))
 }
 
 func initCubeMap(t *CubeMap, mipMap bool) {

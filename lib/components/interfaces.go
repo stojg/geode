@@ -129,13 +129,13 @@ type RenderState interface {
 	SetFloat(string, float32)
 }
 
-type RenderingEngine interface {
+type Renderer interface {
 	Render(a, b Renderable)
 	State() RenderState
 }
 
 type Engine interface {
-	RenderingEngine() RenderingEngine
+	Renderer() Renderer
 }
 
 type Component interface {

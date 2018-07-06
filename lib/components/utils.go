@@ -2,11 +2,6 @@ package components
 
 import "github.com/go-gl/mathgl/mgl32"
 
-var (
-	Width  int
-	Height int
-)
-
 func up() mgl32.Vec3 {
 	return mgl32.Vec3{0, 1, 0}
 }

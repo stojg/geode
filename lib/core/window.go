@@ -3,7 +3,6 @@ package core
 import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
-	"github.com/stojg/graphics/lib/components"
 
 	"fmt"
 	"runtime"
@@ -48,8 +47,6 @@ func NewWindow(width, height int, title string, vsync bool) (*Window, error) {
 
 	// the actual size of the window might be different due to screen, for example retina screens
 	w.viewPortWidth, w.viewPortHeight = window.GetFramebufferSize()
-	components.Width = w.viewPortWidth
-	components.Height = w.viewPortHeight
 
 	if err := gl.Init(); err != nil {
 		return w, err
@@ -87,7 +84,7 @@ func (w *Window) ShouldClose() bool {
 	return w.inst.ShouldClose()
 }
 
-func (w *Window) Render() {
+func (w *Window) Maintenance() {
 	w.inst.SwapBuffers()
 	glfw.PollEvents()
 }

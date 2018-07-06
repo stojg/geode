@@ -87,19 +87,19 @@ func (g *GameObject) UpdateAll(elapsed time.Duration) {
 	}
 }
 
-func (g *GameObject) Render(shader components.Shader, renderingEngine components.RenderState) {
-	shader.UpdateTransform(g.Transform(), renderingEngine)
+func (g *GameObject) Render(shader components.Shader, state components.RenderState) {
+	shader.UpdateTransform(g.Transform(), state)
 	g.model.Draw()
 }
 
-func (g *GameObject) RenderAll(camera components.Viewable, shader components.Shader, renderingEngine components.RenderState) {
+func (g *GameObject) RenderAll(camera components.Viewable, shader components.Shader, state components.RenderState) {
 	list := g.AllModels()
 	shader.Bind()
 	for model, objects := range list {
-		model.Bind(shader, renderingEngine)
+		model.Bind(shader, state)
 		for _, object := range objects {
 			if IsVisible(camera.Planes(), object.model.AABB(), object.transform.Transformation()) {
-				object.Render(shader, renderingEngine)
+				object.Render(shader, state)
 			}
 		}
 		model.Unbind()

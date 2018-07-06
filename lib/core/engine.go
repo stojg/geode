@@ -20,36 +20,34 @@ func NewEngine(width, height int, title string, l components.Logger) (*Engine, e
 
 	input.SetWindow(window.Instance())
 
+	renderer := rendering.New(window.viewPortWidth, window.viewPortHeight, l)
+	scene := NewScene()
+
 	engine := &Engine{
-		game:            NewGame(),
-		window:          window,
-		renderingEngine: rendering.NewEngine(window.viewPortWidth, window.viewPortHeight, l),
-		logger:          l,
+		scene:    scene,
+		window:   window,
+		renderer: renderer,
+		logger:   l,
 	}
-	engine.game.SetEngine(engine)
+	engine.scene.SetEngine(engine)
 
 	return engine, nil
 
 }
 
 type Engine struct {
-	window          *Window
-	game            *Game
-	renderingEngine *rendering.Engine
-	isRunning       bool
-
-	skybox bool
-	logger components.Logger
+	window    *Window
+	scene     *Scene
+	renderer  *rendering.Renderer
+	isRunning bool
+	logger    components.Logger
 }
 
-func (e *Engine) RenderingEngine() components.RenderingEngine {
-	return e.renderingEngine
+func (e *Engine) Renderer() components.Renderer {
+	return e.renderer
 }
 
 func (m *Engine) Start() {
-	if m.isRunning {
-		return
-	}
 	m.run()
 }
 
@@ -62,18 +60,11 @@ func (m *Engine) Height() int {
 }
 
 func (m *Engine) AddObject(object *GameObject) {
-	m.game.AddObject(object)
+	m.scene.AddObject(object)
 }
 
 func (m *Engine) AddTerrain(object *GameObject) {
-	m.game.AddTerrain(object)
-}
-
-func (m *Engine) Stop() {
-	if !m.isRunning {
-		return
-	}
-	m.isRunning = false
+	m.scene.AddTerrain(object)
 }
 
 func (m *Engine) run() {
@@ -88,7 +79,7 @@ func (m *Engine) run() {
 	currentTime := time.Now()
 	var accumulator time.Duration
 
-	defer m.cleanup()
+	defer m.window.Close()
 
 	for m.isRunning {
 
@@ -100,17 +91,19 @@ func (m *Engine) run() {
 
 		for accumulator >= frameTime {
 			if m.window.ShouldClose() {
-				m.Stop()
+				m.isRunning = false
 			}
 			input.Update()
-			m.game.Input(dt)
-			m.game.Update(dt)
+			m.scene.Input(dt)
+			m.scene.Update(dt)
 			accumulator -= dt
 			t += dt
 			frameCounter += dt
 		}
 
-		m.render()
+		m.scene.Render(m.renderer)
+		m.window.Maintenance()
+
 		renderFrames++
 
 		if frameCounter >= time.Second*5 {
@@ -118,7 +111,6 @@ func (m *Engine) run() {
 			secondsPerFrame := (time.Second * 5 / time.Duration(renderFrames)).Seconds()
 			msPerFrame := secondsPerFrame * 1000
 			percent := (msPerFrame / (1000 / 60)) * 100
-
 			dc := debug.GetDrawcalls() / uint64(renderFrames)
 			ss := debug.GetShaderSwitches() / uint64(renderFrames)
 			us := debug.GetUniformSet() / uint64(renderFrames)
@@ -129,18 +121,4 @@ func (m *Engine) run() {
 			frameCounter = 0
 		}
 	}
-	m.cleanup()
-}
-
-func (m *Engine) render() {
-	m.game.Render(m.renderingEngine)
-	m.window.Render()
-}
-
-func (m *Engine) cleanup() {
-	m.window.Close()
-}
-
-func (m *Engine) State() components.RenderState {
-	return m.renderingEngine.State()
 }

@@ -2,7 +2,6 @@ package framebuffer
 
 import (
 	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/debug"
 )
 
@@ -72,18 +71,6 @@ func (t *Texture) UnbindFrameBuffer() {
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 }
 
-//func (t *Texture) BindToDraw() {
-//	gl.BindTexture(gl.TEXTURE_2D, 0)
-//	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, t.fbo)
-//	gl.DrawBuffer(gl.COLOR_ATTACHMENT0)
-//}
-//
-//func (t *Texture) BindToRead() {
-//	gl.BindTexture(gl.TEXTURE_2D, 0)
-//	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, t.fbo)
-//	gl.ReadBuffer(gl.COLOR_ATTACHMENT0)
-//}
-
 func (t *Texture) ResolveToFBO(out *Texture) {
 	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, out.fbo)
 	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, t.fbo)
@@ -91,11 +78,11 @@ func (t *Texture) ResolveToFBO(out *Texture) {
 	t.UnbindFrameBuffer()
 }
 
-func (t *Texture) ResolveToScreen() {
+func (t *Texture) ResolveToScreen(width, height int32) {
 	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, 0)
 	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, t.fbo)
 	gl.DrawBuffer(gl.BACK)
-	gl.BlitFramebuffer(0, 0, t.width, t.height, 0, 0, int32(components.Width), int32(components.Height), gl.COLOR_BUFFER_BIT, gl.NEAREST)
+	gl.BlitFramebuffer(0, 0, t.width, t.height, 0, 0, width, height, gl.COLOR_BUFFER_BIT, gl.NEAREST)
 	t.UnbindFrameBuffer()
 }
 

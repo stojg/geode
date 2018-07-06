@@ -139,7 +139,7 @@ func (e *RenderState) Camera() components.Viewable {
 func (e *RenderState) SamplerSlot(samplerName string) uint32 {
 	slot, exists := e.samplerMap[samplerName]
 	if !exists {
-		fmt.Printf("rendering.Engine tried finding texture slot for %s, failed\n", samplerName)
+		fmt.Printf("rendering.Renderer tried finding texture slot for %s, failed\n", samplerName)
 	}
 	return slot
 }

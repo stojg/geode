@@ -8,7 +8,7 @@ import (
 	"github.com/stojg/graphics/lib/rendering/shader"
 )
 
-func New(s components.RenderState) *Renderer {
+func New(s components.RenderState, width, height int) *Renderer {
 
 	const blurDownScale = 4
 
@@ -19,15 +19,15 @@ func New(s components.RenderState) *Renderer {
 
 	return &Renderer{
 		RenderState:       s,
-		sourceTexture:     framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, components.Width, components.Height, gl.RGBA16F, gl.RGBA, gl.FLOAT, gl.NEAREST, false),
-		brightPassTexture: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, components.Width/2, components.Height/2, gl.RGBA16F, gl.RGB, gl.FLOAT, gl.NEAREST, false),
-		scratch2:          framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, components.Width, components.Height, gl.RGBA16F, gl.RGB, gl.FLOAT, gl.NEAREST, false),
-		blur1:             framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, components.Width/blurDownScale, components.Height/blurDownScale, gl.RGB, gl.RGB, gl.FLOAT, gl.LINEAR, false),
-		blur2:             framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, components.Width/blurDownScale, components.Height/blurDownScale, gl.RGB, gl.RGB, gl.FLOAT, gl.LINEAR, false),
-		blur3:             framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, components.Width/blurDownScale/2, components.Height/blurDownScale/2, gl.RGB, gl.RGB, gl.FLOAT, gl.LINEAR, false),
-		blur4:             framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, components.Width/blurDownScale/2, components.Height/blurDownScale/2, gl.RGB, gl.RGB, gl.FLOAT, gl.LINEAR, false),
-		blur5:             framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, components.Width/blurDownScale/4, components.Height/blurDownScale/4, gl.RGB, gl.RGB, gl.FLOAT, gl.LINEAR, false),
-		blur6:             framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, components.Width/blurDownScale/4, components.Height/blurDownScale/4, gl.RGB, gl.RGB, gl.FLOAT, gl.LINEAR, false),
+		sourceTexture:     framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGBA, gl.FLOAT, gl.NEAREST, false),
+		brightPassTexture: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width/2, height/2, gl.RGBA16F, gl.RGB, gl.FLOAT, gl.NEAREST, false),
+		scratch2:          framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGB, gl.FLOAT, gl.NEAREST, false),
+		blur1:             framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width/blurDownScale, height/blurDownScale, gl.RGB, gl.RGB, gl.FLOAT, gl.LINEAR, false),
+		blur2:             framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width/blurDownScale, height/blurDownScale, gl.RGB, gl.RGB, gl.FLOAT, gl.LINEAR, false),
+		blur3:             framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width/blurDownScale/2, height/blurDownScale/2, gl.RGB, gl.RGB, gl.FLOAT, gl.LINEAR, false),
+		blur4:             framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width/blurDownScale/2, height/blurDownScale/2, gl.RGB, gl.RGB, gl.FLOAT, gl.LINEAR, false),
+		blur5:             framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width/blurDownScale/4, height/blurDownScale/4, gl.RGB, gl.RGB, gl.FLOAT, gl.LINEAR, false),
+		blur6:             framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width/blurDownScale/4, height/blurDownScale/4, gl.RGB, gl.RGB, gl.FLOAT, gl.LINEAR, false),
 
 		toneMapShader: shader.NewShader("filter_tonemap"),
 		gaussShader:   shader.NewShader("filter_gauss"),

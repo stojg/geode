@@ -15,7 +15,7 @@ import (
 	"github.com/stojg/graphics/lib/rendering/terrain"
 )
 
-func NewEngine(width, height int, logger components.Logger) *Engine {
+func New(width, height int, logger components.Logger) *Renderer {
 
 	// @todo add more output
 	var nrAttributes int32
@@ -46,7 +46,7 @@ func NewEngine(width, height int, logger components.Logger) *Engine {
 	gl.Enable(gl.TEXTURE_CUBE_MAP_SEAMLESS)
 	gl.Disable(gl.FRAMEBUFFER_SRGB)
 
-	e := &Engine{
+	e := &Renderer{
 		width:               int32(width),
 		height:              int32(height),
 		state:               NewRenderState(),
@@ -63,7 +63,7 @@ func NewEngine(width, height int, logger components.Logger) *Engine {
 	e.standardRenderer = standard.NewRenderer(e.state)
 	e.shadowMap = shadow.NewRenderer(e.state)
 	e.terrainRenderer = terrain.NewRenderer(e.state)
-	e.postprocess = postprocess.New(e.state)
+	e.postprocess = postprocess.New(e.state, width, height)
 
 	e.skybox = technique.NewSkyBox("res/textures/sky0016.hdr", e.state)
 
@@ -72,12 +72,12 @@ func NewEngine(width, height int, logger components.Logger) *Engine {
 	e.state.SetInteger("x_enable_env_map", 1)
 	e.state.SetInteger("x_enable_skybox", 1)
 
-	debug.CheckForError("rendering.NewEngine end")
+	debug.CheckForError("rendering.New end")
 
 	return e
 }
 
-type Engine struct {
+type Renderer struct {
 	width, height    int32
 	state            components.RenderState
 	nullShader       *shader.Shader
@@ -93,11 +93,11 @@ type Engine struct {
 	fullScreenTemp *framebuffer.Texture
 }
 
-func (e *Engine) State() components.RenderState {
+func (e *Renderer) State() components.RenderState {
 	return e.state
 }
 
-func (e *Engine) Render(object, terrains components.Renderable) {
+func (e *Renderer) Render(object, terrains components.Renderable) {
 	if e.state.Camera() == nil {
 		panic("Camera not found, the game cannot render")
 	}
@@ -121,5 +121,5 @@ func (e *Engine) Render(object, terrains components.Renderable) {
 	e.postprocess.Render(e.multiSampledTexture, false)
 
 	//e.applyFilter(e.overlayShader, debugger.Texture(), nil)
-	debug.CheckForError("renderer.Engine.Draw [end]")
+	debug.CheckForError("renderer.Renderer.Draw [end]")
 }
