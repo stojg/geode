@@ -38,6 +38,7 @@ func (t *Transform) Update() {
 	t.oldScale = t.scale
 }
 
+// angle should be in radians
 func (t *Transform) Rotate(axis mgl32.Vec3, angle float32) {
 	t.rot = t.rot.Mul(mgl32.QuatRotate(angle, axis)).Normalize()
 }
