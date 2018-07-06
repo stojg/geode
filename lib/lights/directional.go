@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/stojg/graphics/lib/components"
 )
 
 func NewDirectional(shadowSize int, r, g, b, intensity float32) *Directional {
@@ -50,6 +51,10 @@ func (b *Directional) SetCamera(inPos mgl32.Vec3, inRot mgl32.Quat) {
 
 func (b *Directional) Direction() mgl32.Vec3 {
 	return b.Parent().Transform().TransformedPos().Normalize()
+}
+
+func (b *Directional) AddToEngine(e components.RenderState) {
+	e.AddLight(b)
 }
 
 func (b *Directional) GetView() mgl32.Mat4 {
