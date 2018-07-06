@@ -79,9 +79,30 @@ func run(l *logger) error {
 
 	tSize := float32(terrain.Size)
 	tHalfSize := tSize / 2
-	for i := 0; i < 800; i++ {
+	for i := 0; i < 200; i++ {
 		p := core.NewGameObject()
 		p, err := loadModel("cube")
+		handleError(err)
+		x, z := rand.Float32()*tSize-tHalfSize, rand.Float32()*tSize-tHalfSize
+		p.Transform().SetPos(vec3(x, terrainA.Height(x, z)+0.5, z))
+		p.Transform().SetScale(vec3(0.5, 0.5, 0.5))
+		p.Transform().Rotate(up(), rand.Float32()*math.Pi*2)
+		engine.AddObject(p)
+	}
+
+	for i := 0; i < 200; i++ {
+		p := core.NewGameObject()
+		p, err := loadModel("sphere")
+		handleError(err)
+		x, z := rand.Float32()*tSize-tHalfSize, rand.Float32()*tSize-tHalfSize
+		p.Transform().SetPos(vec3(x, terrainA.Height(x, z)+0.5, z))
+		p.Transform().SetScale(vec3(0.5, 0.5, 0.5))
+		engine.AddObject(p)
+	}
+
+	for i := 0; i < 200; i++ {
+		p := core.NewGameObject()
+		p, err := loadModel("ico")
 		handleError(err)
 		x, z := rand.Float32()*tSize-tHalfSize, rand.Float32()*tSize-tHalfSize
 		p.Transform().SetPos(vec3(x, terrainA.Height(x, z)+0.5, z))
