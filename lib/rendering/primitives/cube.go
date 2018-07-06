@@ -7,7 +7,7 @@ import (
 )
 
 /* #nosec */
-const sizeOfFloat32 = int(unsafe.Sizeof(float32(1)))
+const SizeOfFloat32 = int(unsafe.Sizeof(float32(1)))
 
 var cubeVao uint32 = 1<<32 - 1
 
@@ -16,6 +16,7 @@ func DrawCube() {
 		setupCube()
 	}
 	gl.BindVertexArray(cubeVao)
+	gl.EnableVertexAttribArray(0)
 	gl.DrawElements(gl.TRIANGLES, 36, gl.UNSIGNED_INT, gl.PtrOffset(0))
 	gl.BindVertexArray(0)
 }
@@ -34,13 +35,13 @@ func setupCube() {
 	gl.BindVertexArray(cubeVao)
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, len(verts)*sizeOfFloat32, gl.Ptr(verts), gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, len(verts)*SizeOfFloat32, gl.Ptr(verts), gl.STATIC_DRAW)
 
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
 	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(inds)*4, gl.Ptr(inds), gl.STATIC_DRAW)
 
 	gl.EnableVertexAttribArray(0)
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, int32(3*sizeOfFloat32), gl.PtrOffset(0))
+	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, int32(3*SizeOfFloat32), gl.PtrOffset(0))
 
 	gl.BindVertexArray(0)
 }
