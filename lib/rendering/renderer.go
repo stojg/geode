@@ -118,7 +118,11 @@ func (e *Renderer) Render(object, terrains components.Renderable) {
 	e.skybox.Render()
 	e.multiSampledTexture.UnbindFrameBuffer()
 
-	e.postprocess.Render(e.multiSampledTexture, false)
+	if e.state.Integer("effects") == 1 {
+		e.postprocess.Render(e.multiSampledTexture, false)
+	} else {
+		e.postprocess.Render(e.multiSampledTexture, true)
+	}
 
 	//e.applyFilter(e.overlayShader, debugger.Texture(), nil)
 	debug.CheckForError("renderer.Renderer.Draw [end]")

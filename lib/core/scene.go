@@ -21,10 +21,14 @@ type Scene struct {
 	root    *GameObject
 	terrain *GameObject
 	vsync   bool
+	effects bool
+	state   components.RenderState
 }
 
-func (g *Scene) SetState(engine components.RenderState) {
-	g.rootObject().SetState(engine)
+func (g *Scene) SetState(state components.RenderState) {
+	g.state = state
+	g.state.SetInteger("effects", 0)
+	g.rootObject().SetState(state)
 }
 
 func (g *Scene) AddObject(object *GameObject) {
@@ -46,6 +50,18 @@ func (g *Scene) Input(elapsed time.Duration) {
 			fmt.Println("vsync off")
 		}
 	}
+
+	if input.KeyDown(glfw.KeyF) {
+		g.effects = !g.effects
+		if g.effects {
+			g.state.SetInteger("effects", 1)
+			fmt.Println("effects on")
+		} else {
+			g.state.SetInteger("effects", 0)
+			fmt.Println("effects off")
+		}
+	}
+
 	g.rootObject().InputAll(elapsed)
 }
 
