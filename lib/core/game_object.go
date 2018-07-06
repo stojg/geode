@@ -18,7 +18,7 @@ type GameObject struct {
 	children   []*GameObject
 	components []components.Component
 	transform  *physics.Transform
-	engine     *Engine
+	state      components.RenderState
 
 	model         *components.Model
 	modelEntities map[*components.Model][]*GameObject
@@ -34,7 +34,7 @@ func (g *GameObject) SetModel(model *components.Model) {
 
 func (g *GameObject) AddChild(child *GameObject) {
 	g.children = append(g.children, child)
-	child.SetEngine(g.engine)
+	child.SetState(g.state)
 	child.Transform().SetParent(g.Transform())
 	if child.Model() != nil {
 		m := child.Model()
@@ -118,14 +118,14 @@ func (g *GameObject) AllTransforms() []*physics.Transform {
 	return l
 }
 
-func (g *GameObject) SetEngine(engine *Engine) {
-	if g.engine != engine {
-		g.engine = engine
+func (g *GameObject) SetState(state components.RenderState) {
+	if g.state != state {
+		g.state = state
 		for _, c := range g.components {
-			c.AddToEngine(engine)
+			c.AddToEngine(state)
 		}
 		for _, c := range g.children {
-			c.SetEngine(engine)
+			c.SetState(state)
 		}
 	}
 }

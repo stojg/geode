@@ -22,7 +22,7 @@ func (m *GameComponent) Transform() *physics.Transform {
 	return m.parent.Transform()
 }
 
-func (m *GameComponent) AddToEngine(engine Engine) {
+func (m *GameComponent) AddToEngine(state RenderState) {
 }
 
 func (m *GameComponent) Render(Shader, state RenderState) {}

@@ -33,8 +33,8 @@ func (c *Camera) Rot() mgl32.Quat {
 	return c.parent.Transform().TransformedRot()
 }
 
-func (c *Camera) AddToEngine(e Engine) {
-	e.Renderer().State().SetCamera(c)
+func (c *Camera) AddToEngine(e RenderState) {
+	e.SetCamera(c)
 }
 
 func (c *Camera) Projection() mgl32.Mat4 {

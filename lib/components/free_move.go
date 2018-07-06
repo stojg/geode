@@ -8,13 +8,19 @@ import (
 	"github.com/stojg/graphics/lib/input"
 )
 
+func NewFreeMove(speed float32) *FreeMove {
+	return &FreeMove{
+		speed: speed,
+	}
+}
+
 type FreeMove struct {
 	GameComponent
-	Speed float32
+	speed float32
 }
 
 func (c *FreeMove) Input(elapsed time.Duration) {
-	amount := float32(elapsed.Seconds()) * c.Speed
+	amount := float32(elapsed.Seconds()) * c.speed
 
 	if input.Key(glfw.KeyW) {
 		c.Move(c.Transform().Rot().Rotate(back()), amount)

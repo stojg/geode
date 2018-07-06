@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/input"
 	"github.com/stojg/graphics/lib/rendering"
 )
@@ -22,8 +23,8 @@ type Scene struct {
 	vsync   bool
 }
 
-func (g *Scene) SetEngine(engine *Engine) {
-	g.rootObject().SetEngine(engine)
+func (g *Scene) SetState(engine components.RenderState) {
+	g.rootObject().SetState(engine)
 }
 
 func (g *Scene) AddObject(object *GameObject) {

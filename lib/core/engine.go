@@ -1,4 +1,4 @@
-// engine is inspired by https://www.youtube.com/watch?v=pBK-lb-k-rs&list=PLEETnX-uPtBXP_B2yupUKlflXBznWIlL5&index=4
+// state is inspired by https://www.youtube.com/watch?v=pBK-lb-k-rs&list=PLEETnX-uPtBXP_B2yupUKlflXBznWIlL5&index=4
 package core
 
 import (
@@ -29,7 +29,7 @@ func NewEngine(width, height int, title string, l components.Logger) (*Engine, e
 		renderer: renderer,
 		logger:   l,
 	}
-	engine.scene.SetEngine(engine)
+	engine.scene.SetState(renderer.State())
 
 	return engine, nil
 

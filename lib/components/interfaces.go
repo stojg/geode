@@ -142,6 +142,6 @@ type Component interface {
 	Update(time.Duration)
 	Input(time.Duration)
 	Render(Shader, state RenderState)
-	AddToEngine(engine Engine)
+	AddToEngine(state RenderState)
 	SetParent(Transformable)
 }
