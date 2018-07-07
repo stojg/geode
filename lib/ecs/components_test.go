@@ -7,9 +7,8 @@ import (
 )
 
 func TestNewComponent(t *testing.T) {
-	ecs.Reset()
-
-	entity := ecs.NewEntity()
+	e := ecs.New()
+	entity := e.NewEntity()
 
 	type Position struct {
 		ecs.BaseComponent
@@ -17,7 +16,7 @@ func TestNewComponent(t *testing.T) {
 	}
 
 	pos := &Position{}
-	entity.Add(pos)
+	e.Add(entity, pos)
 	if pos.TID() != 0 {
 		t.Errorf("pos TID should be 0, got %d", pos.TID())
 	}
@@ -31,7 +30,7 @@ func TestNewComponent(t *testing.T) {
 	}
 
 	mv := &Movement{x: 0}
-	entity.Add(mv)
+	e.Add(entity, mv)
 	if mv.TID() != 1 {
 		t.Errorf("mv TID should be 1, got %d", mv.TID())
 	}
@@ -39,10 +38,10 @@ func TestNewComponent(t *testing.T) {
 		t.Errorf("mv CID should be 1, got %d", mv.CID())
 	}
 
-	otherEntity := ecs.NewEntity()
+	otherEntity := e.NewEntity()
 
 	mv2 := &Movement{x: 0}
-	otherEntity.Add(mv2)
+	e.Add(otherEntity, mv2)
 	if mv2.TID() != 1 {
 		t.Errorf("mv2 TID should be 1, got %d", mv2.TID())
 	}

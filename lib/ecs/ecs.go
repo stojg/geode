@@ -1,20 +1,28 @@
 package ecs
 
+import "reflect"
+
 // Components are only raw data, ie component Position.x, Position.y ie a struct nothing else/more
 // Entities is a collection of Components, Position, Motion, Input nothing else/more
 // System, takes a list of Components, ie. All the Position and Motion component in the world, nothing more/else
 
-// update systems
-// for each system
-// find out what allComponents it needs
-// if a single component
-//    just grab that component list and pass to it
-// else
-//    for all nextEntityID
-//       if entity doesn't have all component
-// 			skip
-//       else
-//          add allComponents to list
-//    end
-//      call system with component list
-//
+func New() *ECS {
+	return &ECS{
+		systemComponents:        make(map[reflect.Value][]int),
+		systemToIn:              make(map[reflect.Value][]reflect.Type),
+		allEntityComponents:     make([][]Component, 0),
+		allEntityComponentTypes: make([][]int, 0),
+		allComponentTypes:       make(map[reflect.Type]int, 0),
+		allComponents:           make(map[int]Component),
+	}
+}
+
+type ECS struct {
+	systemComponents        map[reflect.Value][]int
+	systemToIn              map[reflect.Value][]reflect.Type
+	nextEntityID            Entity
+	allEntityComponents     [][]Component
+	allEntityComponentTypes [][]int
+	allComponentTypes       map[reflect.Type]int
+	allComponents           map[int]Component
+}

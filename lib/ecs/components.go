@@ -4,42 +4,20 @@ import (
 	"reflect"
 )
 
-var allComponentTypes = make(map[reflect.Type]int, 0)
-var allComponents = make(map[int]Component)
-var nextEntityID Entity
-var allEntityComponents = make([][]Component, 0)
-var allEntityComponentTypes = make([][]int, 0)
-var systemComponents = make(map[reflect.Value][]int)
-var systemToIn = make(map[reflect.Value][]reflect.Type)
-
-func getAllEntities() [][]Component {
-	return allEntityComponents
-}
-
-func Reset() {
-	allComponentTypes = make(map[reflect.Type]int, 0)
-	allComponents = make(map[int]Component)
-	nextEntityID = 0
-	allEntityComponents = make([][]Component, 0)
-	allEntityComponentTypes = make([][]int, 0)
-	systemComponents = make(map[reflect.Value][]int)
-	systemToIn = make(map[reflect.Value][]reflect.Type)
-}
-
-func addComponent(x Component) {
-	tid := addComponentType(x)
+func (e *ECS) addComponent(x Component) {
+	tid := e.addComponentType(x)
 	x.setTID(tid)
-	cid := len(allComponents)
-	allComponents[cid] = x
+	cid := len(e.allComponents)
+	e.allComponents[cid] = x
 	x.setCID(cid)
 }
 
-func addComponentType(x Component) int {
+func (e *ECS) addComponentType(x Component) int {
 	t := reflect.TypeOf(x)
-	v, ok := allComponentTypes[t]
+	v, ok := e.allComponentTypes[t]
 	if !ok {
-		v = len(allComponentTypes)
-		allComponentTypes[t] = v
+		v = len(e.allComponentTypes)
+		e.allComponentTypes[t] = v
 	}
 	return v
 }
