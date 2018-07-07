@@ -19,25 +19,29 @@ func AddSystem(system interface{}, components ...Component) {
 }
 
 func Update(elapsed float64) {
-	objects := make(map[reflect.Type]interface{})
 	in := make([]reflect.Value, 16)
 	in[0] = reflect.ValueOf(elapsed)
+	listB := make([]reflect.Value, 16)
 
 	for method, args := range systemToIn {
+		for i := 1; i < len(args); i++ {
+			v, _ := allComponentTypes[args[i].Elem()]
+			listB[v] = reflect.MakeSlice(args[i], 0, len(getAllEntities()))
+		}
 		for entity, components := range getAllEntities() {
 			if !canEntityBeUpdated(entity, systemComponents[method]) {
 				continue
 			}
 			for _, component := range components {
-				objects[reflect.TypeOf(component)] = component
+				v := reflect.ValueOf(component)
+				listB[component.TID()] = reflect.Append(listB[component.TID()], v)
 			}
-
-			for i := 1; i < len(args); i++ {
-				v := reflect.ValueOf(objects[args[i]])
-				in[i] = v
-			}
-			method.Call(in[:len(args)])
 		}
+		for i := 1; i < len(args); i++ {
+			v, _ := allComponentTypes[args[i].Elem()]
+			in[i] = listB[v]
+		}
+		method.Call(in[:len(args)])
 	}
 }
 
