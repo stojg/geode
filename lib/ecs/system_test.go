@@ -41,6 +41,7 @@ func TestSystem(t *testing.T) {
 	}
 }
 
+// BenchmarkAddSystem-8   	    3000	    472263 ns/op	       8 B/op	       1 allocs/op
 func BenchmarkAddSystem(b *testing.B) {
 	Reset()
 
@@ -60,6 +61,9 @@ func BenchmarkAddSystem(b *testing.B) {
 }
 
 func MoveSystem(elapsed float64, pos *Pos, spd *Speed) {
-	pos.X += spd.X
+	//for i := range pos {
+	//	pos[i].X += spd[i].X
+	//}
 
+	pos.X += spd.X
 }

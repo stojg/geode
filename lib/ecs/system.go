@@ -4,8 +4,6 @@ import (
 	"reflect"
 )
 
-//var callers = make(map[reflect.Type]func())
-
 func AddSystem(system interface{}, components ...Component) {
 	method := reflect.ValueOf(system)
 	for _, comp := range components {
@@ -22,8 +20,8 @@ func AddSystem(system interface{}, components ...Component) {
 
 func Update(elapsed float64) {
 	objects := make(map[reflect.Type]interface{})
-	objects[reflect.TypeOf(elapsed)] = elapsed
 	in := make([]reflect.Value, 16)
+	in[0] = reflect.ValueOf(elapsed)
 
 	for method, args := range systemToIn {
 		for entity, components := range getAllEntities() {
@@ -33,8 +31,10 @@ func Update(elapsed float64) {
 			for _, component := range components {
 				objects[reflect.TypeOf(component)] = component
 			}
-			for i, t := range args {
-				in[i] = reflect.ValueOf(objects[t])
+
+			for i := 1; i < len(args); i++ {
+				v := reflect.ValueOf(objects[args[i]])
+				in[i] = v
 			}
 			method.Call(in[:len(args)])
 		}

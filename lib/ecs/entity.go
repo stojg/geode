@@ -26,7 +26,6 @@ func (e Entity) getComponent(compType int) Component {
 	if !ok {
 		panic(fmt.Sprintf("Entity %d cant be found in entityCommponents list", e))
 	}
-
 	for _, c := range v {
 		if c.TID() == compType {
 			return c
