@@ -41,7 +41,10 @@ func TestSystem(t *testing.T) {
 	}
 }
 
+// BenchmarkAddSystem-8   	    3000	    521159 ns/op	      25 B/op	       2 allocs/op
 // BenchmarkAddSystem-8   	    5000	    291462 ns/op	   80498 B/op	    2005 allocs/op
+// BenchmarkAddSystem-8   	   10000	    188817 ns/op	   32899 B/op	      17 allocs/op
+// BenchmarkAddSystem-8   	   10000	    105271 ns/op	   32897 B/op	      17 allocs/op
 func BenchmarkAddSystem(b *testing.B) {
 	Reset()
 

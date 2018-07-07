@@ -7,12 +7,12 @@ import (
 var allComponentTypes = make(map[reflect.Type]int, 0)
 var allComponents = make(map[int]Component)
 var nextEntityID Entity
-var allEntityComponents = make(map[Entity][]Component)
-var allEntityComponentTypes = make(map[Entity][]int)
+var allEntityComponents = make([][]Component, 0)
+var allEntityComponentTypes = make([][]int, 0)
 var systemComponents = make(map[reflect.Value][]int)
 var systemToIn = make(map[reflect.Value][]reflect.Type)
 
-func getAllEntities() map[Entity][]Component {
+func getAllEntities() [][]Component {
 	return allEntityComponents
 }
 
@@ -20,8 +20,8 @@ func Reset() {
 	allComponentTypes = make(map[reflect.Type]int, 0)
 	allComponents = make(map[int]Component)
 	nextEntityID = 0
-	allEntityComponents = make(map[Entity][]Component)
-	allEntityComponentTypes = make(map[Entity][]int)
+	allEntityComponents = make([][]Component, 0)
+	allEntityComponentTypes = make([][]int, 0)
 	systemComponents = make(map[reflect.Value][]int)
 	systemToIn = make(map[reflect.Value][]reflect.Type)
 }

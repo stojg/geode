@@ -1,6 +1,7 @@
 package ecs
 
 import (
+	"fmt"
 	"reflect"
 )
 
@@ -11,31 +12,43 @@ func AddSystem(system interface{}, components ...Component) {
 		systemComponents[method] = append(systemComponents[method], tid)
 	}
 
-	in := make([]reflect.Type, method.Type().NumIn())
-	for i := 0; i < method.Type().NumIn(); i++ {
-		in[i] = method.Type().In(i)
+	num := method.Type().NumIn()
+	systemToIn[method] = make([]reflect.Type, num)
+	for i := 1; i < num; i++ {
+		systemToIn[method][i] = method.Type().In(i)
 	}
-	systemToIn[method] = in
 }
 
 func Update(elapsed float64) {
-	in := make([]reflect.Value, 16)
+	in := make([]reflect.Value, 8)
 	in[0] = reflect.ValueOf(elapsed)
-	listB := make([]reflect.Value, 16)
+	listB := make([]reflect.Value, len(allComponentTypes))
 
 	for method, args := range systemToIn {
-		for i := 1; i < len(args); i++ {
-			v, _ := allComponentTypes[args[i].Elem()]
-			listB[v] = reflect.MakeSlice(args[i], 0, len(getAllEntities()))
-		}
-		for entity, components := range getAllEntities() {
+		count := 0
+		var entities []Entity
+		for entity := range getAllEntities() {
 			if !canEntityBeUpdated(entity, systemComponents[method]) {
 				continue
 			}
-			for _, component := range components {
-				v := reflect.ValueOf(component)
-				listB[component.TID()] = reflect.Append(listB[component.TID()], v)
+			entities = append(entities, Entity(entity))
+		}
+
+		for i := 1; i < len(args); i++ {
+			componentID, ok := allComponentTypes[args[i].Elem()]
+			if !ok {
+				panic(fmt.Sprintf("Can't find component type for %s", args[i].Elem()))
 			}
+			listB[componentID] = reflect.MakeSlice(args[i], len(entities), len(entities))
+		}
+
+		for _, entity := range entities {
+			// @todo, only grab the relevant components
+			for _, component := range entity.getComponents() {
+				v := reflect.ValueOf(component)
+				listB[component.TID()].Index(count).Set(v)
+			}
+			count++
 		}
 		for i := 1; i < len(args); i++ {
 			v, _ := allComponentTypes[args[i].Elem()]
@@ -45,10 +58,11 @@ func Update(elapsed float64) {
 	}
 }
 
-func canEntityBeUpdated(entity Entity, componentTypes []int) bool {
+func canEntityBeUpdated(entity int, componentTypes []int) bool {
 	count := 0
+	e := Entity(entity)
 	for _, typeID := range componentTypes {
-		for _, entityComponentID := range entity.getComponentTypes() {
+		for _, entityComponentID := range e.getComponentTypes() {
 			if typeID == entityComponentID {
 				count++
 				break
