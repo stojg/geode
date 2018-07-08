@@ -17,7 +17,8 @@ func New(s components.RenderState, width, height, vpWidth, vpHeight int) *Render
 		RenderState:       s,
 		sourceTexture:     framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGBA, gl.FLOAT, gl.NEAREST, false),
 		brightPassTexture: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGB, gl.FLOAT, gl.NEAREST, false),
-		scratch2:          framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGB, gl.FLOAT, gl.LINEAR, false),
+		scratch1:          framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGB, gl.FLOAT, gl.NEAREST, false),
+		scratch2:          framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGB, gl.FLOAT, gl.NEAREST, false),
 
 		vpWidth:       vpWidth,
 		vpHeight:      vpHeight,
@@ -27,6 +28,8 @@ func New(s components.RenderState, width, height, vpWidth, vpHeight int) *Render
 		combine:       shader.NewShader("filter_combine"),
 		pass:          shader.NewShader("filter_null"),
 	}
+
+	//r.pixelShader = shader.NewShader("filter_pixelator")
 
 	filterCount := 2
 	for i := uint(2); i < 2+3; i++ {
@@ -49,6 +52,7 @@ type Renderer struct {
 	components.RenderState
 	sourceTexture     *framebuffer.Texture
 	brightPassTexture *framebuffer.Texture
+	scratch1          *framebuffer.Texture
 	scratch2          *framebuffer.Texture
 	blurTextures      [][2]*framebuffer.Texture
 	brightnessTex     *framebuffer.Texture
@@ -57,6 +61,7 @@ type Renderer struct {
 	brightness        *shader.Shader
 	combine           *shader.Shader
 	pass              *shader.Shader
+	pixelShader       *shader.Shader
 }
 
 func (r *Renderer) Render(in *framebuffer.Texture, bypass bool) {
@@ -77,9 +82,14 @@ func (r *Renderer) Render(in *framebuffer.Texture, bypass bool) {
 		res = r.blur(res, t[0], t[1])
 		r.SetTexture(fmt.Sprintf("x_filterTexture%d", i+2), res)
 	}
-	r.applyFilter(r.combine, r.sourceTexture, r.scratch2)
 
-	r.applyFilter(r.toneMapShader, r.scratch2, nil)
+	r.applyFilter(r.combine, r.sourceTexture, r.scratch1)
+	if r.pixelShader != nil {
+		r.applyFilter(r.pixelShader, r.scratch1, r.scratch2)
+		r.applyFilter(r.toneMapShader, r.scratch2, nil)
+	} else {
+		r.applyFilter(r.toneMapShader, r.scratch1, nil)
+	}
 }
 
 func (r *Renderer) blur(in, t1, t2 *framebuffer.Texture) *framebuffer.Texture {
