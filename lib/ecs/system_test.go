@@ -49,6 +49,8 @@ func TestSystem(t *testing.T) {
 // BenchmarkAddSystem-8   	    2000	    696510 ns/op	  422113 B/op	    3070 allocs/op
 // BenchmarkAddSystem-8   	    3000	    426758 ns/op	  187206 B/op	    3031 allocs/op
 // BenchmarkAddSystem-8   	    5000	    303953 ns/op	  171189 B/op	    2031 allocs/op
+// BenchmarkAddSystem-8   	    5000	    339174 ns/op	  147169 B/op	    2031 allocs/op (2 calls)
+// BenchmarkAddSystem-8   	    5000	    208592 ns/op	   81680 B/op	    1017 allocs/op (1 call)
 func BenchmarkAddSystem(b *testing.B) {
 	e := New()
 

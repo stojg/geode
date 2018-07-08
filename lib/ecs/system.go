@@ -5,10 +5,10 @@ import (
 	"reflect"
 )
 
-func (e *ECS) AddSystem(system interface{}, components ...Component) {
+func (e *ECS) AddSystem(system interface{}, components ...interface{}) {
 	method := reflect.ValueOf(system)
 	for _, comp := range components {
-		tid := e.addComponentType(comp)
+		tid := e.addComponentType(comp.(Component))
 		e.systemComponents[method] = append(e.systemComponents[method], tid)
 	}
 
@@ -25,7 +25,8 @@ func (e *ECS) Update(elapsed float64) {
 	for method, args := range e.systemToIn {
 		componentList := make([]reflect.Value, len(args)-1)
 
-		entities := make([][]Component, 0, 0)
+		// @todo check if turning this into an [][]int will use less memory
+		entities := make([][]int, 0, 0)
 		for entity := range e.allEntityComponents {
 			components, ok := e.canEntityBeUpdated(entity, e.systemComponents[method])
 			if !ok {
@@ -44,8 +45,8 @@ func (e *ECS) Update(elapsed float64) {
 
 		count := 0
 		for _, components := range entities {
-			for i, component := range components {
-				v := reflect.ValueOf(component)
+			for i, componentID := range components {
+				v := reflect.ValueOf(e.allComponents[componentID])
 				componentList[i].Index(count).Set(v)
 			}
 			count++
@@ -61,14 +62,14 @@ func (e *ECS) Update(elapsed float64) {
 	}
 }
 
-func (d *ECS) canEntityBeUpdated(entity int, componentTypes []int) ([]Component, bool) {
-	result := make([]Component, len(componentTypes))
+func (d *ECS) canEntityBeUpdated(entity int, componentTypes []int) ([]int, bool) {
+	result := make([]int, len(componentTypes))
 	e := Entity(entity)
 	count := 0
 	for i, typeID := range componentTypes {
 		for _, component := range d.allEntityComponents[e] {
 			if typeID == component.TID() {
-				result[i] = component
+				result[i] = component.CID()
 				count++
 				break
 			}
