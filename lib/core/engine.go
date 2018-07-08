@@ -20,7 +20,7 @@ func NewEngine(width, height int, title string, l components.Logger) (*Engine, e
 
 	input.SetWindow(window.Instance())
 
-	renderer := rendering.New(window.viewPortWidth, window.viewPortHeight, l)
+	renderer := rendering.New(window.width, window.height, window.viewPortWidth, window.viewPortHeight, l)
 	scene := NewScene()
 
 	engine := &Engine{
@@ -52,11 +52,11 @@ func (m *Engine) Start() {
 }
 
 func (m *Engine) Width() int {
-	return m.window.viewPortWidth
+	return m.window.width
 }
 
 func (m *Engine) Height() int {
-	return m.window.viewPortHeight
+	return m.window.height
 }
 
 func (m *Engine) AddObject(object *GameObject) {

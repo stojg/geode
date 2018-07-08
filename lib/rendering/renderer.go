@@ -15,7 +15,7 @@ import (
 	"github.com/stojg/graphics/lib/rendering/terrain"
 )
 
-func New(width, height int, logger components.Logger) *Renderer {
+func New(width, height, viewPortWidth, viewPortHeight int, logger components.Logger) *Renderer {
 
 	// @todo add more output
 	var nrAttributes int32
@@ -63,7 +63,7 @@ func New(width, height int, logger components.Logger) *Renderer {
 	e.standardRenderer = standard.NewRenderer(e.state)
 	e.shadowMap = shadow.NewRenderer(e.state)
 	e.terrainRenderer = terrain.NewRenderer(e.state)
-	e.postprocess = postprocess.New(e.state, width, height)
+	e.postprocess = postprocess.New(e.state, width, height, viewPortWidth, viewPortHeight)
 
 	e.skybox = technique.NewSkyBox("res/textures/sky0016.hdr", e.state)
 
