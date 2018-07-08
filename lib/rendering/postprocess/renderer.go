@@ -10,15 +10,17 @@ import (
 	"github.com/stojg/graphics/lib/rendering/shader"
 )
 
-func New(s components.RenderState, width, height int) *Renderer {
+func New(s components.RenderState, width, height, vpWidth, vpHeight int) *Renderer {
 
 	s.AddSamplerSlot("x_filterTexture")
 	r := &Renderer{
 		RenderState:       s,
 		sourceTexture:     framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGBA, gl.FLOAT, gl.NEAREST, false),
 		brightPassTexture: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGB, gl.FLOAT, gl.NEAREST, false),
-		scratch2:          framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGB, gl.FLOAT, gl.NEAREST, false),
+		scratch2:          framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGB, gl.FLOAT, gl.LINEAR, false),
 
+		vpWidth:       vpWidth,
+		vpHeight:      vpHeight,
 		toneMapShader: shader.NewShader("filter_tonemap"),
 		gaussShader:   shader.NewShader("filter_gauss"),
 		brightness:    shader.NewShader("filter_brightness"),
@@ -43,6 +45,7 @@ func New(s components.RenderState, width, height int) *Renderer {
 }
 
 type Renderer struct {
+	vpWidth, vpHeight int
 	components.RenderState
 	sourceTexture     *framebuffer.Texture
 	brightPassTexture *framebuffer.Texture
@@ -67,8 +70,6 @@ func (r *Renderer) Render(in *framebuffer.Texture, bypass bool) {
 	in.ResolveToFBO(r.sourceTexture)
 
 	r.applyFilter(r.brightness, r.sourceTexture, r.brightPassTexture)
-	//r.applyFilter(r.toneMapShader, r.brightPassTexture, nil)
-	//return
 
 	r.gaussShader.Bind()
 	res := r.brightPassTexture
@@ -109,6 +110,7 @@ func (r *Renderer) blur(in, t1, t2 *framebuffer.Texture) *framebuffer.Texture {
 
 func (r *Renderer) applyFilter(shader components.Shader, in, out components.Texture) {
 	if out == nil {
+		gl.Viewport(0, 0, int32(r.vpWidth), int32(r.vpHeight))
 		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 	} else {
 		out.BindFrameBuffer()
