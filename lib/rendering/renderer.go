@@ -54,7 +54,7 @@ func New(width, height, viewPortWidth, viewPortHeight int, logger components.Log
 		state:               NewRenderState(),
 		nullShader:          shader.NewShader("filter_null"),
 		overlayShader:       shader.NewShader("filter_overlay"),
-		multiSampledTexture: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGBA, gl.FLOAT, gl.LINEAR, false),
+		multiSampledTexture: framebuffer.NewMultiSampledTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGBA, gl.FLOAT, gl.LINEAR_MIPMAP_LINEAR, false),
 	}
 
 	e.state.AddSamplerSlot("albedo")
