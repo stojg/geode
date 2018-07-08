@@ -68,12 +68,12 @@ func run(l *logger) error {
 	engine.AddObject(spot)
 
 	pointLightA := core.NewGameObject()
-	pointLightA.Transform().SetPos(vec3(-2, terrainA.Height(-2, 2)+0.2, 2))
+	pointLightA.Transform().SetPos(vec3(-2, terrainA.Height(-2, 10)+0.5, 10))
 	pointLightA.AddComponent(lights.NewPoint(0, 0.5, 1.0, 50))
 	engine.AddObject(pointLightA)
 
 	pointLightB := core.NewGameObject()
-	pointLightB.Transform().SetPos(vec3(-10, terrainA.Height(-10, 0)+0.2, 0))
+	pointLightB.Transform().SetPos(vec3(-10, terrainA.Height(-10, 0)+0.5, 0))
 	pointLightB.AddComponent(lights.NewPoint(0.0, 0.5, 1.0, 50))
 	engine.AddObject(pointLightB)
 
