@@ -17,6 +17,8 @@ import (
 
 func New(width, height, viewPortWidth, viewPortHeight int, logger components.Logger) *Renderer {
 
+	//width /= 8
+	//height /= 8
 	// @todo add more output
 	var nrAttributes int32
 	gl.GetIntegerv(gl.MAX_VERTEX_ATTRIBS, &nrAttributes)
@@ -52,7 +54,7 @@ func New(width, height, viewPortWidth, viewPortHeight int, logger components.Log
 		state:               NewRenderState(),
 		nullShader:          shader.NewShader("filter_null"),
 		overlayShader:       shader.NewShader("filter_overlay"),
-		multiSampledTexture: framebuffer.NewMultiSampledTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGBA, gl.FLOAT, gl.LINEAR, false),
+		multiSampledTexture: framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA16F, gl.RGBA, gl.FLOAT, gl.LINEAR, false),
 	}
 
 	e.state.AddSamplerSlot("albedo")
