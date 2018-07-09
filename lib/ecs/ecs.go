@@ -8,6 +8,7 @@ import "reflect"
 
 func New() *ECS {
 	return &ECS{
+		methods:                 make([]uintptr, 0),
 		methodPointerToMethod:   make(map[uintptr]reflect.Value),
 		methodComponents:        make(map[uintptr][]int),
 		systemToIn:              make(map[uintptr][]reflect.Type),
@@ -19,6 +20,7 @@ func New() *ECS {
 }
 
 type ECS struct {
+	methods                 []uintptr
 	methodPointerToMethod   map[uintptr]reflect.Value
 	methodComponents        map[uintptr][]int
 	systemToIn              map[uintptr][]reflect.Type

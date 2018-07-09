@@ -4,27 +4,6 @@ import (
 	"reflect"
 )
 
-var methodNumArgs = make(map[uintptr]int)
-
-func (e *ECS) AddSystem(system interface{}, components ...interface{}) {
-	method := reflect.ValueOf(system)
-
-	id := method.Pointer()
-	e.methodPointerToMethod[id] = method
-
-	for _, comp := range components {
-		tid := e.addComponentType(comp.(Component))
-		e.methodComponents[id] = append(e.methodComponents[id], tid)
-	}
-
-	num := method.Type().NumIn()
-	methodNumArgs[id] = num
-	e.systemToIn[id] = make([]reflect.Type, num)
-	for i := 1; i < num; i++ {
-		e.systemToIn[id][i] = method.Type().In(i)
-	}
-}
-
 const maxFunctionArguments = 8
 
 // caches
@@ -34,10 +13,34 @@ var (
 	entityComponents [maxFunctionArguments]int
 )
 
+func (e *ECS) AddSystem(system interface{}, components ...interface{}) {
+	method := reflect.ValueOf(system)
+
+	id := method.Pointer()
+	e.methodPointerToMethod[id] = method
+	e.methods = append(e.methods, id)
+
+	for _, comp := range components {
+		tid := e.addComponentType(comp.(Component))
+		e.methodComponents[id] = append(e.methodComponents[id], tid)
+	}
+
+	num := method.Type().NumIn()
+
+	e.systemToIn[id] = make([]reflect.Type, num)
+	for i := 1; i < num; i++ {
+		e.systemToIn[id][i] = method.Type().In(i)
+	}
+}
+
 func (e *ECS) Update(elapsed float64) {
+
+	// the first argument to an update function should always be elapsed
 	in[0] = reflect.ValueOf(elapsed)
+
 	entities := make([][]int, len(e.allEntityComponents))
-	for methodId := range methodNumArgs {
+	for _, methodId := range e.methods {
+
 		numEntities := 0
 		for entityID := range e.allEntityComponents {
 			count := 0
@@ -65,10 +68,6 @@ func (e *ECS) Update(elapsed float64) {
 		args := e.systemToIn[methodId]
 
 		for i := 1; i < len(args); i++ {
-			//_, ok := e.allComponentTypes[args[i].Elem()]
-			//if !ok {
-			//	panic(fmt.Sprintf("Can't find component type for %s", args[i].Elem()))
-			//}
 			componentList[i-1] = reflect.MakeSlice(args[i], numEntities, numEntities)
 		}
 
@@ -88,20 +87,4 @@ func (e *ECS) Update(elapsed float64) {
 		}
 		e.methodPointerToMethod[methodId].Call(in[:len(args)])
 	}
-}
-
-func (d *ECS) canEntityBeUpdated(entityID int, componentTypes []int) ([]int, bool) {
-	result := make([]int, len(componentTypes))
-	entity := Entity(entityID)
-	count := 0
-	for i, typeID := range componentTypes {
-		for _, component := range d.allEntityComponents[entity] {
-			if typeID == component.TID() {
-				result[i] = component.CID()
-				count++
-				break
-			}
-		}
-	}
-	return result, count == len(componentTypes)
 }
