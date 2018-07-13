@@ -1,32 +1,55 @@
 package ecs
 
-import "reflect"
-
-// Components are only raw data, ie component Position.x, Position.y ie a struct nothing else/more
-// Entities is a collection of Components, Position, Motion, Input nothing else/more
-// System, takes a list of Components, ie. All the Position and Motion component in the world, nothing more/else
-
-func New() *ECS {
-	return &ECS{
-		methods:                 make([]uintptr, 0),
-		methodPointerToMethod:   make(map[uintptr]reflect.Value),
-		methodComponents:        make(map[uintptr][]int),
-		systemToIn:              make(map[uintptr][]reflect.Type),
-		allEntityComponents:     make([][]Component, 0),
-		allEntityComponentTypes: make([][]int, 0),
-		allComponentTypes:       make(map[reflect.Type]int, 0),
-		allComponents:           make(map[int]Component),
-	}
+// Component represents the abstract version of data.
+// each component will associate with a meaningful data.
+// because of underneath structure, we can have upto
+// 32 components in total per game.
+// hope that enough...
+type Component interface {
+	ComponentType() uint32
+	SetComponentType(uint32)
 }
 
-type ECS struct {
-	methods                 []uintptr
-	methodPointerToMethod   map[uintptr]reflect.Value
-	methodComponents        map[uintptr][]int
-	systemToIn              map[uintptr][]reflect.Type
-	nextEntityID            Entity
-	allEntityComponents     [][]Component
-	allEntityComponentTypes [][]int
-	allComponentTypes       map[reflect.Type]int
-	allComponents           map[int]Component
+// Entity is a shell around multiple components.
+// components can be added or removed from entity either at
+// runtime or compile time.
+type Entity interface {
+	Component(component Component) Component
+	AddComponent(component Component) Entity
+	RemoveComponent(componentType uint32)
+	HasComponentTypes(componentTypes uint32) bool
+}
+
+// Query is a bridge between System and Entity.
+// query can be used to fetch array of entities
+// based on the data that they have or accessing
+// an already exist system.
+type Query interface {
+	Entities(componentTypes ...Component) []Entity
+	AddEntity(Entity)
+	RemoveEntity(Entity)
+	System(systemType uint32) System
+}
+
+// System contains all the methods which will needed for
+// hopfully all the scenarioes. There is an Update method
+// that is being called by World and was given a Query object
+// for manipulating entities.
+type System interface {
+	SystemType() uint32
+	//Active() bool
+	//Start()
+	//Pause()
+	//Resume()
+	//End()
+	Update(delta float32, query Query)
+}
+
+// World is a simple abstraction of minimum requirement of
+// method which needed for any game.
+type World interface {
+	Query
+	AddSystem(system System)
+	RemoveSystem(systemType uint32)
+	Update(delta float32)
 }
