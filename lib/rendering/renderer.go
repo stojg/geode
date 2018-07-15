@@ -1,12 +1,15 @@
 package rendering
 
 import (
+	"math/rand"
+
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/debug"
 	"github.com/stojg/graphics/lib/rendering/debugger"
 	"github.com/stojg/graphics/lib/rendering/framebuffer"
+	"github.com/stojg/graphics/lib/rendering/particle"
 	"github.com/stojg/graphics/lib/rendering/postprocess"
 	"github.com/stojg/graphics/lib/rendering/shader"
 	"github.com/stojg/graphics/lib/rendering/shadow"
@@ -41,7 +44,7 @@ func New(width, height, viewPortWidth, viewPortHeight int, logger components.Log
 
 	gl.FrontFace(gl.CCW)
 	gl.CullFace(gl.BACK)
-	gl.Enable(gl.CULL_FACE)
+	gl.Disable(gl.CULL_FACE)
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LESS)
 
@@ -66,6 +69,7 @@ func New(width, height, viewPortWidth, viewPortHeight int, logger components.Log
 	e.shadowMap = shadow.NewRenderer(e.state)
 	e.terrainRenderer = terrain.NewRenderer(e.state)
 	e.postprocess = postprocess.New(e.state, width, height, viewPortWidth, viewPortHeight)
+	e.particle = particle.NewMaster(e.state)
 
 	e.skybox = technique.NewSkyBox("res/textures/sky0016.hdr", e.state)
 
@@ -87,6 +91,7 @@ type Renderer struct {
 	standardRenderer *standard.Renderer
 	shadowMap        *shadow.Renderer
 	terrainRenderer  *terrain.Renderer
+	particle         *particle.Master
 	postprocess      *postprocess.Renderer
 	skybox           *technique.SkyBox
 
@@ -105,6 +110,12 @@ func (e *Renderer) Render(object, terrains components.Renderable) {
 	}
 	debugger.Clear()
 
+	if e.particle.Len() < 100 {
+		e.particle.AddParticle([3]float32{0, 3.8, 0}, [3]float32{rand.Float32()*4 - 2, rand.Float32() * 20, rand.Float32()*4 - 2}, [3]float32{0, 1, 0}, rand.Float32()*0.1+0.05, rand.Float32()*45, 1, rand.Float32()*10)
+	}
+
+	e.particle.Update(0.016)
+
 	// update all necessary UBOs etc
 	e.state.Update()
 
@@ -118,6 +129,9 @@ func (e *Renderer) Render(object, terrains components.Renderable) {
 	e.terrainRenderer.Render(terrains)
 	e.standardRenderer.Render(object)
 	e.skybox.Render()
+
+	e.particle.Render(e.state.Camera())
+
 	e.multiSampledTexture.UnbindFrameBuffer()
 
 	if e.state.Integer("effects") == 1 {
