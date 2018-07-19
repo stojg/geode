@@ -10,7 +10,6 @@ func NewModel(mesh Drawable, material Material) *Model {
 
 type Model struct {
 	GameComponent
-
 	mesh         Drawable
 	material     Material
 	numberOfRows uint32
@@ -30,5 +29,8 @@ func (m *Model) Unbind() {
 }
 
 func (m *Model) AABB() [3][2]float32 {
+	if m.mesh == nil {
+		panic("no mesh?!")
+	}
 	return m.mesh.HalfWidths()
 }

@@ -30,7 +30,7 @@ func TestGameObject_SetModel(t *testing.T) {
 	cam := components.NewCamera(65, 10, 10, 0.1, 100)
 	root.RenderAll(cam, &FakeShader{}, &FakeEngine{})
 
-	modelObjects := root.AllModels()
+	modelObjects := root.allModels()
 	objects, ok := modelObjects[model]
 	if !ok {
 		t.Fatalf("Expected to find model in model entity list")

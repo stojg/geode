@@ -46,7 +46,6 @@ func (r *Renderer) Render(particles []*Particle, camera components.Viewable) {
 	gl.DepthMask(false)
 	gl.BindVertexArray(r.quadVao)
 	gl.EnableVertexAttribArray(0)
-
 	for _, p := range particles {
 		r.shader.UpdateUniform("model", p.Transform(camera))
 		gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, gl.PtrOffset(0))
@@ -63,10 +62,10 @@ const sizeOfUint32 = unsafe.Sizeof(uint32(0))
 func setupVAO() uint32 {
 	var quadVao uint32
 	quadVertices := []float32{
-		-1, 1, 0, // top left
-		-1, -1, 0, // bottom left
-		1, 1, 0, // top right
-		1, -1, 0, // bottom right
+		-0.5, 0.5, 0, // top left
+		-0.5, -0.5, 0, // bottom left
+		0.5, 0.5, 0, // top right
+		0.5, -0.5, 0, // bottom right
 	}
 	indices := []uint32{0, 1, 2, 1, 3, 2}
 

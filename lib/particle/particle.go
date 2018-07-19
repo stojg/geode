@@ -3,6 +3,7 @@ package particle
 import (
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
+	"github.com/stojg/graphics/lib/math"
 )
 
 const Gravity float32 = -9.92
@@ -26,6 +27,8 @@ type Particle struct {
 	Rotation    float32
 	Scale       float32
 	elapsedTime float32
+
+	tmp1, tmp2 mgl32.Mat4
 }
 
 func (p *Particle) Update(elapsed float32) bool {
@@ -53,10 +56,14 @@ func (t *Particle) Transform(camera components.Viewable) mgl32.Mat4 {
 	translateMatrix.Set(1, 2, view.At(2, 1))
 	translateMatrix.Set(2, 2, view.At(2, 2))
 
-	rotationMatrix := mgl32.HomogRotate3D(mgl32.DegToRad(t.Rotation), mgl32.Vec3{0, 0, 1})
+	// @todo optimise this
+	//rotationMatrix := mgl32.HomogRotate3D(mgl32.DegToRad(t.Rotation), mgl32.Vec3{0, 0, 1})
+	rotationMatrix := mgl32.Ident4()
 	scaleMatrix := mgl32.Scale3D(t.Scale, t.Scale, t.Scale)
-	model := translateMatrix.Mul4(rotationMatrix.Mul4(scaleMatrix))
-	modelView := view.Mul4(model)
-	c := camera.Projection().Mul4(modelView)
-	return c
+
+	math.Mul4(rotationMatrix, scaleMatrix, &t.tmp1)
+	math.Mul4(translateMatrix, t.tmp1, &t.tmp2)
+	math.Mul4(view, t.tmp2, &t.tmp1)
+	math.Mul4(camera.Projection(), t.tmp1, &t.tmp2)
+	return t.tmp2
 }

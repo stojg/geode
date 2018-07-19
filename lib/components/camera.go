@@ -11,6 +11,7 @@ func NewCamera(fovy float32, width, height int, near, far float32) *Camera {
 
 	return &Camera{
 		projection: mgl32.Perspective(mgl32.DegToRad(fovy), float32(width/height), near, far),
+		view:       mgl32.Ident4(),
 	}
 }
 
@@ -18,6 +19,7 @@ type Camera struct {
 	GameComponent
 
 	projection mgl32.Mat4
+	view       mgl32.Mat4
 	planes     [6][4]float32
 }
 
@@ -42,24 +44,23 @@ func (c *Camera) Projection() mgl32.Mat4 {
 }
 
 func (c *Camera) View() mgl32.Mat4 {
+	return c.view
+}
+
+// @todo this should probably be replaced with a function that returns the planes
+
+func (c *Camera) Update(ts time.Duration) {
+	c.view = calcView(c)
+	c.planes = extractPlanesFromProjection(c.Projection().Mul4(c.View()), true)
+}
+
+func calcView(c *Camera) mgl32.Mat4 {
 	//This comes from the conjugate rotation because the world should appear to rotate opposite to the camera's rotation.
 	cameraRotation := c.Transform().TransformedRot().Conjugate().Mat4()
 	//Similarly, the translation is inverted because the world appears to move opposite to the camera's movement.
 	cameraPos := c.Transform().TransformedPos().Mul(-1)
 	cameraTranslation := mgl32.Translate3D(cameraPos[0], cameraPos[1], cameraPos[2])
 	return cameraRotation.Mul4(cameraTranslation)
-}
-
-// @todo this should probably be replaced with a function that returns the planes
-
-func (c *Camera) Update(ts time.Duration) {
-	c.planes = extractPlanesFromProjection(c.Projection().Mul4(c.View()), true)
-	//not := IsVisible(c.planes, [3]float32{0, 1.144242, 0}, mgl32.Mat4{})
-	//if !not {
-	//	fmt.Println("not vis")
-	//} else {
-	//	fmt.Println("vis")
-	//}
 }
 
 func extractPlanesFromProjection(projection mgl32.Mat4, normalise bool) [6][4]float32 {

@@ -203,25 +203,6 @@ func (s *Shader) setUniformBaseLight(uniformName string, baseLight components.Li
 	s.UpdateUniform(uniformName+".maxDistance", baseLight.MaxDistance())
 }
 
-func (s *Shader) updateUniformDirectionalLight(uniformName string, directional components.DirectionalLight) {
-	s.setUniformBaseLight(uniformName+".base", directional)
-	s.UpdateUniform(uniformName+".direction", directional.Direction())
-}
-
-func (s *Shader) updateUniformPointLight(uniformName string, pointLight components.PointLight) {
-	s.setUniformBaseLight(uniformName+".base", pointLight)
-	s.UpdateUniform(uniformName+".position", pointLight.Position())
-	s.UpdateUniform(uniformName+".atten.constant", pointLight.Constant())
-	s.UpdateUniform(uniformName+".atten.linear", pointLight.Linear())
-	s.UpdateUniform(uniformName+".atten.exponent", pointLight.Exponent())
-}
-
-func (s *Shader) updateUniformSpotLight(uniformName string, spotLight components.Spotlight) {
-	s.updateUniformPointLight(uniformName+".pointLight", spotLight)
-	s.UpdateUniform(uniformName+".direction", spotLight.Direction())
-	s.UpdateUniform(uniformName+".cutoff", spotLight.Cutoff())
-}
-
 func (s *Shader) UpdateUniform(uniformName string, value interface{}) {
 	loc, ok := s.resource.uniforms[uniformName]
 	if !ok {

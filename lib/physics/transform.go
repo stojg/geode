@@ -15,6 +15,7 @@ func NewTransform() *Transform {
 		scale: mgl32.Vec3{1, 1, 1},
 
 		oldPos:       mgl32.Vec3{math.MaxFloat32 - 1, math.MaxFloat32 - 1, math.MaxFloat32 - 1},
+		oldRot:       mgl32.Quat{W: math.MaxFloat32 - 1, V: mgl32.Vec3{math.MaxFloat32 - 1, math.MaxFloat32 - 1, math.MaxFloat32 - 1}},
 		parentMatrix: mgl32.Ident4(),
 	}
 }
@@ -30,12 +31,15 @@ type Transform struct {
 	oldPos   mgl32.Vec3
 	oldRot   mgl32.Quat
 	oldScale mgl32.Vec3
+
+	transformation mgl32.Mat4
 }
 
 func (t *Transform) Update() {
 	t.oldPos = t.pos
 	t.oldRot = t.rot
 	t.oldScale = t.scale
+	t.transformation = t.calcTransformation()
 }
 
 // angle should be in radians
@@ -95,11 +99,15 @@ func (t *Transform) HasChanged() bool {
 	return false
 }
 
-func (t *Transform) Transformation() mgl32.Mat4 {
+func (t *Transform) calcTransformation() mgl32.Mat4 {
 	translationMatrix := mgl32.Translate3D(t.pos[0], t.pos[1], t.pos[2])
 	rotationMatrix := t.rot.Mat4()
 	scaleMatrix := mgl32.Scale3D(t.scale[0], t.scale[1], t.scale[2])
 	return t.ParentMatrix().Mul4(translationMatrix.Mul4(rotationMatrix.Mul4(scaleMatrix)))
+}
+
+func (t *Transform) Transformation() mgl32.Mat4 {
+	return t.transformation
 }
 
 func (t *Transform) ParentMatrix() mgl32.Mat4 {

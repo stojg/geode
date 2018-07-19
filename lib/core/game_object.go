@@ -15,11 +15,10 @@ func NewGameObject() *GameObject {
 }
 
 type GameObject struct {
-	children   []*GameObject
-	components []components.Component
-	transform  *physics.Transform
-	state      components.RenderState
-
+	children      []*GameObject
+	components    []components.Component
+	transform     *physics.Transform
+	state         components.RenderState
 	model         *components.Model
 	modelEntities map[*components.Model][]*GameObject
 }
@@ -67,10 +66,10 @@ func (g *GameObject) Update(elapsed time.Duration) {
 	}
 }
 
-func (g *GameObject) AllModels() map[*components.Model][]*GameObject {
+func (g *GameObject) allModels() map[*components.Model][]*GameObject {
 	a := make(map[*components.Model][]*GameObject)
 	for _, c := range g.children {
-		for k, v := range c.AllModels() {
+		for k, v := range c.allModels() {
 			a[k] = append(a[k], v...)
 		}
 	}
@@ -87,23 +86,37 @@ func (g *GameObject) UpdateAll(elapsed time.Duration) {
 	}
 }
 
-func (g *GameObject) Render(shader components.Shader, state components.RenderState) {
+func (g *GameObject) Render(camera components.Viewable, shader components.Shader, state components.RenderState) {
+	list := g.allModels()
+
+	for model, objects := range list {
+
+		var visible []int
+		for i := range objects {
+			if objects[i].isVisible(camera) {
+				visible = append(visible, i)
+			}
+		}
+
+		if len(visible) == 0 {
+			continue
+		}
+		shader.Bind()
+		model.Bind(shader, state)
+		for _, i := range visible {
+			objects[i].render(shader, state)
+		}
+		model.Unbind()
+	}
+}
+
+func (g *GameObject) render(shader components.Shader, state components.RenderState) {
 	shader.UpdateTransform(g.Transform(), state)
 	g.model.Draw()
 }
 
-func (g *GameObject) RenderAll(camera components.Viewable, shader components.Shader, state components.RenderState) {
-	list := g.AllModels()
-	shader.Bind()
-	for model, objects := range list {
-		model.Bind(shader, state)
-		for _, object := range objects {
-			if IsVisible(camera.Planes(), object.model.AABB(), object.transform.Transformation()) {
-				object.Render(shader, state)
-			}
-		}
-		model.Unbind()
-	}
+func (g *GameObject) isVisible(camera components.Viewable) bool {
+	return IsVisible(camera.Planes(), g.model.AABB(), g.transform.Transformation())
 }
 
 func (g *GameObject) Transform() *physics.Transform {

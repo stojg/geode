@@ -7,9 +7,11 @@ import (
 	"os"
 
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/pkg/profile"
 	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/core"
 	"github.com/stojg/graphics/lib/lights"
+	"github.com/stojg/graphics/lib/particle"
 	"github.com/stojg/graphics/lib/rendering/terrain"
 )
 
@@ -54,6 +56,12 @@ func run(l *logger) error {
 	cameraObject.Transform().LookAt(vec3(4, 1, 1), up())
 	cameraObject.AddComponent(components.NewHeadHeight(terrainA))
 	engine.AddObject(cameraObject)
+
+	p1 := core.NewGameObject()
+	p1.Transform().SetPos(vec3(0, 1, 0))
+	particleSystem := particle.NewSystem()
+	p1.AddComponent(particleSystem)
+	engine.AddObject(p1)
 
 	sun := core.NewGameObject()
 	sun.Transform().SetPos(vec3(1, 1, 0))
@@ -119,6 +127,7 @@ func run(l *logger) error {
 		engine.AddObject(bot)
 	}
 
+	defer profile.Start().Stop()
 	engine.Start()
 	return nil
 }

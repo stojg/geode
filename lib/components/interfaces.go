@@ -55,7 +55,7 @@ type Transformable interface {
 }
 
 type Renderable interface {
-	RenderAll(camera Viewable, shader Shader, engine RenderState)
+	Render(camera Viewable, shader Shader, engine RenderState)
 }
 
 type Viewable interface {
@@ -88,18 +88,6 @@ type Light interface {
 	SetCamera(pos mgl32.Vec3, rot mgl32.Quat)
 	ShadowInfo() ShadowInfo
 	ShadowCaster() bool
-}
-
-type DirectionalLight interface {
-	Light
-}
-
-type PointLight interface {
-	Light
-}
-
-type Spotlight interface {
-	PointLight
 }
 
 type RenderState interface {
@@ -141,7 +129,6 @@ type Engine interface {
 type Component interface {
 	Update(time.Duration)
 	Input(time.Duration)
-	Render(Shader, state RenderState)
 	AddToEngine(state RenderState)
 	SetParent(Transformable)
 }
