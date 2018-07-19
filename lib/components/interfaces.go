@@ -55,7 +55,6 @@ type Shader interface {
 
 type Transformable interface {
 	Transform() *physics.Transform
-	AllTransforms() []*physics.Transform
 }
 
 type Renderable interface {
