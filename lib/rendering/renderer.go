@@ -1,6 +1,8 @@
 package rendering
 
 import (
+	"math/rand"
+
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/stojg/graphics/lib/components"
@@ -106,6 +108,7 @@ func (e *Renderer) Render(object, terrains components.Renderable) {
 	}
 	debugger.Clear()
 
+	e.particle.AddParticle([3]float32{0, 3.8, 0}, [3]float32{rand.Float32()*4 - 2, rand.Float32() * 20, rand.Float32()*4 - 2}, [3]float32{0, 1, 0}, rand.Float32()*0.05+0.025, rand.Float32()*45, 1, rand.Float32()*10)
 	//e.particle.AddParticle([3]float32{0, 3.8, 0}, [3]float32{rand.Float32()*4 - 2, rand.Float32() * 20, rand.Float32()*4 - 2}, [3]float32{0, 1, 0}, rand.Float32()*0.05+0.025, rand.Float32()*45, 1, rand.Float32()*10)
 	//e.particle.AddParticle([3]float32{0, 3.8, 0}, [3]float32{rand.Float32()*4 - 2, rand.Float32() * 20, rand.Float32()*4 - 2}, [3]float32{0, 1, 0}, rand.Float32()*0.05+0.025, rand.Float32()*45, 1, rand.Float32()*10)
 	//e.particle.AddParticle([3]float32{0, 3.8, 0}, [3]float32{rand.Float32()*4 - 2, rand.Float32() * 20, rand.Float32()*4 - 2}, [3]float32{0, 1, 0}, rand.Float32()*0.05+0.025, rand.Float32()*45, 1, rand.Float32()*10)
@@ -114,8 +117,7 @@ func (e *Renderer) Render(object, terrains components.Renderable) {
 	//e.particle.AddParticle([3]float32{0, 3.8, 0}, [3]float32{rand.Float32()*4 - 2, rand.Float32() * 20, rand.Float32()*4 - 2}, [3]float32{0, 1, 0}, rand.Float32()*0.05+0.025, rand.Float32()*45, 1, rand.Float32()*10)
 	//e.particle.AddParticle([3]float32{0, 3.8, 0}, [3]float32{rand.Float32()*4 - 2, rand.Float32() * 20, rand.Float32()*4 - 2}, [3]float32{0, 1, 0}, rand.Float32()*0.05+0.025, rand.Float32()*45, 1, rand.Float32()*10)
 	//e.particle.AddParticle([3]float32{0, 3.8, 0}, [3]float32{rand.Float32()*4 - 2, rand.Float32() * 20, rand.Float32()*4 - 2}, [3]float32{0, 1, 0}, rand.Float32()*0.05+0.025, rand.Float32()*45, 1, rand.Float32()*10)
-	//e.particle.AddParticle([3]float32{0, 3.8, 0}, [3]float32{rand.Float32()*4 - 2, rand.Float32() * 20, rand.Float32()*4 - 2}, [3]float32{0, 1, 0}, rand.Float32()*0.05+0.025, rand.Float32()*45, 1, rand.Float32()*10)
-	//e.particle.Update(0.016)
+	e.particle.Update(0.016)
 
 	// update all necessary UBOs etc
 	e.state.Update()
@@ -131,7 +133,7 @@ func (e *Renderer) Render(object, terrains components.Renderable) {
 	e.standardRenderer.Render(object)
 	e.skybox.Render()
 
-	//e.particle.Render(e.state.Camera())
+	e.particle.Render(e.state.Camera())
 
 	e.multiSampledTexture.UnbindFrameBuffer()
 

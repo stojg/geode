@@ -11,7 +11,6 @@ import (
 	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/core"
 	"github.com/stojg/graphics/lib/lights"
-	"github.com/stojg/graphics/lib/particle"
 	"github.com/stojg/graphics/lib/rendering/terrain"
 )
 
@@ -47,7 +46,7 @@ func run(l *logger) error {
 	engine.AddTerrain(terrainObj)
 
 	cameraObject := core.NewGameObject()
-	cameraObject.Transform().SetPos(vec3(10, 0, -10))
+	cameraObject.Transform().SetPos(vec3(10, 2, -10))
 	cameraObject.Transform().SetScale(vec3(0.1, 0.1, 0.1))
 	cameraObject.AddComponent(components.NewCamera(75, engine.Width(), engine.Height(), 0.1, 512))
 	cameraObject.AddComponent(components.NewFreeMove(5))
@@ -56,11 +55,11 @@ func run(l *logger) error {
 	cameraObject.AddComponent(components.NewHeadHeight(terrainA))
 	engine.AddObject(cameraObject)
 
-	p1 := core.NewGameObject()
-	p1.Transform().SetPos(vec3(0, 1, 0))
-	particleSystem := particle.NewSystem()
-	p1.AddComponent(particleSystem)
-	engine.AddObject(p1)
+	//p1 := core.NewGameObject()
+	//p1.Transform().SetPos(vec3(0, 1, 0))
+	//particleSystem := particle.NewSystem()
+	//p1.AddComponent(particleSystem)
+	//engine.AddObject(p1)
 
 	sun := core.NewGameObject()
 	sun.Transform().SetPos(vec3(1, 1, 0))

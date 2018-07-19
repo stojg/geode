@@ -10,23 +10,25 @@ const Gravity float32 = -9.92
 
 func NewParticle(pos, vel, rotAxis [3]float32, scale, rotAngle, gravity, life float32) *Particle {
 	return &Particle{
-		Position:   pos,
-		Velocity:   vel,
-		Gravity:    gravity,
-		LifeLength: life,
-		Rotation:   rotAngle,
-		Scale:      scale,
+		Position:     pos,
+		Velocity:     vel,
+		Gravity:      gravity,
+		LifeLength:   life,
+		Transparency: 1,
+		Rotation:     rotAngle,
+		Scale:        scale,
 	}
 }
 
 type Particle struct {
-	Position    [3]float32
-	Velocity    [3]float32
-	Gravity     float32
-	LifeLength  float32
-	Rotation    float32
-	Scale       float32
-	elapsedTime float32
+	Position     [3]float32
+	Velocity     [3]float32
+	Gravity      float32
+	LifeLength   float32
+	Transparency float32
+	Rotation     float32
+	Scale        float32
+	elapsedTime  float32
 
 	tmp1, tmp2 mgl32.Mat4
 }
@@ -38,6 +40,7 @@ func (p *Particle) Update(elapsed float32) bool {
 	p.Position[1] += change[1]
 	p.Position[2] += change[2]
 	p.elapsedTime += elapsed
+	p.Transparency = 1 - p.elapsedTime/p.LifeLength
 	return p.elapsedTime < p.LifeLength
 }
 

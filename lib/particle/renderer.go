@@ -48,6 +48,7 @@ func (r *Renderer) Render(particles []*Particle, camera components.Viewable) {
 	gl.EnableVertexAttribArray(0)
 	for _, p := range particles {
 		r.shader.UpdateUniform("model", p.Transform(camera))
+		r.shader.UpdateUniform("transparency", p.Transparency)
 		gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, gl.PtrOffset(0))
 		debug.Drawcall()
 	}
