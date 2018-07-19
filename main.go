@@ -40,7 +40,6 @@ func run(l *logger) error {
 	if err != nil {
 		return err
 	}
-	width, height := engine.Width(), engine.Height()
 
 	terrainA := terrain.New(float32(-0.5), float32(-0.5))
 	terrainObj, _ := loadModelFromMesh(terrainA.Mesh(), "dry-dirt")
@@ -50,9 +49,9 @@ func run(l *logger) error {
 	cameraObject := core.NewGameObject()
 	cameraObject.Transform().SetPos(vec3(10, 0, -10))
 	cameraObject.Transform().SetScale(vec3(0.1, 0.1, 0.1))
-	cameraObject.AddComponent(components.NewCamera(75, width, height, 0.1, 512))
+	cameraObject.AddComponent(components.NewCamera(75, engine.Width(), engine.Height(), 0.1, 512))
 	cameraObject.AddComponent(components.NewFreeMove(5))
-	cameraObject.AddComponent(components.NewFreelook(width, height))
+	cameraObject.AddComponent(components.NewFreelook(engine.Width(), engine.Height()))
 	cameraObject.Transform().LookAt(vec3(4, 1, 1), up())
 	cameraObject.AddComponent(components.NewHeadHeight(terrainA))
 	engine.AddObject(cameraObject)
