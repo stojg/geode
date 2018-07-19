@@ -83,30 +83,28 @@ func (s *Shader) Bind() {
 	}
 }
 
-func (s *Shader) UpdateUniforms(mtrl components.Material, engine components.RenderState) {
+func (s *Shader) UpdateUniforms(mtrl components.Material, state components.RenderState) {
 
 	for i, name := range s.resource.uniformNames {
 		uniformType := s.resource.uniformTypes[i]
-		// x_ means that the uniform is a engine uniform and should be fetch from the render engines storage
+		// x_ means that the uniform is a state uniform and should be fetch from the "global" state
 		if strings.Index(name, "x_") == 0 {
-			s.updateUniformFromRenderer(uniformType, engine, name)
+			s.updateUniformFromState(uniformType, state, name)
 			continue
 		}
 
 		name, index := getArray(name)
 
 		switch name {
-		case "skyboxView":
-			s.UpdateUniform(name, engine.Camera().View().Mat3().Mat4()) // remove rotation
 		case "material":
-			for _, sn := range []string{"albedo", "metallic", "roughness", "normal"} {
-				samplerSlot := engine.SamplerSlot(sn)
-				mtrl.Texture(sn).Activate(samplerSlot)
-				s.UpdateUniform(name+"."+sn, int32(samplerSlot))
+			for _, textureNames := range []string{"albedo", "metallic", "roughness", "normal"} {
+				samplerSlot := state.SamplerSlot(textureNames)
+				mtrl.Texture(textureNames).Activate(samplerSlot)
+				s.UpdateUniform(name+"."+textureNames, int32(samplerSlot))
 			}
 		case "lights":
-			if len(engine.Lights()) > index {
-				light := engine.Lights()[index]
+			if len(state.Lights()) > index {
+				light := state.Lights()[index]
 				s.UpdateUniform(fmt.Sprintf("%s[%d].position", name, index), light.Position())
 				s.UpdateUniform(fmt.Sprintf("%s[%d].color", name, index), light.Color())
 				s.UpdateUniform(fmt.Sprintf("%s[%d].constant", name, index), light.Constant())
@@ -117,12 +115,12 @@ func (s *Shader) UpdateUniforms(mtrl components.Material, engine components.Rend
 				s.UpdateUniform(fmt.Sprintf("%s[%d].cutoff", name, index), light.Cutoff())
 			}
 		case "numLights":
-			s.UpdateUniform(name, int32(len(engine.Lights())))
+			s.UpdateUniform(name, int32(len(state.Lights())))
 		}
 	}
 }
 
-func (s *Shader) updateUniformFromRenderer(uniformType string, engine components.RenderState, name string) {
+func (s *Shader) updateUniformFromState(uniformType string, engine components.RenderState, name string) {
 	if uniformType == "sampler2D" || uniformType == "samplerCube" {
 		samplerSlot := engine.SamplerSlot(name)
 		engine.Texture(name).Activate(samplerSlot)

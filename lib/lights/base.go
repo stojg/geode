@@ -2,6 +2,7 @@ package lights
 
 import (
 	"math"
+	"time"
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
@@ -21,6 +22,12 @@ type BaseLight struct {
 	cutoff float32
 
 	intensity float32
+
+	view mgl32.Mat4
+}
+
+func (l *BaseLight) Update(elapsed time.Duration) {
+	l.view = l.calcView()
 }
 
 func (l *BaseLight) MaxDistance() float32 {
@@ -80,7 +87,7 @@ func (l *BaseLight) Projection() mgl32.Mat4 {
 	return l.shadowInfo.projection
 }
 
-func calcRange(l *BaseLight) {
+func (l *BaseLight) calcRange() {
 
 	max := l.color[0]
 	if l.color[1] > max {
@@ -101,7 +108,7 @@ func calcRange(l *BaseLight) {
 	}
 }
 
-func (l *BaseLight) View() mgl32.Mat4 {
+func (l *BaseLight) calcView() mgl32.Mat4 {
 	//This comes from the conjugate rotation because the world should appear to rotate opposite to the camera's rotation.
 	lightRotation := l.Transform().TransformedRot().Conjugate().Mat4()
 	//Similarly, the translation is inverted because the world appears to move opposite to the camera's movement.

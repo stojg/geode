@@ -50,7 +50,6 @@ func (r *Renderer) Render(objects, terrains components.Renderable) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	objects.Render(r.Camera(), r.shader, r)
 	terrains.Render(r.Camera(), r.shader, r)
-	//terrains.RenderAll(e.shadowShader, e)
 	//e.blurShadowMap(idx, 1)
 }
 

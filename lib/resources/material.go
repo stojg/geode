@@ -1,61 +1,56 @@
 package resources
 
 import (
-	"fmt"
-
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
 )
 
 func NewMaterial() *Material {
 	return &Material{
-		textures:  make(map[string]*Texture),
-		albedo:    mgl32.Vec3{0.02, 0.02, 0.02}, // charcoal
-		metallic:  0.00,                         // non metallic
-		roughness: 0.5,
+		textures: make(map[string]components.Texture),
+		vectors:  make(map[string]mgl32.Vec3),
+		floats:   make(map[string]float32),
 	}
 }
 
-// https://docs.unrealengine.com/latest/INT/Engine/Rendering/Materials/PhysicallyBased/
 type Material struct {
-	textures  map[string]*Texture
-	albedo    mgl32.Vec3
-	metallic  float32
-	roughness float32
+	textures map[string]components.Texture
+	vectors  map[string]mgl32.Vec3
+	floats   map[string]float32
 }
 
-func (m *Material) Albedo() mgl32.Vec3 {
-	return m.albedo
-}
-
-func (m *Material) SetAlbedo(albedo mgl32.Vec3) {
-	m.albedo = albedo
-}
-
-func (m *Material) SetMetallic(metallic float32) {
-	m.metallic = metallic
-}
-
-func (m *Material) Metallic() float32 {
-	return m.metallic
-}
-
-func (m *Material) SetRoughness(roughness float32) {
-	m.roughness = roughness
-}
-
-func (m *Material) Roughness() float32 {
-	return m.roughness
-}
-
-func (m *Material) AddTexture(name string, texture *Texture) {
-	m.textures[name] = texture
-}
-
-func (m *Material) Texture(name string) components.Texture {
-	texture, ok := m.textures[name]
-	if !ok {
-		panic(fmt.Sprintf("could not find texture '%s', should return test texture instead\n", name))
+func (m *Material) Float(n string) float32 {
+	float, ok := m.floats[n]
+	if ok {
+		return float
 	}
-	return texture
+	return 0
+}
+
+func (m *Material) AddFloat(n string, a float32) {
+	m.floats[n] = a
+}
+
+func (m *Material) Vector(n string) mgl32.Vec3 {
+	vector, ok := m.vectors[n]
+	if ok {
+		return vector
+	}
+	return mgl32.Vec3{0, 0, 0}
+}
+
+func (m *Material) AddVector(n string, vec3 mgl32.Vec3) {
+	m.vectors[n] = vec3
+}
+
+func (m *Material) Texture(n string) components.Texture {
+	texture, ok := m.textures[n]
+	if ok {
+		return texture
+	}
+	return m.textures[n]
+}
+
+func (m *Material) AddTexture(n string, t components.Texture) {
+	m.textures[n] = t
 }

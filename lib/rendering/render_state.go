@@ -51,15 +51,16 @@ type RenderState struct {
 	uniformsFloat map[string]float32
 }
 
+const sizeOfMat4 = int(unsafe.Sizeof(mgl32.Ident4()))
+
 func (e *RenderState) Update() {
-	size := int(unsafe.Sizeof(mgl32.Ident4()))
 	view := e.Camera().View()
 	invView := view.Inv()
 	projection := e.Camera().Projection()
 	gl.BindBuffer(gl.UNIFORM_BUFFER, e.uboMatrices)
-	gl.BufferSubData(gl.UNIFORM_BUFFER, 0, size, gl.Ptr(&view[0]))
-	gl.BufferSubData(gl.UNIFORM_BUFFER, size, size, gl.Ptr(&invView[0]))
-	gl.BufferSubData(gl.UNIFORM_BUFFER, 2*size, size, gl.Ptr(&projection[0]))
+	gl.BufferSubData(gl.UNIFORM_BUFFER, 0, sizeOfMat4, gl.Ptr(&view[0]))
+	gl.BufferSubData(gl.UNIFORM_BUFFER, sizeOfMat4, sizeOfMat4, gl.Ptr(&invView[0]))
+	gl.BufferSubData(gl.UNIFORM_BUFFER, 2*sizeOfMat4, sizeOfMat4, gl.Ptr(&projection[0]))
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
 }
 

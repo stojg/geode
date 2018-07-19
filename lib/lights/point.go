@@ -16,7 +16,7 @@ func NewPoint(r, g, b, intensity float32) *PointLight {
 		},
 	}
 
-	calcRange(&pointLight.BaseLight)
+	pointLight.calcRange()
 
 	return pointLight
 }

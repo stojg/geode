@@ -2,6 +2,7 @@ package lights
 
 import (
 	"math"
+	"time"
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
@@ -30,42 +31,41 @@ func NewDirectional(shadowSize int, r, g, b, intensity float32) *Directional {
 
 type Directional struct {
 	BaseLight
-	matrix mgl32.Mat4
+	matrix        mgl32.Mat4
+	viewDirection mgl32.Mat4
+	direction     mgl32.Vec3
 }
 
-func (b *Directional) SetCamera(inPos mgl32.Vec3, inRot mgl32.Quat) {
-	resultPos := inPos.Mul(-1).Add(inRot.Rotate(mgl32.Vec3{0, 0, b.shadowInfo.halfSize}))
-	resultRot := b.Transform().TransformedRot().Conjugate()
+func (direction *Directional) Update(elapsed time.Duration) {
+	direction.BaseLight.Update(elapsed)
+	direction.viewDirection = direction.Projection().Mul4(direction.matrix)
+	direction.direction = direction.Parent().Transform().TransformedPos().Normalize()
+}
 
-	size := 1 << uint(b.shadowInfo.SizeAsPowerOfTwo())
+func (direction *Directional) SetCamera(inPos mgl32.Vec3, inRot mgl32.Quat) {
+	resultPos := inPos.Mul(-1).Add(inRot.Rotate(mgl32.Vec3{0, 0, direction.shadowInfo.halfSize}))
+	resultRot := direction.Transform().TransformedRot().Conjugate()
+
+	size := 1 << uint(direction.shadowInfo.SizeAsPowerOfTwo())
 	lightSpaceCameraPos := resultRot.Conjugate().Rotate(resultPos)
-	texelSize := 2 * b.shadowInfo.halfSize / float32(size)
+	texelSize := 2 * direction.shadowInfo.halfSize / float32(size)
 	lightSpaceCameraPos[0] = texelSize * float32(math.Floor(float64(lightSpaceCameraPos[0]))) / texelSize
 	lightSpaceCameraPos[1] = texelSize * float32(math.Floor(float64(lightSpaceCameraPos[1]))) / texelSize
 	lightSpaceCameraPos[2] = texelSize * float32(math.Floor(float64(lightSpaceCameraPos[2]))) / texelSize
 	resultPos = resultRot.Rotate(lightSpaceCameraPos)
 
 	translation := mgl32.Translate3D(resultPos[0], resultPos[1], resultPos[2])
-	b.matrix = resultRot.Mat4().Mul4(translation)
+	direction.matrix = resultRot.Mat4().Mul4(translation)
 }
 
-func (b *Directional) Direction() mgl32.Vec3 {
-	return b.Parent().Transform().TransformedPos().Normalize()
+func (direction *Directional) Direction() mgl32.Vec3 {
+	return direction.direction
 }
 
-func (b *Directional) AddToEngine(e components.RenderState) {
-	e.AddLight(b)
+func (direction *Directional) AddToEngine(e components.RenderState) {
+	e.AddLight(direction)
 }
 
-func (b *Directional) GetView() mgl32.Mat4 {
-	//This comes from the conjugate rotation because the world should appear to rotate opposite to the camera's rotation.
-	rotation := b.Transform().TransformedRot().Conjugate().Mat4()
-	//Similarly, the translation is inverted because the world appears to move opposite to the camera's movement.
-	position := b.Transform().TransformedPos().Mul(-1)
-	translation := mgl32.Translate3D(position[0], position[1], position[2])
-	return rotation.Mul4(translation)
-}
-
-func (b *Directional) ViewProjection() mgl32.Mat4 {
-	return b.Projection().Mul4(b.matrix)
+func (direction *Directional) ViewProjection() mgl32.Mat4 {
+	return direction.viewDirection
 }

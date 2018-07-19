@@ -19,9 +19,13 @@ type Texture interface {
 
 type Material interface {
 	Texture(name string) Texture
-	Albedo() mgl32.Vec3
-	Metallic() float32
-	Roughness() float32
+	AddTexture(name string, texture Texture)
+
+	Float(name string) float32
+	AddFloat(name string, float float32)
+
+	Vector(name string) mgl32.Vec3
+	AddVector(name string, vector mgl32.Vec3)
 }
 
 type Terrain interface {
