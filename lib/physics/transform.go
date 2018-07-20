@@ -5,6 +5,8 @@ package physics
 import (
 	"math"
 
+	x "github.com/stojg/graphics/lib/math"
+
 	"github.com/go-gl/mathgl/mgl32"
 )
 
@@ -99,11 +101,18 @@ func (t *Transform) HasChanged() bool {
 	return false
 }
 
+var tmp1, tmp2 mgl32.Mat4
+
 func (t *Transform) calcTransformation() mgl32.Mat4 {
 	translationMatrix := mgl32.Translate3D(t.pos[0], t.pos[1], t.pos[2])
 	rotationMatrix := t.rot.Mat4()
 	scaleMatrix := mgl32.Scale3D(t.scale[0], t.scale[1], t.scale[2])
-	return t.ParentMatrix().Mul4(translationMatrix.Mul4(rotationMatrix.Mul4(scaleMatrix)))
+
+	x.Mul4(rotationMatrix, scaleMatrix, &tmp1)
+	x.Mul4(translationMatrix, tmp1, &tmp2)
+	x.Mul4(t.ParentMatrix(), tmp2, &tmp1)
+	return tmp1
+	//return t.ParentMatrix().Mul4(translationMatrix.Mul4(rotationMatrix.Mul4(scaleMatrix)))
 }
 
 func (t *Transform) Transformation() mgl32.Mat4 {
