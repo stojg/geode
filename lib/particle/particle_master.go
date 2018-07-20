@@ -29,8 +29,8 @@ func (m *Master) Render(camera components.Viewable) {
 	m.renderer.Render(m.particles, camera)
 }
 
-func (m *Master) AddParticle(pos, vel, rotAxis [3]float32, scale, rotAngle, gravity, life float32) {
-	p := NewParticle(pos, vel, rotAxis, scale, rotAngle, gravity, life)
+func (m *Master) AddParticle(pos, vel [3]float32, scale, rotAngle, gravity, life float32) {
+	p := NewParticle(pos, vel, scale, rotAngle, gravity, life)
 	m.particles = append(m.particles, p)
 }
 

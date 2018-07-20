@@ -55,7 +55,6 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
     return ggx1 * ggx2;
 }
 
-uniform Material material;
 
 uniform int numLights;
 uniform Light lights[16];

@@ -43,6 +43,9 @@ func (m *Material) AddVector(n string, vec3 mgl32.Vec3) {
 	m.vectors[n] = vec3
 }
 
+func (m *Material) Textures() map[string]components.Texture {
+	return m.textures
+}
 func (m *Material) Texture(n string) components.Texture {
 	texture, ok := m.textures[n]
 	if ok {

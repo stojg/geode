@@ -6,9 +6,9 @@ import (
 	"github.com/stojg/graphics/lib/math"
 )
 
-const Gravity float32 = -9.92
+const Gravity float32 = -9.82
 
-func NewParticle(pos, vel, rotAxis [3]float32, scale, rotAngle, gravity, life float32) *Particle {
+func NewParticle(pos, vel [3]float32, scale, rotAngle, gravity, life float32) *Particle {
 	return &Particle{
 		Position:     pos,
 		Velocity:     vel,

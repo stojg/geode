@@ -27,11 +27,11 @@ func (s *System) Update(elapsed time.Duration) {
 	}
 
 	if len(s.particles) < 100 {
-		s.AddParticle([3]float32{0, 3.8, 0}, [3]float32{rand.Float32()*4 - 2, rand.Float32() * 20, rand.Float32()*4 - 2}, [3]float32{0, 1, 0}, rand.Float32()*0.05+0.025, rand.Float32()*45, 1, rand.Float32()*10)
+		s.AddParticle([3]float32{0, 3.8, 0}, [3]float32{rand.Float32()*4 - 2, rand.Float32() * 20, rand.Float32()*4 - 2}, rand.Float32()*0.05+0.025, rand.Float32()*45, 1, rand.Float32()*10)
 	}
 }
 
-func (m *System) AddParticle(pos, vel, rotAxis [3]float32, scale, rotAngle, gravity, life float32) {
-	p := NewParticle(pos, vel, rotAxis, scale, rotAngle, gravity, life)
+func (m *System) AddParticle(pos, vel [3]float32, scale, rotAngle, gravity, life float32) {
+	p := NewParticle(pos, vel, scale, rotAngle, gravity, life)
 	m.particles = append(m.particles, p)
 }
