@@ -7,6 +7,16 @@ import (
 	"github.com/stojg/graphics/lib/physics"
 )
 
+const (
+	_    = iota // ignore first value by assigning to blank identifier
+	R_NA = 1 << iota
+	R_DEFAULT
+	R_TERRAIN
+	R_LIGHT
+	R_PARTICLE
+	R_SHADOWED
+)
+
 type Texture interface {
 	ID() uint32
 	Activate(samplerSlot uint32)
@@ -19,6 +29,7 @@ type Texture interface {
 
 type Material interface {
 	Texture(name string) Texture
+	Textures() map[string]Texture
 	AddTexture(name string, texture Texture)
 
 	Float(name string) float32
@@ -32,22 +43,36 @@ type Terrain interface {
 	Height(x, z float32) float32
 }
 
-// ie mesh
-type Drawable interface {
+type Bindable interface {
 	Bind()
-	Draw()
-	Unbind()
-	HalfWidths() [3][2]float32
 }
 
-type Logger interface {
-	Println(a ...interface{})
-	Printf(format string, a ...interface{})
-	ErrorLn(inError error)
+type Unbindable interface {
+	Unbind()
+}
+
+type AABB interface {
+	AABB() [3][2]float32
+}
+
+type Component interface {
+	Update(time.Duration)
+	Input(time.Duration)
+	AddToEngine(state RenderState)
+	SetParent(Object)
+}
+
+// ie mesh
+type Drawable interface {
+	AABB
+	Bindable
+	Unbindable
+	Draw()
 }
 
 type Shader interface {
-	Bind()
+	Bindable
+	Unbindable
 	UpdateUniforms(Material Material, state RenderState)
 	UpdateTransform(*physics.Transform, RenderState)
 	UpdateUniform(name string, value interface{})
@@ -57,8 +82,28 @@ type Transformable interface {
 	Transform() *physics.Transform
 }
 
+type Model interface {
+	AABB
+	Unbindable
+	Bind(Shader, RenderState)
+	Draw()
+}
+
+type Object interface {
+	Transformable
+	Model() Model
+	Input(elapsed time.Duration)
+	Update(elapsed time.Duration)
+	AllModels() map[Model][]Object
+	IsType(int) bool
+	IsVisible(camera Viewable) bool
+	// @todo, the below method feels weird
+	SetState(state RenderState)
+	Draw(camera Viewable, shader Shader, state RenderState)
+}
+
 type Renderable interface {
-	Render(camera Viewable, shader Shader, engine RenderState)
+	Render(camera Viewable, shader Shader, state RenderState, rtype int)
 }
 
 type Viewable interface {
@@ -121,7 +166,7 @@ type RenderState interface {
 }
 
 type Renderer interface {
-	Render(a, b Renderable)
+	Render(a Renderable)
 	State() RenderState
 }
 
@@ -129,9 +174,8 @@ type Engine interface {
 	Renderer() Renderer
 }
 
-type Component interface {
-	Update(time.Duration)
-	Input(time.Duration)
-	AddToEngine(state RenderState)
-	SetParent(Transformable)
+type Logger interface {
+	Println(a ...interface{})
+	Printf(format string, a ...interface{})
+	ErrorLn(inError error)
 }

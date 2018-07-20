@@ -7,14 +7,14 @@ import (
 )
 
 type GameComponent struct {
-	parent Transformable
+	parent Object
 }
 
-func (m *GameComponent) SetParent(parent Transformable) {
+func (m *GameComponent) SetParent(parent Object) {
 	m.parent = parent
 }
 
-func (m *GameComponent) Parent() Transformable {
+func (m *GameComponent) Parent() Object {
 	return m.parent
 }
 

@@ -1,8 +1,6 @@
 package rendering
 
 import (
-	"math/rand"
-
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/stojg/graphics/lib/components"
@@ -67,7 +65,7 @@ func New(width, height, viewPortWidth, viewPortHeight int, logger components.Log
 	e.shadowMap = shadow.NewRenderer(e.state)
 	e.terrainRenderer = terrain.NewRenderer(e.state)
 	e.postprocess = postprocess.New(e.state, width, height, viewPortWidth, viewPortHeight)
-	e.particle = particle.NewMaster(e.state)
+	e.particle = particle.NewRenderer(e.state)
 
 	e.skybox = technique.NewSkyBox("res/textures/sky0016.hdr", e.state)
 
@@ -89,7 +87,7 @@ type Renderer struct {
 	standardRenderer *standard.Renderer
 	shadowMap        *shadow.Renderer
 	terrainRenderer  *terrain.Renderer
-	particle         *particle.Master
+	particle         *particle.Renderer
 	postprocess      *postprocess.Renderer
 	skybox           *technique.SkyBox
 
@@ -102,30 +100,30 @@ func (e *Renderer) State() components.RenderState {
 	return e.state
 }
 
-func (e *Renderer) Render(object, terrains components.Renderable) {
+func (e *Renderer) Render(objects components.Renderable) {
 	if e.state.Camera() == nil {
 		panic("Camera not found, the game cannot render")
 	}
 	debugger.Clear()
 
-	e.particle.AddParticle([3]float32{0, 3.8, 0}, [3]float32{rand.Float32()*4 - 2, rand.Float32() * 20, rand.Float32()*4 - 2}, rand.Float32()*0.05+0.025, rand.Float32()*45, 1, rand.Float32()*10)
-	e.particle.Update(0.016)
+	//e.particle.AddParticle([3]float32{0, 3.8, 0}, [3]float32{rand.Float32()*4 - 2, rand.Float32() * 20, rand.Float32()*4 - 2}, rand.Float32()*0.05+0.025, rand.Float32()*45, 1, rand.Float32()*10)
+	//e.particle.Update(0.016)
 
 	// update all necessary UBOs etc
 	e.state.Update()
 
 	// @todo maybe only do this every other frame?
-	e.shadowMap.Render(object, terrains)
+	e.shadowMap.Render(objects)
 
 	e.multiSampledTexture.BindFrameBuffer()
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT)
 	e.shadowMap.Load()
 	e.skybox.Load()
-	e.terrainRenderer.Render(terrains)
-	e.standardRenderer.Render(object)
+	e.terrainRenderer.Render(objects)
+	e.standardRenderer.Render(objects)
 	e.skybox.Render()
 
-	e.particle.Render(e.state.Camera())
+	e.particle.Render(objects)
 
 	e.multiSampledTexture.UnbindFrameBuffer()
 

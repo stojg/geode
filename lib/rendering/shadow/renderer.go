@@ -35,7 +35,7 @@ type Renderer struct {
 	shadowCaster       components.Light
 }
 
-func (r *Renderer) Render(objects, terrains components.Renderable) {
+func (r *Renderer) Render(objects components.Renderable) {
 	gl.Enable(gl.DEPTH_TEST)
 	for _, light := range r.RenderState.Lights() {
 		if light.ShadowCaster() {
@@ -47,9 +47,10 @@ func (r *Renderer) Render(objects, terrains components.Renderable) {
 	r.shadowCaster.SetCamera(r.Camera().Pos(), r.Camera().Rot())
 	idx := r.shadowCaster.ShadowInfo().SizeAsPowerOfTwo()
 	r.shadowTextures[idx].BindFrameBuffer()
+	gl.ClearColor(1, 1, 1, 1)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-	objects.Render(r.Camera(), r.shader, r)
-	terrains.Render(r.Camera(), r.shader, r)
+	objects.Render(r.Camera(), r.shader, r, components.R_SHADOWED)
+	//terrains.Render(r.Camera(), r.shader, r)
 	//e.blurShadowMap(idx, 1)
 }
 

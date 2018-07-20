@@ -7,31 +7,37 @@ import (
 	"github.com/stojg/graphics/lib/physics"
 )
 
-func NewGameObject() *GameObject {
+func NewGameObject(rtype int) *GameObject {
 	return &GameObject{
+		rtype:         rtype,
 		transform:     physics.NewTransform(),
-		modelEntities: make(map[*components.Model][]*GameObject),
+		modelEntities: make(map[components.Model][]components.Object),
 	}
 }
 
 type GameObject struct {
-	children      []*GameObject
+	rtype         int
+	children      []components.Object
 	components    []components.Component
 	transform     *physics.Transform
 	state         components.RenderState
-	model         *components.Model
-	modelEntities map[*components.Model][]*GameObject
+	model         components.Model
+	modelEntities map[components.Model][]components.Object
 }
 
-func (g *GameObject) Model() *components.Model {
+func (g *GameObject) Model() components.Model {
 	return g.model
 }
 
-func (g *GameObject) SetModel(model *components.Model) {
+func (g *GameObject) IsType(a int) bool {
+	return g.rtype&a != 0
+}
+
+func (g *GameObject) SetModel(model components.Model) {
 	g.model = model
 }
 
-func (g *GameObject) AddChild(child *GameObject) {
+func (g *GameObject) AddChild(child components.Object) {
 	g.children = append(g.children, child)
 	child.SetState(g.state)
 	child.Transform().SetParent(g.Transform())
@@ -50,26 +56,15 @@ func (g *GameObject) Input(elapsed time.Duration) {
 	for _, c := range g.components {
 		c.Input(elapsed)
 	}
-}
-
-func (g *GameObject) InputAll(elapsed time.Duration) {
-	g.Input(elapsed)
 	for _, o := range g.children {
-		o.InputAll(elapsed)
+		o.Input(elapsed)
 	}
 }
 
-func (g *GameObject) Update(elapsed time.Duration) {
-	g.Transform().Update()
-	for _, c := range g.components {
-		c.Update(elapsed)
-	}
-}
-
-func (g *GameObject) allModels() map[*components.Model][]*GameObject {
-	a := make(map[*components.Model][]*GameObject)
+func (g *GameObject) AllModels() map[components.Model][]components.Object {
+	a := make(map[components.Model][]components.Object)
 	for _, c := range g.children {
-		for k, v := range c.allModels() {
+		for k, v := range c.AllModels() {
 			a[k] = append(a[k], v...)
 		}
 	}
@@ -79,21 +74,27 @@ func (g *GameObject) allModels() map[*components.Model][]*GameObject {
 	return a
 }
 
-func (g *GameObject) UpdateAll(elapsed time.Duration) {
-	g.Update(elapsed)
+func (g *GameObject) Update(elapsed time.Duration) {
+	g.Transform().Update()
+	for _, c := range g.components {
+		c.Update(elapsed)
+	}
 	for _, o := range g.children {
-		o.UpdateAll(elapsed)
+		o.Update(elapsed)
 	}
 }
 
-func (g *GameObject) Render(camera components.Viewable, shader components.Shader, state components.RenderState) {
-	list := g.allModels()
+func (g *GameObject) Render(camera components.Viewable, shader components.Shader, state components.RenderState, rtype int) {
+	list := g.AllModels()
 
 	for model, objects := range list {
-
 		var visible []int
 		for i := range objects {
-			if objects[i].isVisible(camera) {
+
+			if !objects[i].IsType(rtype) {
+				continue
+			}
+			if objects[i].IsVisible(camera) {
 				visible = append(visible, i)
 			}
 		}
@@ -101,13 +102,19 @@ func (g *GameObject) Render(camera components.Viewable, shader components.Shader
 		if len(visible) == 0 {
 			continue
 		}
+
 		shader.Bind()
 		model.Bind(shader, state)
 		for _, i := range visible {
-			objects[i].render(shader, state)
+			objects[i].Draw(camera, shader, state)
 		}
 		model.Unbind()
 	}
+}
+
+func (g *GameObject) Draw(camera components.Viewable, shader components.Shader, state components.RenderState) {
+	shader.UpdateTransform(g.Transform(), state)
+	g.Model().Draw()
 }
 
 func (g *GameObject) render(shader components.Shader, state components.RenderState) {
@@ -115,20 +122,12 @@ func (g *GameObject) render(shader components.Shader, state components.RenderSta
 	g.model.Draw()
 }
 
-func (g *GameObject) isVisible(camera components.Viewable) bool {
+func (g *GameObject) IsVisible(camera components.Viewable) bool {
 	return IsVisible(camera.Planes(), g.model.AABB(), g.transform.Transformation())
 }
 
 func (g *GameObject) Transform() *physics.Transform {
 	return g.transform
-}
-
-func (g *GameObject) AllTransforms() []*physics.Transform {
-	var l []*physics.Transform
-	for _, c := range g.children {
-		l = append(l, c.Transform())
-	}
-	return l
 }
 
 func (g *GameObject) SetState(state components.RenderState) {

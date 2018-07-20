@@ -12,12 +12,12 @@ import (
 	"github.com/stojg/graphics/lib/resources"
 )
 
-var models map[string][]*components.Model
+var models map[string][]components.Model
 var meshes map[string][]*resources.Mesh
 var modelTextures map[string]*resources.Texture
 
 func init() {
-	models = make(map[string][]*components.Model)
+	models = make(map[string][]components.Model)
 	meshes = make(map[string][]*resources.Mesh)
 	meshes = make(map[string][]*resources.Mesh)
 	modelTextures = make(map[string]*resources.Texture)
@@ -52,26 +52,26 @@ func loadModel(modelName string) (*core.GameObject, error) {
 		}
 
 		for idx, m := range meshes[modelFile] {
-			localModels = append(localModels, components.NewModel(m, mtrls[idx]))
+			localModels = append(localModels, core.NewModel(m, mtrls[idx]))
 		}
 
 		models[modelName] = localModels
 	}
 
-	p := core.NewGameObject()
+	p := core.NewGameObject(components.R_DEFAULT | components.R_SHADOWED)
 	for _, model := range localModels {
-		g := core.NewGameObject()
+		g := core.NewGameObject(components.R_DEFAULT | components.R_SHADOWED)
 		g.SetModel(model)
 		p.AddChild(g)
 	}
 	return p, nil
 }
 
-func loadModelFromMesh(mesh components.Drawable, texture string) (*core.GameObject, error) {
+func loadModelFromMesh(mesh components.Drawable, texture string, rtype int) (*core.GameObject, error) {
 
 	material := loadMaterial(texture)
-	m := components.NewModel(mesh, material)
-	p := core.NewGameObject()
+	m := core.NewModel(mesh, material)
+	p := core.NewGameObject(rtype)
 	p.SetModel(m)
 	return p, nil
 

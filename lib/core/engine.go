@@ -59,12 +59,8 @@ func (m *Engine) Height() int {
 	return m.window.height
 }
 
-func (m *Engine) AddObject(object *GameObject) {
+func (m *Engine) AddObject(object components.Object) {
 	m.scene.AddObject(object)
-}
-
-func (m *Engine) AddTerrain(object *GameObject) {
-	m.scene.AddTerrain(object)
 }
 
 func (m *Engine) run() {

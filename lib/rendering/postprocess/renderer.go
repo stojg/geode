@@ -42,7 +42,6 @@ func New(s components.RenderState, width, height, vpWidth, vpHeight int) *Render
 		}
 		r.blurTextures = append(r.blurTextures, texts)
 	}
-	fmt.Println(len(r.blurTextures))
 
 	return r
 }

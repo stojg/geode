@@ -5,7 +5,6 @@ import (
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/stojg/graphics/lib/components"
-	"github.com/stojg/graphics/lib/debug"
 	"github.com/stojg/graphics/lib/rendering/primitives"
 	"github.com/stojg/graphics/lib/rendering/shader"
 )
@@ -39,21 +38,25 @@ type Renderer struct {
 	mesh    components.Drawable
 }
 
-func (r *Renderer) Render(particles []*Particle, camera components.Viewable) {
+func (r *Renderer) Render(objects components.Renderable) {
 	r.shader.Bind()
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	gl.DepthMask(false)
-	gl.BindVertexArray(r.quadVao)
-	gl.EnableVertexAttribArray(0)
-	for _, p := range particles {
-		r.shader.UpdateUniform("model", p.Transform(camera))
-		r.shader.UpdateUniform("transparency", p.Transparency)
-		gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, gl.PtrOffset(0))
-		debug.Drawcall()
-	}
-	gl.DisableVertexAttribArray(0)
-	gl.BindVertexArray(0)
+	//gl.BindVertexArray(r.quadVao)
+	//gl.EnableVertexAttribArray(0)
+
+	objects.Render(r.RenderState.Camera(), r.shader, r.RenderState, components.R_PARTICLE)
+
+	//for _, p := range objects {
+	//	r.shader.UpdateUniform("model", p.Transform(r.Camera()))
+	//	r.shader.UpdateUniform("transparency", p.Transparency)
+	//	gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, gl.PtrOffset(0))
+	//	debug.Drawcall()
+	//}
+
+	//gl.DisableVertexAttribArray(0)
+	//gl.BindVertexArray(0)
 	gl.DepthMask(true)
 	gl.Disable(gl.BLEND)
 }

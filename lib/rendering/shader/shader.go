@@ -21,10 +21,6 @@ var loadedShaders = make(map[string]*ShaderResource)
 var shaderInUse uint32 = 2 ^ 32 - 1
 var shaderFolder = "./res/shaders/"
 
-func init() {
-
-}
-
 func NewShader(fileName string) *Shader {
 
 	s := &Shader{
@@ -83,25 +79,40 @@ func (s *Shader) Bind() {
 	}
 }
 
-func (s *Shader) UpdateUniforms(mtrl components.Material, state components.RenderState) {
+func (s *Shader) Unbind() {
+	gl.UseProgram(0)
+}
+
+func (s *Shader) UpdateTransform(transform *physics.Transform, engine components.RenderState) {
+	for _, name := range s.resource.uniformNames {
+		switch name {
+		case "LightVP":
+			s.UpdateUniform(name, engine.ActiveLight().ViewProjection())
+		case "model":
+			s.UpdateUniform(name, transform.Transformation())
+		}
+	}
+}
+
+func (s *Shader) UpdateUniforms(material components.Material, state components.RenderState) {
 
 	for i, name := range s.resource.uniformNames {
 		uniformType := s.resource.uniformTypes[i]
+
 		// x_ means that the uniform is a state uniform and should be fetch from the "global" state
 		if strings.Index(name, "x_") == 0 {
 			s.updateUniformFromState(uniformType, state, name)
 			continue
 		}
 
-		name, index := getArray(name)
+		if uniformType == "sampler2D" || uniformType == "samplerCube" {
+			samplerSlot := state.SamplerSlot(name)
+			material.Texture(name).Activate(samplerSlot)
+			s.UpdateUniform(name, int32(samplerSlot))
+		}
 
+		name, index := getArray(name)
 		switch name {
-		case "material":
-			for _, textureNames := range []string{"albedo", "metallic", "roughness", "normal"} {
-				samplerSlot := state.SamplerSlot(textureNames)
-				mtrl.Texture(textureNames).Activate(samplerSlot)
-				s.UpdateUniform(name+"."+textureNames, int32(samplerSlot))
-			}
 		case "lights":
 			if len(state.Lights()) > index {
 				light := state.Lights()[index]
@@ -117,6 +128,26 @@ func (s *Shader) UpdateUniforms(mtrl components.Material, state components.Rende
 		case "numLights":
 			s.UpdateUniform(name, int32(len(state.Lights())))
 		}
+	}
+}
+
+func (s *Shader) UpdateUniform(uniformName string, value interface{}) {
+	loc, ok := s.resource.uniforms[uniformName]
+	if !ok {
+		panic(fmt.Sprintf("no shader location found for uniform: '%s' in shader '%s'", uniformName, s.filename))
+	}
+	debug.AddUniformSet()
+	switch v := value.(type) {
+	case float32:
+		gl.Uniform1f(loc, v)
+	case int32:
+		gl.Uniform1i(loc, v)
+	case mgl32.Mat4:
+		gl.UniformMatrix4fv(loc, 1, false, &v[0])
+	case mgl32.Vec3:
+		gl.Uniform3fv(loc, 1, &v[0])
+	default:
+		panic(fmt.Sprintf("unknown uniform type for '%s'", uniformName))
 	}
 }
 
@@ -139,21 +170,6 @@ func (s *Shader) updateUniformFromState(uniformType string, engine components.Re
 		s.UpdateUniform(name, engine.Integer(name))
 	default:
 		panic(fmt.Sprintf("Shader.UpdateUniforms() don't know how to set uniformType '%s' with name '%s'", uniformType, name))
-	}
-}
-
-func (s *Shader) UpdateTransform(transform *physics.Transform, engine components.RenderState) {
-	for _, name := range s.resource.uniformNames {
-		name, _ := getArray(name)
-
-		switch name {
-		case "LightMVP":
-			s.UpdateUniform(name, engine.ActiveLight().ViewProjection().Mul4(transform.Transformation()))
-		case "LightVP":
-			s.UpdateUniform(name, engine.ActiveLight().ViewProjection())
-		case "model":
-			s.UpdateUniform(name, transform.Transformation())
-		}
 	}
 }
 
@@ -199,26 +215,6 @@ func (s *Shader) addIncludes(shaderText string) (string, error) {
 func (s *Shader) setUniformBaseLight(uniformName string, baseLight components.Light) {
 	s.UpdateUniform(uniformName+".color", baseLight.Color())
 	s.UpdateUniform(uniformName+".maxDistance", baseLight.MaxDistance())
-}
-
-func (s *Shader) UpdateUniform(uniformName string, value interface{}) {
-	loc, ok := s.resource.uniforms[uniformName]
-	if !ok {
-		panic(fmt.Sprintf("no shader location found for uniform: '%s' in shader '%s'", uniformName, s.filename))
-	}
-	debug.AddUniformSet()
-	switch v := value.(type) {
-	case float32:
-		gl.Uniform1f(loc, v)
-	case int32:
-		gl.Uniform1i(loc, v)
-	case mgl32.Mat4:
-		gl.UniformMatrix4fv(loc, 1, false, &v[0])
-	case mgl32.Vec3:
-		gl.Uniform3fv(loc, 1, &v[0])
-	default:
-		panic(fmt.Sprintf("unknown uniform type for '%s'", uniformName))
-	}
 }
 
 func (s *Shader) addVertexShader(shader string) uint32 {

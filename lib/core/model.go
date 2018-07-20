@@ -1,6 +1,8 @@
-package components
+package core
 
-func NewModel(mesh Drawable, material Material) *Model {
+import "github.com/stojg/graphics/lib/components"
+
+func NewModel(mesh components.Drawable, material components.Material) *Model {
 	return &Model{
 		mesh:         mesh,
 		material:     material,
@@ -9,13 +11,13 @@ func NewModel(mesh Drawable, material Material) *Model {
 }
 
 type Model struct {
-	GameComponent
-	mesh         Drawable
-	material     Material
+	components.GameComponent
+	mesh         components.Drawable
+	material     components.Material
 	numberOfRows uint32
 }
 
-func (m *Model) Bind(shader Shader, engine RenderState) {
+func (m *Model) Bind(shader components.Shader, engine components.RenderState) {
 	shader.UpdateUniforms(m.material, engine)
 	m.mesh.Bind()
 }
@@ -32,5 +34,5 @@ func (m *Model) AABB() [3][2]float32 {
 	if m.mesh == nil {
 		panic("no mesh?!")
 	}
-	return m.mesh.HalfWidths()
+	return m.mesh.AABB()
 }

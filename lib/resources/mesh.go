@@ -64,7 +64,7 @@ func (m *Mesh) SetVertices(vertices []Vertex, indices []uint32) {
 	m.halfWidth[2] = HalfWidth(vertices, [3]float32{0, 0, 1})
 }
 
-func (m *Mesh) HalfWidths() [3][2]float32 {
+func (m *Mesh) AABB() [3][2]float32 {
 	return m.halfWidth
 }
 
@@ -82,10 +82,10 @@ func (m *Mesh) Draw() {
 }
 
 func (m *Mesh) Unbind() {
-	gl.DisableVertexAttribArray(0)
-	gl.DisableVertexAttribArray(1)
-	gl.DisableVertexAttribArray(2)
 	gl.DisableVertexAttribArray(3)
+	gl.DisableVertexAttribArray(2)
+	gl.DisableVertexAttribArray(1)
+	gl.DisableVertexAttribArray(0)
 	gl.BindVertexArray(0)
 }
 
