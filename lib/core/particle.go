@@ -35,10 +35,9 @@ type Particle struct {
 
 func (p *Particle) Update(elapsed float32) bool {
 	p.Velocity[1] += Gravity * p.Gravity * elapsed
-	change := mgl32.Vec3(p.Velocity).Mul(elapsed)
-	p.Position[0] += change[0]
-	p.Position[1] += change[1]
-	p.Position[2] += change[2]
+	p.Position[0] += p.Velocity[0] * elapsed
+	p.Position[1] += p.Velocity[1] * elapsed
+	p.Position[2] += p.Velocity[2] * elapsed
 	p.elapsedTime += elapsed
 	p.Transparency = 1 - p.elapsedTime/p.LifeLength
 	return p.elapsedTime < p.LifeLength

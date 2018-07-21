@@ -4,10 +4,12 @@ import (
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/mathgl/mgl32"
 )
 
 /* #nosec */
 const SizeOfFloat32 = int(unsafe.Sizeof(float32(1)))
+const SizeOfMat4 = int(unsafe.Sizeof(mgl32.Ident4()))
 
 var cubeVao uint32 = 1<<32 - 1
 
