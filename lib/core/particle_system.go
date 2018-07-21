@@ -59,7 +59,7 @@ func (s *ParticleSystem) Update(elapsed time.Duration) {
 	toCreate, reminder := math.Modf(s.reminder)
 	s.reminder = reminder
 	for i := 0; i < int(toCreate); i++ {
-		s.AddParticle(s.Transform().Pos(), [3]float32{rand.Float32()*4 - 2, rand.Float32()*15 + 5, rand.Float32()*4 - 2}, rand.Float32()*0.05+0.025, rand.Float32()*45, 1, rand.Float32()*9+1)
+		s.AddParticle(s.Transform().Pos(), [3]float32{rand.Float32()*4 - 2, rand.Float32()*15 + 5, rand.Float32()*4 - 2}, rand.Float32()*0.05+0.025, rand.Float32()*45, 0.5, rand.Float32()*9+1)
 	}
 }
 
@@ -70,19 +70,23 @@ func (s *ParticleSystem) OldDraw(camera components.Viewable, shader components.S
 	}
 }
 
+var instanceData = make([]float32, MaxParticles*InstanceDataLength, MaxParticles*InstanceDataLength)
+
 // @todo sort particles from back to front to fix blending
 func (s *ParticleSystem) Draw(camera components.Viewable, shader components.Shader, state components.RenderState) {
 
-	var instanceData []float32
+	count := 0
 
 	for _, p := range s.particles {
 		x := p.Transform(camera)
 		for i := 0; i < 4; i++ {
 			for _, j := range x.Col(i) {
-				instanceData = append(instanceData, j)
+				instanceData[count] = j
+				count++
 			}
 		}
-		instanceData = append(instanceData, p.Transparency)
+		instanceData[count] = p.Transparency
+		count++
 	}
 	updateVBO(s.perInstanceVBO, instanceData, gl.ARRAY_BUFFER, gl.STREAM_DRAW)
 	gl.DrawElementsInstanced(gl.TRIANGLES, 6, gl.UNSIGNED_INT, gl.PtrOffset(0), int32(len(s.particles)))
