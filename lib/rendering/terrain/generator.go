@@ -6,9 +6,9 @@ import (
 	"github.com/ojrac/opensimplex-go"
 )
 
-const OCTAVES = 4
-const ROUGHNESS = 0.4
-const AMPLITUDE float64 = 40
+const OCTAVES = 5
+const ROUGHNESS = 0.5
+const AMPLITUDE float64 = 60
 
 var xOffset float64
 var zOffset float64

@@ -58,8 +58,13 @@ func (s *ParticleSystem) Update(elapsed time.Duration) {
 	s.reminder += elapsed.Seconds() * s.perSecond
 	toCreate, reminder := math.Modf(s.reminder)
 	s.reminder = reminder
+
+	posX := s.Transform().Pos()[0]
+	posY := s.Transform().Pos()[1]
+	posZ := s.Transform().Pos()[2]
+
 	for i := 0; i < int(toCreate); i++ {
-		s.AddParticle(s.Transform().Pos(), [3]float32{rand.Float32()*4 - 2, rand.Float32()*15 + 5, rand.Float32()*4 - 2}, rand.Float32()*0.05+0.025, rand.Float32()*45, 0.5, rand.Float32()*9+1)
+		s.AddParticle([3]float32{posX + rand.Float32()*100 - 50, posY, posZ + rand.Float32()*100 - 50}, [3]float32{rand.Float32()*0.5 - 0.25, rand.Float32() * 5, rand.Float32()*0.5 - 0.25}, rand.Float32()*0.05+0.025, rand.Float32()*45, 0.01, rand.Float32()*9+1)
 	}
 }
 
