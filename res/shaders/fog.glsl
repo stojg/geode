@@ -8,5 +8,6 @@ vec3 fogCalc(vec3 Lo, vec3 vp) {
     dist = length(vp);
     fogFactor = 1.0 /exp(dist * FogDensity);
     fogFactor = clamp( fogFactor, 0.0, 1.0 );
+    return Lo;
     return mix(fogColor, Lo, fogFactor);
 }

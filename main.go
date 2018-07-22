@@ -49,10 +49,10 @@ func run(l *logger) error {
 	cameraObject.Transform().SetPos(vec3(10, terrainA.Height(10, -10)+20, -10))
 	cameraObject.Transform().SetScale(vec3(0.1, 0.1, 0.1))
 	cameraObject.AddComponent(components.NewCamera(75, engine.Width(), engine.Height(), 0.1, 512))
-	cameraObject.AddComponent(components.NewFreeMove(20))
+	cameraObject.AddComponent(components.NewFreeMove(4))
 	cameraObject.AddComponent(components.NewFreelook(engine.Width(), engine.Height()))
 	cameraObject.Transform().LookAt(vec3(4, 1, 1), up())
-	//cameraObject.AddComponent(components.NewHeadHeight(terrainA))
+	cameraObject.AddComponent(components.NewHeadHeight(terrainA))
 	engine.AddObject(cameraObject)
 
 	p1 := core.NewParticleSystem(10)
@@ -60,9 +60,9 @@ func run(l *logger) error {
 	engine.AddObject(p1)
 
 	sun := core.NewGameObject(components.R_LIGHT)
-	sun.Transform().SetPos(vec3(1, 1, 0))
+	sun.Transform().SetPos(vec3(1, 0.75, 0))
 	sun.Transform().LookAt(vec3(0, 0, 0), up())
-	sun.AddComponent(lights.NewDirectional(11, 0.9, 0.9, 0.9, 10))
+	sun.AddComponent(lights.NewDirectional(11, 0.9, 0.9, 0.9, 7))
 	engine.AddObject(sun)
 
 	spot := core.NewGameObject(components.R_LIGHT)
