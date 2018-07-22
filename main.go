@@ -46,13 +46,13 @@ func run(l *logger) error {
 	engine.AddObject(terrainObj)
 
 	cameraObject := core.NewGameObject(components.R_NA)
-	cameraObject.Transform().SetPos(vec3(10, 2, -10))
+	cameraObject.Transform().SetPos(vec3(10, terrainA.Height(10, -10)+20, -10))
 	cameraObject.Transform().SetScale(vec3(0.1, 0.1, 0.1))
 	cameraObject.AddComponent(components.NewCamera(75, engine.Width(), engine.Height(), 0.1, 512))
-	cameraObject.AddComponent(components.NewFreeMove(5))
+	cameraObject.AddComponent(components.NewFreeMove(20))
 	cameraObject.AddComponent(components.NewFreelook(engine.Width(), engine.Height()))
 	cameraObject.Transform().LookAt(vec3(4, 1, 1), up())
-	cameraObject.AddComponent(components.NewHeadHeight(terrainA))
+	//cameraObject.AddComponent(components.NewHeadHeight(terrainA))
 	engine.AddObject(cameraObject)
 
 	p1 := core.NewParticleSystem(10)
