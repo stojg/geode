@@ -2,6 +2,8 @@ package resources
 
 import (
 	"math"
+
+	"github.com/go-gl/mathgl/mgl32"
 )
 
 // ConvertToVertices takes an slice of float32 and turnes them into nice Vertexes.
@@ -52,6 +54,14 @@ func ConvertToVertices(meshdata []float32, indices []uint32) []Vertex {
 			f * (deltaV2*edge1[2] - deltaV1*edge2[2]),
 		}
 		tangent = normalise(tangent)
+
+		n := mgl32.Vec3(vertices[indices[indexPos]].Normal)
+		// check handiness
+		if n.Dot(mgl32.Vec3(tangent)) < 0.0 {
+			tangent[0] *= -1
+			tangent[1] *= -1
+			tangent[2] *= -1
+		}
 
 		copy(vertices[indices[indexPos]].Tangent[:], tangent[:])
 		copy(vertices[indices[indexPos+1]].Tangent[:], tangent[:])

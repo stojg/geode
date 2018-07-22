@@ -62,6 +62,8 @@ func (e *RenderState) Update() {
 	gl.BufferSubData(gl.UNIFORM_BUFFER, sizeOfMat4, sizeOfMat4, gl.Ptr(&invView[0]))
 	gl.BufferSubData(gl.UNIFORM_BUFFER, 2*sizeOfMat4, sizeOfMat4, gl.Ptr(&projection[0]))
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
+
+	e.SetVector3f("x_camPos", e.Camera().Pos())
 }
 
 func (e *RenderState) SetActiveLight(light components.Light) {
