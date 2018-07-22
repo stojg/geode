@@ -10,6 +10,7 @@ import (
 
 const Size float32 = 512
 const VertexCount = 128
+const stride = 8
 
 func New(gridX, gridZ float32) *Terrain {
 	t := &Terrain{
@@ -38,7 +39,6 @@ func (t *Terrain) generateTerrain(gridX, gridZ float32) ([]float32, []uint32) {
 	zOffset = float64(gridZ*float32(VertexCount-1)) / 4
 
 	hg := NewHeightGenerator(349)
-	const stride = 8
 
 	// https://www.youtube.com/watch?v=yNYwZMmgTJk&list=PLRIWtICgwaX0u7Rf9zkZhLoLuZVfUksDP&index=14
 	vertices := make([]float32, VertexCount*VertexCount*stride)
@@ -46,20 +46,20 @@ func (t *Terrain) generateTerrain(gridX, gridZ float32) ([]float32, []uint32) {
 	for z := 0; z < VertexCount; z++ {
 		for x := 0; x < VertexCount; x++ {
 			t.heights[x][z] = hg.Height(float64(x)+xOffset, float64(z)+zOffset)
-			mapSquares := float32(VertexCount) - 1
+			numSquares := float32(VertexCount) - 1
 			v := []float32{
-				float32(x) / mapSquares * Size,
+				float32(x) / numSquares * Size,
 				t.heights[x][z],
-				float32(z) / mapSquares * Size,
+				float32(z) / numSquares * Size,
 				0, 0, 0,
-				float32(x) / mapSquares,
-				float32(z) / mapSquares,
+				float32(x) / numSquares,
+				float32(z) / numSquares,
 			}
-			copy(vertices[z*VertexCount*stride+x*stride:], v)
+			copy(vertices[x*stride+z*stride*VertexCount:], v)
 		}
 	}
 
-	vertices = setNormals(vertices)
+	vertices = t.setNormals(vertices)
 
 	var indices []uint32
 	for gz := 0; gz < VertexCount-1; gz++ {
@@ -130,16 +130,17 @@ func barryCentric(p1, p2, p3 [3]float32, pos [2]float32) float32 {
 	return l1*p1[1] + l2*p2[1] + l3*p3[1]
 }
 
-func setNormals(data []float32) []float32 {
+func (t *Terrain) setNormals(data []float32) []float32 {
 	for x := 0; x < VertexCount-1; x++ {
 		for z := 0; z < VertexCount-1; z++ {
 			heightL := getY(x-1, z, data)
 			heightR := getY(x+1, z, data)
 			heightD := getY(x, z-1, data)
 			heightT := getY(x, z+1, data)
-			normal := mgl32.Vec3{heightL - heightR, 2, heightD - heightT}
-			normal.Normalize()
-			normXPos := (x*8 + z*8*VertexCount) + 3
+
+			normal := mgl32.Vec3{heightL - heightR, 2, heightD - heightT}.Normalize()
+
+			normXPos := (x*stride + z*stride*VertexCount) + 3
 			data[normXPos] = normal[0]
 			data[normXPos+1] = normal[1]
 			data[normXPos+2] = normal[2]
@@ -149,7 +150,7 @@ func setNormals(data []float32) []float32 {
 }
 
 func getY(x, z int, data []float32) float32 {
-	pos := x*8 + z*8*(VertexCount) + 1
+	pos := x*stride + z*stride*VertexCount + 1
 	if pos < 0 || pos > len(data) {
 		return 0
 	}
