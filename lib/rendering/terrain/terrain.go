@@ -60,6 +60,7 @@ func (t *Terrain) generateTerrain(gridX, gridZ float32) ([]float32, []uint32) {
 	}
 
 	vertices = t.setNormals(vertices)
+	//vertices = t.normaliseNormals(vertices)
 
 	var indices []uint32
 	for gz := 0; gz < VertexCount-1; gz++ {
@@ -138,7 +139,7 @@ func (t *Terrain) setNormals(data []float32) []float32 {
 			heightD := getY(x, z-1, data)
 			heightT := getY(x, z+1, data)
 
-			normal := mgl32.Vec3{heightL - heightR, 2, heightD - heightT}.Normalize()
+			normal := mgl32.Vec3{heightL - heightR, 2 * t.gridSizeSquare, heightD - heightT}.Normalize()
 
 			normXPos := (x*stride + z*stride*VertexCount) + 3
 			data[normXPos] = normal[0]
