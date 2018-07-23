@@ -4,36 +4,21 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/rendering/shader"
-	"github.com/stojg/graphics/lib/utilities"
 )
 
 func NewRenderer(s components.RenderState) *Renderer {
 	r := &Renderer{
 		RenderState: s,
 		shader:      shader.NewShader("particle"),
-		quadVao:     setupVAO(),
 	}
-
-	//objVert, objInd, err := loader.Load("res/meshes/cube/model.obj")
-	//if err != nil {
-	//	fmt.Printf("Model loading failed: %v", err)
-	//	os.Exit(1)
-	//}
-	//var meshes []*resources.Mesh
-	//for i, data := range objVert {
-	//	mesh := resources.NewMesh()
-	//	mesh.SetVertices(resources.ConvertToVertices(data, objInd[i]), objInd[i])
-	//	meshes = append(meshes, mesh)
-	//}
 
 	return r
 }
 
 type Renderer struct {
 	components.RenderState
-	shader  components.Shader
-	quadVao uint32
-	mesh    components.Drawable
+	shader components.Shader
+	mesh   components.Drawable
 }
 
 func (r *Renderer) Render(objects components.Renderable) {
@@ -44,38 +29,4 @@ func (r *Renderer) Render(objects components.Renderable) {
 	objects.Render(r.RenderState.Camera(), r.shader, r.RenderState, components.R_PARTICLE)
 	gl.DepthMask(true)
 	gl.Disable(gl.BLEND)
-}
-
-func setupVAO() uint32 {
-	var quadVao uint32
-	quadVertices := []float32{
-		-0.5, 0.5, 0, // top left
-		-0.5, -0.5, 0, // bottom left
-		0.5, 0.5, 0, // top right
-		0.5, -0.5, 0, // bottom right
-	}
-	indices := []uint32{0, 1, 2, 1, 3, 2}
-
-	// Create buffers/arrays
-	var vbo, ebo uint32
-	gl.GenBuffers(1, &vbo)
-	gl.GenVertexArrays(1, &quadVao)
-	gl.GenBuffers(1, &ebo)
-
-	gl.BindVertexArray(quadVao)
-
-	// load data into vertex buffer
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, len(quadVertices)*utilities.SizeOfFloat32*3, gl.Ptr(quadVertices), gl.STATIC_DRAW)
-
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
-	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(indices)*int(utilities.SizeOfUint32), gl.Ptr(indices), gl.STATIC_DRAW)
-
-	gl.EnableVertexAttribArray(0)
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, int32(utilities.SizeOfFloat32)*3, gl.PtrOffset(0))
-
-	// reset the current bound vertex array so that no one else mistakenly changes the VAO
-	gl.BindVertexArray(0)
-
-	return quadVao
 }

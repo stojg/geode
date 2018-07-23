@@ -50,15 +50,14 @@ vec3 Uncharted2Tonemap(vec3 x)
     return ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;
 }
 
-
-uniform float x_exposure = 4;
+uniform float x_exposure;
 
 void main()
 {
     const float gamma = 2.2;
-    // @todo make this a uniform
+
     vec3 hdrColor = texture(x_filterTexture, TexCoords).rgb;
-    hdrColor = ACESFitted(hdrColor);
+//    hdrColor = ACESFitted(hdrColor);
     hdrColor = Uncharted2Tonemap(hdrColor);
 
     // Exposure tone mapping
