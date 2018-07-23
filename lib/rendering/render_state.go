@@ -5,8 +5,8 @@ import (
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/stojg/graphics/lib/buffers"
 	"github.com/stojg/graphics/lib/components"
-	"github.com/stojg/graphics/lib/utilities"
 )
 
 func NewRenderState() *RenderState {
@@ -19,8 +19,8 @@ func NewRenderState() *RenderState {
 		uniformsFloat: make(map[string]float32),
 	}
 
-	size := int(3 * utilities.SizeOfMat4)
-	s.uboMatrices = utilities.CreateEmptyUBO(size)
+	size := int(3 * buffers.SizeOfMat4)
+	s.uboMatrices = buffers.CreateEmptyUBO(size)
 	// @todo, this is hacky since the index must be the same as in shader binding, so really, we need to query it per
 	// @todo shader and manage it per shader, but we count on there only being one UBO block for now
 	index := uint32(0)
@@ -46,9 +46,9 @@ func (e *RenderState) Update() {
 	invView := view.Inv()
 	projection := e.Camera().Projection()
 	gl.BindBuffer(gl.UNIFORM_BUFFER, e.uboMatrices)
-	gl.BufferSubData(gl.UNIFORM_BUFFER, 0, utilities.SizeOfMat4, gl.Ptr(&view[0]))
-	gl.BufferSubData(gl.UNIFORM_BUFFER, utilities.SizeOfMat4, utilities.SizeOfMat4, gl.Ptr(&invView[0]))
-	gl.BufferSubData(gl.UNIFORM_BUFFER, 2*utilities.SizeOfMat4, utilities.SizeOfMat4, gl.Ptr(&projection[0]))
+	gl.BufferSubData(gl.UNIFORM_BUFFER, 0, buffers.SizeOfMat4, gl.Ptr(&view[0]))
+	gl.BufferSubData(gl.UNIFORM_BUFFER, buffers.SizeOfMat4, buffers.SizeOfMat4, gl.Ptr(&invView[0]))
+	gl.BufferSubData(gl.UNIFORM_BUFFER, 2*buffers.SizeOfMat4, buffers.SizeOfMat4, gl.Ptr(&projection[0]))
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
 
 	// @todo add this to the ubo

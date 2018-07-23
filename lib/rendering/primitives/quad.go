@@ -2,7 +2,7 @@ package primitives
 
 import (
 	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/stojg/graphics/lib/utilities"
+	"github.com/stojg/graphics/lib/buffers"
 )
 
 var quadVao uint32 = 1<<32 - 1
@@ -31,9 +31,9 @@ func setupQuad() {
 	var vbo uint32
 	gl.GenVertexArrays(1, &quadVao)
 
-	vbo = utilities.CreateFloatVBO(quadVao, len(quadVertices), quadVertices, gl.STATIC_DRAW)
+	vbo = buffers.CreateFloatVBO(quadVao, len(quadVertices), quadVertices, gl.STATIC_DRAW)
 	instanceDataLength := int32(5) // 3 pos, 2 TexCoords
-	utilities.AddAttribute(quadVao, vbo, 0, 3, instanceDataLength, 0)
-	utilities.AddAttribute(quadVao, vbo, 1, 2, instanceDataLength, 3)
+	buffers.AddAttribute(quadVao, vbo, 0, 3, instanceDataLength, 0)
+	buffers.AddAttribute(quadVao, vbo, 1, 2, instanceDataLength, 3)
 
 }

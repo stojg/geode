@@ -26,7 +26,9 @@ func (r *Renderer) Render(objects components.Renderable) {
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	gl.DepthMask(false)
+
 	objects.Render(r.RenderState.Camera(), r.shader, r.RenderState, components.R_PARTICLE)
+
 	gl.DepthMask(true)
 	gl.Disable(gl.BLEND)
 }

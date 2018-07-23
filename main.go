@@ -80,13 +80,12 @@ func run(l *logger) error {
 	pointLightB.AddComponent(lights.NewPoint(0.0, 0.5, 1.0, 50))
 	engine.AddObject(pointLightB)
 
-	tSize := float32(terrain.Size)
-	tHalfSize := tSize / 2
+	terrainSize := float32(terrain.Size)
 	for i := 0; i < 200; i++ {
 		p := core.NewGameObject(components.R_DEFAULT | components.R_SHADOWED)
 		p, err := loadModel("cube")
 		handleError(err)
-		x, z := rand.Float32()*tSize-tHalfSize, rand.Float32()*tSize-tHalfSize
+		x, z := rand.Float32()*terrainSize-terrainSize/2, rand.Float32()*terrainSize-terrainSize/2
 		p.SetPos(x, terrainA.Height(x, z)+0.5, z)
 		p.SetScale(0.5, 0.5, 0.5)
 		p.Rotate(up(), rand.Float32()*math.Pi*2)
@@ -97,7 +96,7 @@ func run(l *logger) error {
 		p := core.NewGameObject(components.R_DEFAULT | components.R_SHADOWED)
 		p, err := loadModel("sphere")
 		handleError(err)
-		x, z := rand.Float32()*tSize-tHalfSize, rand.Float32()*tSize-tHalfSize
+		x, z := rand.Float32()*terrainSize-terrainSize/2, rand.Float32()*terrainSize-terrainSize/2
 		p.SetPos(x, terrainA.Height(x, z)+0.5, z)
 		p.SetScale(0.5, 0.5, 0.5)
 		engine.AddObject(p)
@@ -107,7 +106,7 @@ func run(l *logger) error {
 		p := core.NewGameObject(components.R_DEFAULT | components.R_SHADOWED)
 		p, err := loadModel("ico")
 		handleError(err)
-		x, z := rand.Float32()*tSize-tHalfSize, rand.Float32()*tSize-tHalfSize
+		x, z := rand.Float32()*terrainSize-terrainSize/2, rand.Float32()*terrainSize-terrainSize/2
 		p.SetPos(x, terrainA.Height(x, z)+0.5, z)
 		p.SetScale(0.5, 0.5, 0.5)
 		p.Rotate(up(), rand.Float32()*math.Pi*2)

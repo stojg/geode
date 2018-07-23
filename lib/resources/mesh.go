@@ -4,8 +4,8 @@ import (
 	"math"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/stojg/graphics/lib/buffers"
 	"github.com/stojg/graphics/lib/debug"
-	"github.com/stojg/graphics/lib/utilities"
 )
 
 // @todo check http://ogldev.atspace.co.uk/www/tutorial33/tutorial33.html for proper instanced rendering
@@ -32,19 +32,19 @@ func (m *Mesh) SetVertices(vertices []Vertex, indices []uint32) {
 
 	m.num = int32(len(indices))
 
-	utilities.CreateIntEBO(m.vao, len(indices), indices, gl.STATIC_DRAW)
+	buffers.CreateIntEBO(m.vao, len(indices), indices, gl.STATIC_DRAW)
 
 	// load data into vertex buffers
-	m.vbo = utilities.CreateVBO(m.vao, len(vertices)*int(sizeOfVertex), vertices, gl.STATIC_DRAW)
+	m.vbo = buffers.CreateVBO(m.vao, len(vertices)*int(sizeOfVertex), vertices, gl.STATIC_DRAW)
 
 	// position
-	utilities.AddAttribute(m.vao, m.vbo, 0, 3, 11, 0)
+	buffers.AddAttribute(m.vao, m.vbo, 0, 3, 11, 0)
 	// normals
-	utilities.AddAttribute(m.vao, m.vbo, 1, 3, 11, 3)
+	buffers.AddAttribute(m.vao, m.vbo, 1, 3, 11, 3)
 	// texture coordinates
-	utilities.AddAttribute(m.vao, m.vbo, 2, 2, 11, 6)
+	buffers.AddAttribute(m.vao, m.vbo, 2, 2, 11, 6)
 	// tangents
-	utilities.AddAttribute(m.vao, m.vbo, 3, 3, 11, 8)
+	buffers.AddAttribute(m.vao, m.vbo, 3, 3, 11, 8)
 
 	m.halfWidth[0] = HalfWidth(vertices, [3]float32{1, 0, 0})
 	m.halfWidth[1] = HalfWidth(vertices, [3]float32{0, 1, 0})

@@ -6,7 +6,7 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/stojg/graphics/lib/debug"
-	"github.com/stojg/graphics/lib/loaders"
+	"github.com/stojg/graphics/lib/images"
 )
 
 func NewTexture(filename string, srgb bool) *Texture {
@@ -86,11 +86,11 @@ func (t *Texture) SetViewPort() {
 }
 
 func loadLDRTexture(filename string, srgb bool) (*TextureResource, error) {
-	rgba, err := loaders.RGBAImagedata(filename)
+	rgba, err := images.RGBAImagedata(filename)
 	if err != nil {
 		return nil, err
 	}
-	loaders.Flip(rgba)
+	images.Flip(rgba)
 
 	if srgb {
 		return createTextureResource(rgba.Rect.Size().X, rgba.Rect.Size().Y, gl.SRGB_ALPHA, gl.UNSIGNED_BYTE, rgba.Pix), nil
@@ -100,20 +100,20 @@ func loadLDRTexture(filename string, srgb bool) (*TextureResource, error) {
 }
 
 func loadMetallicTexture(filename string) (*TextureResource, error) {
-	rgba, err := loaders.RGBAImagedata(filename)
+	rgba, err := images.RGBAImagedata(filename)
 	if err != nil {
 		return nil, err
 	}
-	loaders.Flip(rgba)
+	images.Flip(rgba)
 	return createTextureResource(rgba.Rect.Size().X, rgba.Rect.Size().Y, gl.R8, gl.UNSIGNED_BYTE, rgba.Pix), nil
 }
 
 func loadRoughnessTexture(filename string) (*TextureResource, error) {
-	rgba, err := loaders.RGBAImagedata(filename)
+	rgba, err := images.RGBAImagedata(filename)
 	if err != nil {
 		return nil, err
 	}
-	loaders.Flip(rgba)
+	images.Flip(rgba)
 	return createTextureResource(rgba.Rect.Size().X, rgba.Rect.Size().Y, gl.R8, gl.UNSIGNED_BYTE, rgba.Pix), nil
 }
 

@@ -119,7 +119,6 @@ func (e *Renderer) Render(objects components.Renderable) {
 	e.terrainRenderer.Render(objects)
 	e.standardRenderer.Render(objects)
 	e.skybox.Render()
-
 	e.particle.Render(objects)
 
 	e.multiSampledTexture.UnbindFrameBuffer()

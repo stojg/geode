@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/stojg/graphics/lib/buffers"
 	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/debug"
 	"github.com/stojg/graphics/lib/resources"
-	"github.com/stojg/graphics/lib/utilities"
 )
 
 const MaxParticles = 10000
@@ -22,12 +22,12 @@ func NewParticleSystem(perSecond float64) *ParticleSystem {
 	o := NewGameObject(components.R_PARTICLE)
 	o.SetModel(model)
 
-	vbo := utilities.CreateEmptyFloatVBO(vao, InstanceDataLength*MaxParticles, gl.STREAM_DRAW)
-	utilities.AddInstancedAttribute(vao, vbo, 1, 4, InstanceDataLength, 0)
-	utilities.AddInstancedAttribute(vao, vbo, 2, 4, InstanceDataLength, 4)
-	utilities.AddInstancedAttribute(vao, vbo, 3, 4, InstanceDataLength, 8)
-	utilities.AddInstancedAttribute(vao, vbo, 4, 4, InstanceDataLength, 12)
-	utilities.AddInstancedAttribute(vao, vbo, 5, 1, InstanceDataLength, 16)
+	vbo := buffers.CreateEmptyFloatVBO(vao, InstanceDataLength*MaxParticles, gl.STREAM_DRAW)
+	buffers.AddInstancedAttribute(vao, vbo, 1, 4, InstanceDataLength, 0)
+	buffers.AddInstancedAttribute(vao, vbo, 2, 4, InstanceDataLength, 4)
+	buffers.AddInstancedAttribute(vao, vbo, 3, 4, InstanceDataLength, 8)
+	buffers.AddInstancedAttribute(vao, vbo, 4, 4, InstanceDataLength, 12)
+	buffers.AddInstancedAttribute(vao, vbo, 5, 1, InstanceDataLength, 16)
 
 	return &ParticleSystem{
 		GameObject: *o,
@@ -86,7 +86,7 @@ func (s *ParticleSystem) Draw(camera components.Viewable, shader components.Shad
 		instanceData[count] = p.Transparency
 		count++
 	}
-	utilities.UpdateFloatVBO(s.vao, s.vbo, len(instanceData), instanceData, gl.STREAM_DRAW)
+	buffers.UpdateFloatVBO(s.vao, s.vbo, len(instanceData), instanceData, gl.STREAM_DRAW)
 
 	gl.BindVertexArray(s.vao)
 	gl.DrawElementsInstanced(gl.TRIANGLES, 6, gl.UNSIGNED_INT, gl.PtrOffset(0), int32(len(s.particles)))
@@ -183,10 +183,10 @@ func setupVAO() uint32 {
 	gl.GenVertexArrays(1, &vao)
 
 	// load data into vertex buffer
-	vbo := utilities.CreateFloatVBO(vao, len(quadVertices), quadVertices, gl.STATIC_DRAW)
-	utilities.AddAttribute(vao, vbo, 0, 3, 3, 0)
+	vbo := buffers.CreateFloatVBO(vao, len(quadVertices), quadVertices, gl.STATIC_DRAW)
+	buffers.AddAttribute(vao, vbo, 0, 3, 3, 0)
 
-	utilities.CreateIntEBO(vao, len(indices), indices, gl.STATIC_DRAW)
+	buffers.CreateIntEBO(vao, len(indices), indices, gl.STATIC_DRAW)
 
 	return vao
 }

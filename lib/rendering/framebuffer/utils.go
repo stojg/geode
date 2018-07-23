@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/stojg/graphics/lib/loaders"
+	"github.com/stojg/graphics/lib/images"
 	"github.com/stojg/graphics/lib/rendering/primitives"
 	"github.com/stojg/graphics/lib/rendering/shader"
 )
@@ -71,7 +71,7 @@ func loadEquirectangular(t *CubeMap, filename string) {
 }
 
 func loadFromFiles(t *CubeMap, files [6]string) {
-	img, err := loaders.RGBAImagedata(files[0])
+	img, err := images.RGBAImagedata(files[0])
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -80,7 +80,7 @@ func loadFromFiles(t *CubeMap, files [6]string) {
 	t.height = int32(img.Rect.Size().Y)
 
 	for i := 0; i < 6; i++ {
-		img, err := loaders.RGBAImagedata(files[i])
+		img, err := images.RGBAImagedata(files[i])
 		if err != nil {
 			fmt.Println(err)
 			continue
@@ -94,10 +94,10 @@ func loadFromFiles(t *CubeMap, files [6]string) {
 }
 
 func loadHDRTextureResource(filename string) (*TextureResource, error) {
-	width, height, data, err := loaders.RGBEImagedata(filename)
+	width, height, data, err := images.RGBEImagedata(filename)
 	if err != nil {
 		return nil, err
 	}
-	loaders.FlipRaw(width, height, data)
+	images.FlipRaw(width, height, data)
 	return createTextureResource(width, height, gl.RGB32F, gl.FLOAT, data), nil
 }

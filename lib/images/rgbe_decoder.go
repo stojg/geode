@@ -1,4 +1,4 @@
-package loaders
+package images
 
 // http://www.graphics.cornell.edu/~bjw/rgbe
 // https://github.com/Opioid/rgbe/blob/master/decode.go
