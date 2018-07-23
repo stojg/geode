@@ -12,21 +12,25 @@ import (
 
 func NewScene() *Scene {
 	g := &Scene{
-		vsync: false,
+		vsync:    false,
+		exposure: 1.0,
+		effects:  true,
 	}
 	return g
 }
 
 type Scene struct {
-	root    *GameObject
-	vsync   bool
-	effects bool
-	state   components.RenderState
+	root     *GameObject
+	vsync    bool
+	effects  bool
+	exposure float32
+	state    components.RenderState
 }
 
 func (g *Scene) SetState(state components.RenderState) {
 	g.state = state
-	g.state.SetInteger("effects", 0)
+	g.state.SetInteger("effects", 1)
+	g.state.SetFloat("x_exposure", g.exposure)
 	g.rootObject().SetState(state)
 }
 
@@ -55,6 +59,17 @@ func (g *Scene) Input(elapsed time.Duration) {
 			g.state.SetInteger("effects", 0)
 			fmt.Println("effects off")
 		}
+	}
+
+	if input.KeyDown(glfw.KeyLeftBracket) {
+		g.exposure -= 0.1
+		g.state.SetFloat("x_exposure", g.exposure)
+		fmt.Printf("setting exposure to %0.1f\n", g.exposure)
+	}
+	if input.KeyDown(glfw.KeyRightBracket) {
+		g.exposure += 0.1
+		g.state.SetFloat("x_exposure", g.exposure)
+		fmt.Printf("setting exposure to %0.1f\n", g.exposure)
 	}
 
 	g.rootObject().Input(elapsed)
