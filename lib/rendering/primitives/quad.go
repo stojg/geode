@@ -30,11 +30,9 @@ func setupQuad() {
 	}
 	var vbo uint32
 	gl.GenVertexArrays(1, &quadVao)
-	gl.BindVertexArray(quadVao)
 
-	vbo = utilities.CreateEmptyVBO(len(quadVertices), gl.STATIC_DRAW)
-	utilities.UpdateVBO(vbo, len(quadVertices), quadVertices, gl.STATIC_DRAW)
-	instanceDataLength := 5 // 3 pos, 2 TexCoords
+	vbo = utilities.CreateFloatVBO(quadVao, len(quadVertices), quadVertices, gl.STATIC_DRAW)
+	instanceDataLength := int32(5) // 3 pos, 2 TexCoords
 	utilities.AddAttribute(quadVao, vbo, 0, 3, instanceDataLength, 0)
 	utilities.AddAttribute(quadVao, vbo, 1, 2, instanceDataLength, 3)
 

@@ -30,35 +30,21 @@ func (m *Mesh) SetVertices(vertices []Vertex, indices []uint32) {
 	gl.GenVertexArrays(1, &m.vao)
 	gl.BindVertexArray(m.vao)
 
-	gl.GenBuffers(1, &m.vbo)
-	gl.GenBuffers(1, &m.ebo)
 	m.num = int32(len(indices))
 
+	utilities.CreateIntEBO(m.vao, len(indices), indices, gl.STATIC_DRAW)
+
 	// load data into vertex buffers
-	gl.BindBuffer(gl.ARRAY_BUFFER, m.vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, len(vertices)*int(sizeOfVertex), gl.Ptr(vertices), gl.STATIC_DRAW)
+	m.vbo = utilities.CreateVBO(m.vao, len(vertices)*int(sizeOfVertex), vertices, gl.STATIC_DRAW)
 
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.ebo)
-	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(indices)*int(utilities.SizeOfUint32), gl.Ptr(indices), gl.STATIC_DRAW)
-
-	offset := 0
-	// vertex position
-	gl.VertexAttribPointer(0, numVertexPositions, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*utilities.SizeOfFloat32))
-	offset += numVertexPositions
-
+	// position
+	utilities.AddAttribute(m.vao, m.vbo, 0, 3, 11, 0)
 	// normals
-	gl.VertexAttribPointer(1, numVertexNormals, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*utilities.SizeOfFloat32))
-	offset += numVertexNormals
-
+	utilities.AddAttribute(m.vao, m.vbo, 1, 3, 11, 3)
 	// texture coordinates
-	gl.VertexAttribPointer(2, numVertexTexCoords, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*utilities.SizeOfFloat32))
-	offset += numVertexTexCoords
-
+	utilities.AddAttribute(m.vao, m.vbo, 2, 2, 11, 6)
 	// tangents
-	gl.VertexAttribPointer(3, numVertexTangents, gl.FLOAT, false, int32(sizeOfVertex), gl.PtrOffset(offset*utilities.SizeOfFloat32))
-
-	// reset the current bound vertex array so that no one else mistakenly changes the VAO
-	gl.BindVertexArray(0)
+	utilities.AddAttribute(m.vao, m.vbo, 3, 3, 11, 8)
 
 	m.halfWidth[0] = HalfWidth(vertices, [3]float32{1, 0, 0})
 	m.halfWidth[1] = HalfWidth(vertices, [3]float32{0, 1, 0})

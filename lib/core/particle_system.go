@@ -22,7 +22,7 @@ func NewParticleSystem(perSecond float64) *ParticleSystem {
 	o := NewGameObject(components.R_PARTICLE)
 	o.SetModel(model)
 
-	vbo := utilities.CreateEmptyVBO(InstanceDataLength*MaxParticles, gl.STREAM_DRAW)
+	vbo := utilities.CreateEmptyVBO(vao, InstanceDataLength*MaxParticles, gl.STREAM_DRAW)
 	utilities.AddInstancedAttribute(vao, vbo, 1, 4, InstanceDataLength, 0)
 	utilities.AddInstancedAttribute(vao, vbo, 2, 4, InstanceDataLength, 4)
 	utilities.AddInstancedAttribute(vao, vbo, 3, 4, InstanceDataLength, 8)
@@ -30,18 +30,19 @@ func NewParticleSystem(perSecond float64) *ParticleSystem {
 	utilities.AddInstancedAttribute(vao, vbo, 5, 1, InstanceDataLength, 16)
 
 	return &ParticleSystem{
-		GameObject:     *o,
-		perSecond:      perSecond,
-		perInstanceVBO: vbo,
+		GameObject: *o,
+		perSecond:  perSecond,
+		vbo:        vbo,
+		vao:        vao,
 	}
 }
 
 type ParticleSystem struct {
 	GameObject
-	perSecond      float64
-	reminder       float64
-	particles      []*Particle
-	perInstanceVBO uint32
+	perSecond float64
+	reminder  float64
+	particles []*Particle
+	vao, vbo  uint32
 }
 
 func (s *ParticleSystem) Update(elapsed time.Duration) {
@@ -63,14 +64,7 @@ func (s *ParticleSystem) Update(elapsed time.Duration) {
 	posZ := s.Transform().Pos()[2]
 
 	for i := 0; i < int(toCreate); i++ {
-		s.AddParticle([3]float32{posX + rand.Float32()*100 - 50, posY, posZ + rand.Float32()*100 - 50}, [3]float32{rand.Float32()*0.5 - 0.25, rand.Float32() * 5, rand.Float32()*0.5 - 0.25}, rand.Float32()*0.05+0.025, rand.Float32()*45, 0.01, rand.Float32()*9+1)
-	}
-}
-
-func (s *ParticleSystem) OldDraw(camera components.Viewable, shader components.Shader, state components.RenderState) {
-	for _, p := range s.particles {
-		shader.UpdateUniform("model", p.Transform(camera))
-		s.model.Draw()
+		s.addParticle([3]float32{posX + rand.Float32()*100 - 50, posY, posZ + rand.Float32()*100 - 50}, [3]float32{rand.Float32()*0.5 - 0.25, rand.Float32() * 5, rand.Float32()*0.5 - 0.25}, rand.Float32()*0.05+0.025, rand.Float32()*45, 0.01, rand.Float32()*9+1)
 	}
 }
 
@@ -92,13 +86,15 @@ func (s *ParticleSystem) Draw(camera components.Viewable, shader components.Shad
 		instanceData[count] = p.Transparency
 		count++
 	}
-	utilities.UpdateVBO(s.perInstanceVBO, len(instanceData), instanceData, gl.STREAM_DRAW)
+	utilities.UpdateFloatVBO(s.vao, s.vbo, len(instanceData), instanceData, gl.STREAM_DRAW)
+
+	gl.BindVertexArray(s.vao)
 	gl.DrawElementsInstanced(gl.TRIANGLES, 6, gl.UNSIGNED_INT, gl.PtrOffset(0), int32(len(s.particles)))
 	debug.Drawcall()
 
 }
 
-func (m *ParticleSystem) AddParticle(pos, vel [3]float32, scale, rotAngle, gravity, life float32) {
+func (m *ParticleSystem) addParticle(pos, vel [3]float32, scale, rotAngle, gravity, life float32) {
 	p := NewParticle(pos, vel, scale, rotAngle, gravity, life)
 	m.particles = append(m.particles, p)
 }
@@ -185,15 +181,12 @@ func setupVAO() uint32 {
 	// create arrays
 	var vao uint32
 	gl.GenVertexArrays(1, &vao)
-	gl.BindVertexArray(vao)
 
 	// load data into vertex buffer
-	vbo := utilities.CreateEmptyVBO(len(quadVertices), gl.STATIC_DRAW)
-	utilities.UpdateVBO(vbo, len(quadVertices), quadVertices, gl.STATIC_DRAW)
+	vbo := utilities.CreateFloatVBO(vao, len(quadVertices), quadVertices, gl.STATIC_DRAW)
 	utilities.AddAttribute(vao, vbo, 0, 3, 3, 0)
 
-	// Create buffers
-	_ = utilities.CreateUint32BO(vao, gl.ELEMENT_ARRAY_BUFFER, gl.STATIC_DRAW, indices)
+	utilities.CreateIntEBO(vao, len(indices), indices, gl.STATIC_DRAW)
 
 	return vao
 }
