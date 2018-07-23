@@ -77,7 +77,9 @@ func (m *Mesh) Unbind() {
 }
 
 func (m *Mesh) CleanUp() {
-	//gl.DeleteV
+	gl.DeleteBuffers(1, &m.vbo)
+	gl.DeleteBuffers(1, &m.ebo)
+	gl.DeleteVertexArrays(1, &m.vao)
 }
 
 func HalfWidth(in []Vertex, direction [3]float32) [2]float32 {

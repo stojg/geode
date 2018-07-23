@@ -12,6 +12,21 @@ import (
 	"github.com/stojg/graphics/lib/rendering/shader"
 )
 
+func CubeProjection() mgl32.Mat4 {
+	return mgl32.Perspective(float32((90*math.Pi)/180.0), 1, 0.1, 10)
+}
+
+func CubeViews() []mgl32.Mat4 {
+	return []mgl32.Mat4{
+		mgl32.LookAt(0, 0, 0, 1, 0, 0, 0, -1, 0),
+		mgl32.LookAt(0, 0, 0, -1, 0, 0, 0, -1, 0),
+		mgl32.LookAt(0, 0, 0, 0, 1, 0, 0, 0, 1),
+		mgl32.LookAt(0, 0, 0, 0, -1, 0, 0, 0, -1),
+		mgl32.LookAt(0, 0, 0, 0, 0, 1, 0, -1, 0),
+		mgl32.LookAt(0, 0, 0, 0, 0, -1, 0, -1, 0),
+	}
+}
+
 func NewCubeMap(width, height int32, mipMap bool) *CubeMap {
 
 	if width == 0 || height == 0 {
@@ -163,21 +178,6 @@ func (cubeMap *CubeMap) loadEquiRectangular(filename string) {
 	hdrTexture.Delete()
 }
 
-func CubeProjection() mgl32.Mat4 {
-	return mgl32.Perspective(float32((90*math.Pi)/180.0), 1, 0.1, 10)
-}
-
-func CubeViews() []mgl32.Mat4 {
-	return []mgl32.Mat4{
-		mgl32.LookAt(0, 0, 0, 1, 0, 0, 0, -1, 0),
-		mgl32.LookAt(0, 0, 0, -1, 0, 0, 0, -1, 0),
-		mgl32.LookAt(0, 0, 0, 0, 1, 0, 0, 0, 1),
-		mgl32.LookAt(0, 0, 0, 0, -1, 0, 0, 0, -1),
-		mgl32.LookAt(0, 0, 0, 0, 0, 1, 0, -1, 0),
-		mgl32.LookAt(0, 0, 0, 0, 0, -1, 0, -1, 0),
-	}
-}
-
 func (cubeMap *CubeMap) loadFromFiles(files [6]string) {
 	img, err := images.RGBAImagedata(files[0])
 	if err != nil {
@@ -198,5 +198,4 @@ func (cubeMap *CubeMap) loadFromFiles(files [6]string) {
 		}
 		gl.TexImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X+uint32(i), 0, gl.SRGB, cubeMap.width, cubeMap.height, 0, gl.RGBA, gl.UNSIGNED_INT_8_8_8_8_REV, gl.Ptr(img.Pix))
 	}
-
 }
