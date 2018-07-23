@@ -1,6 +1,9 @@
 package primitives
 
-import "github.com/go-gl/gl/v4.1-core/gl"
+import (
+	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/stojg/graphics/lib/utilities"
+)
 
 var quadVao uint32 = 1<<32 - 1
 
@@ -19,7 +22,7 @@ func DrawQuad() {
 func setupQuad() {
 	// vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
 	quadVertices := []float32{
-		// positions -  texture Coords
+		// positions -  textureCoords
 		-1.0, 1.0, 0.0, 0.0, 1.0,
 		-1.0, -1.0, 0.0, 0.0, 0.0,
 		1.0, 1.0, 0.0, 1.0, 1.0,
@@ -27,12 +30,12 @@ func setupQuad() {
 	}
 	var vbo uint32
 	gl.GenVertexArrays(1, &quadVao)
-	gl.GenBuffers(1, &vbo)
 	gl.BindVertexArray(quadVao)
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, len(quadVertices)*SizeOfFloat32, gl.Ptr(quadVertices), gl.STATIC_DRAW)
-	gl.EnableVertexAttribArray(0)
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, int32(5*SizeOfFloat32), gl.PtrOffset(0))
-	gl.EnableVertexAttribArray(1)
-	gl.VertexAttribPointer(1, 2, gl.FLOAT, false, int32(5*SizeOfFloat32), gl.PtrOffset(3*SizeOfFloat32))
+
+	vbo = utilities.CreateEmptyVBO(len(quadVertices), gl.STATIC_DRAW)
+	utilities.UpdateVBO(vbo, len(quadVertices), quadVertices, gl.STATIC_DRAW)
+	instanceDataLength := 5 // 3 pos, 2 TexCoords
+	utilities.AddAttribute(quadVao, vbo, 0, 3, instanceDataLength, 0)
+	utilities.AddAttribute(quadVao, vbo, 1, 2, instanceDataLength, 3)
+
 }

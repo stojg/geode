@@ -43,6 +43,8 @@ func New(s components.RenderState, width, height, vpWidth, vpHeight int) *Render
 		r.blurTextures = append(r.blurTextures, texts)
 	}
 
+	//s.SetFloat("x_exposure", 6.0)
+
 	return r
 }
 
@@ -64,6 +66,7 @@ type Renderer struct {
 }
 
 func (r *Renderer) Render(in *framebuffer.Texture, bypass bool) {
+
 	gl.Disable(gl.DEPTH_TEST)
 	if bypass {
 		in.ResolveToFBO(r.sourceTexture)

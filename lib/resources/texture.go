@@ -118,6 +118,9 @@ func loadRoughnessTexture(filename string) (*TextureResource, error) {
 }
 
 func createTextureResource(width, height int, internalFormat int32, dataType uint32, data []uint8) *TextureResource {
+	if width == 0 || height == 0 {
+		panic("texture cannot have zero height or width")
+	}
 	resource := NewTextureResource()
 	resource.width = int32(width)
 	resource.height = int32(height)
@@ -127,7 +130,8 @@ func createTextureResource(width, height int, internalFormat int32, dataType uin
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
 
-	gl.TexParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
 	if glfw.ExtensionSupported("GL_EXT_texture_filter_anisotropic") {
 		var t float32
@@ -138,9 +142,6 @@ func createTextureResource(width, height int, internalFormat int32, dataType uin
 		gl.TexParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAX_ANISOTROPY, t)
 	}
 
-	if width == 0 || height == 0 {
-		panic("texture cannot have zero height or width")
-	}
 	gl.TexImage2D(gl.TEXTURE_2D, 0, internalFormat, resource.width, resource.height, 0, gl.RGBA, dataType, gl.Ptr(data))
 
 	gl.GenerateMipmap(gl.TEXTURE_2D)

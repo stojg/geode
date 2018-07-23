@@ -23,11 +23,11 @@ func Prefilter(src, dest components.Texture) {
 		mgl32.LookAt(0, 0, 0, 0, 0, -1, 0, -1, 0),
 	}
 
-	shad := shader.NewShader("ibl_prefilter")
-	shad.Bind()
+	shader := shader.NewShader("ibl_prefilter")
+	shader.Bind()
 
-	shad.UpdateUniform("projection", captureProjection)
-	shad.UpdateUniform("environmentMap", int32(0))
+	shader.UpdateUniform("projection", captureProjection)
+	shader.UpdateUniform("environmentMap", int32(0))
 	src.Activate(0)
 
 	maxMipLevels := 5
@@ -42,10 +42,10 @@ func Prefilter(src, dest components.Texture) {
 		gl.Viewport(0, 0, mipWidth, mipHeight)
 
 		roughness := float32(mip) / float32(maxMipLevels-1)
-		shad.UpdateUniform("roughness", roughness)
+		shader.UpdateUniform("roughness", roughness)
 
 		for i := 0; i < 6; i++ {
-			shad.UpdateUniform("view", captureViews[i])
+			shader.UpdateUniform("view", captureViews[i])
 			gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_CUBE_MAP_POSITIVE_X+uint32(i), dest.ID(), int32(mip))
 			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 			primitives.DrawCube()

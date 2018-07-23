@@ -4,13 +4,12 @@ import (
 	"math"
 	"math/rand"
 	"time"
-	"unsafe"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/debug"
-	"github.com/stojg/graphics/lib/rendering/primitives"
 	"github.com/stojg/graphics/lib/resources"
+	"github.com/stojg/graphics/lib/utilities"
 )
 
 const MaxParticles = 10000
@@ -23,12 +22,12 @@ func NewParticleSystem(perSecond float64) *ParticleSystem {
 	o := NewGameObject(components.R_PARTICLE)
 	o.SetModel(model)
 
-	vbo := createEmptyFloatBO(InstanceDataLength*MaxParticles, gl.ARRAY_BUFFER, gl.STREAM_DRAW)
-	addInstancedAttribute(vao, vbo, 1, 4, InstanceDataLength, 0)
-	addInstancedAttribute(vao, vbo, 2, 4, InstanceDataLength, 4)
-	addInstancedAttribute(vao, vbo, 3, 4, InstanceDataLength, 8)
-	addInstancedAttribute(vao, vbo, 4, 4, InstanceDataLength, 12)
-	addInstancedAttribute(vao, vbo, 5, 1, InstanceDataLength, 16)
+	vbo := utilities.CreateEmptyVBO(InstanceDataLength*MaxParticles, gl.STREAM_DRAW)
+	utilities.AddInstancedAttribute(vao, vbo, 1, 4, InstanceDataLength, 0)
+	utilities.AddInstancedAttribute(vao, vbo, 2, 4, InstanceDataLength, 4)
+	utilities.AddInstancedAttribute(vao, vbo, 3, 4, InstanceDataLength, 8)
+	utilities.AddInstancedAttribute(vao, vbo, 4, 4, InstanceDataLength, 12)
+	utilities.AddInstancedAttribute(vao, vbo, 5, 1, InstanceDataLength, 16)
 
 	return &ParticleSystem{
 		GameObject:     *o,
@@ -93,7 +92,7 @@ func (s *ParticleSystem) Draw(camera components.Viewable, shader components.Shad
 		instanceData[count] = p.Transparency
 		count++
 	}
-	updateVBO(s.perInstanceVBO, instanceData, gl.ARRAY_BUFFER, gl.STREAM_DRAW)
+	utilities.UpdateVBO(s.perInstanceVBO, len(instanceData), instanceData, gl.STREAM_DRAW)
 	gl.DrawElementsInstanced(gl.TRIANGLES, 6, gl.UNSIGNED_INT, gl.PtrOffset(0), int32(len(s.particles)))
 	debug.Drawcall()
 
@@ -173,8 +172,6 @@ func (p *ParticleMesh) Unbind() {
 	gl.BindVertexArray(0)
 }
 
-const sizeOfUint32 = unsafe.Sizeof(uint32(0))
-
 func setupVAO() uint32 {
 
 	quadVertices := []float32{
@@ -191,57 +188,12 @@ func setupVAO() uint32 {
 	gl.BindVertexArray(vao)
 
 	// load data into vertex buffer
-	vbo := createEmptyFloatBO(len(quadVertices), gl.ARRAY_BUFFER, gl.STATIC_DRAW)
-	updateVBO(vbo, quadVertices, gl.ARRAY_BUFFER, gl.STATIC_DRAW)
-	addAttribute(vao, vbo, gl.ARRAY_BUFFER, 0, 3, 3, 0)
+	vbo := utilities.CreateEmptyVBO(len(quadVertices), gl.STATIC_DRAW)
+	utilities.UpdateVBO(vbo, len(quadVertices), quadVertices, gl.STATIC_DRAW)
+	utilities.AddAttribute(vao, vbo, 0, 3, 3, 0)
 
 	// Create buffers
-	_ = createUint32BO(vao, gl.ELEMENT_ARRAY_BUFFER, gl.STATIC_DRAW, indices)
+	_ = utilities.CreateUint32BO(vao, gl.ELEMENT_ARRAY_BUFFER, gl.STATIC_DRAW, indices)
 
 	return vao
-}
-
-func createUint32BO(vao uint32, target, usage uint32, indices []uint32) uint32 {
-	var ebo uint32
-	gl.GenBuffers(1, &ebo)
-	gl.BindVertexArray(vao)
-	gl.BindBuffer(target, ebo)
-	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(indices)*int(sizeOfUint32), gl.Ptr(indices), usage)
-	gl.BindVertexArray(0)
-	return ebo
-}
-
-func createEmptyFloatBO(floatCount int, target, usage uint32) uint32 {
-	var bufferObject uint32
-	gl.GenBuffers(1, &bufferObject)
-	gl.BindBuffer(target, bufferObject)
-	gl.BufferData(target, floatCount*primitives.SizeOfFloat32, nil, usage)
-	gl.BindBuffer(target, 0)
-	return bufferObject
-}
-
-func addInstancedAttribute(vao, vbo uint32, attribute uint32, dataSizeInFloats int32, instanceDataLength int, offset int) {
-	gl.BindVertexArray(vao)
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.VertexAttribPointer(attribute, dataSizeInFloats, gl.FLOAT, false, int32(instanceDataLength*primitives.SizeOfFloat32), gl.PtrOffset(offset*primitives.SizeOfFloat32))
-	gl.VertexAttribDivisor(attribute, 1)
-	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-	gl.BindVertexArray(0)
-}
-
-func addAttribute(vao, vbo uint32, target, attribute uint32, dataSizeInFloats int32, instanceDataLength int, offset int) {
-	gl.BindVertexArray(vao)
-	gl.BindBuffer(target, vbo)
-	gl.VertexAttribPointer(attribute, dataSizeInFloats, gl.FLOAT, false, int32(instanceDataLength*primitives.SizeOfFloat32), gl.PtrOffset(offset*primitives.SizeOfFloat32))
-	gl.BindBuffer(target, 0)
-	gl.BindVertexArray(0)
-}
-
-func updateVBO(vbo uint32, data []float32, target, usage uint32) {
-	gl.BindBuffer(target, vbo)
-	// Buffer orphaning, a common way to improve streaming perf.
-	gl.BufferData(target, len(data)*primitives.SizeOfFloat32, nil, usage)
-	gl.BufferSubData(target, 0, len(data)*primitives.SizeOfFloat32, gl.Ptr(data))
-	gl.BindBuffer(target, 0)
-
 }

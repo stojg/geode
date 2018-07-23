@@ -2,11 +2,11 @@ package rendering
 
 import (
 	"fmt"
-	"unsafe"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
+	"github.com/stojg/graphics/lib/utilities"
 )
 
 func NewRenderState() *RenderState {
@@ -30,7 +30,7 @@ func NewRenderState() *RenderState {
 
 	gl.GenBuffers(1, &s.uboMatrices)
 	index := uint32(0) // should be the same as in shader binding
-	size := int(3 * unsafe.Sizeof(mgl32.Ident4()))
+	size := int(3 * utilities.SizeOfMat4)
 	gl.BindBuffer(gl.UNIFORM_BUFFER, s.uboMatrices)
 	gl.BufferData(gl.UNIFORM_BUFFER, size, nil, gl.STATIC_DRAW)
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
@@ -51,18 +51,17 @@ type RenderState struct {
 	uniformsFloat map[string]float32
 }
 
-const sizeOfMat4 = int(unsafe.Sizeof(mgl32.Ident4()))
-
 func (e *RenderState) Update() {
 	view := e.Camera().View()
 	invView := view.Inv()
 	projection := e.Camera().Projection()
 	gl.BindBuffer(gl.UNIFORM_BUFFER, e.uboMatrices)
-	gl.BufferSubData(gl.UNIFORM_BUFFER, 0, sizeOfMat4, gl.Ptr(&view[0]))
-	gl.BufferSubData(gl.UNIFORM_BUFFER, sizeOfMat4, sizeOfMat4, gl.Ptr(&invView[0]))
-	gl.BufferSubData(gl.UNIFORM_BUFFER, 2*sizeOfMat4, sizeOfMat4, gl.Ptr(&projection[0]))
+	gl.BufferSubData(gl.UNIFORM_BUFFER, 0, utilities.SizeOfMat4, gl.Ptr(&view[0]))
+	gl.BufferSubData(gl.UNIFORM_BUFFER, utilities.SizeOfMat4, utilities.SizeOfMat4, gl.Ptr(&invView[0]))
+	gl.BufferSubData(gl.UNIFORM_BUFFER, 2*utilities.SizeOfMat4, utilities.SizeOfMat4, gl.Ptr(&projection[0]))
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
 
+	// @todo add this to the ubo
 	e.SetVector3f("x_camPos", e.Camera().Pos())
 }
 

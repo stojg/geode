@@ -1,15 +1,9 @@
 package primitives
 
 import (
-	"unsafe"
-
 	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/go-gl/mathgl/mgl32"
+	"github.com/stojg/graphics/lib/utilities"
 )
-
-/* #nosec */
-const SizeOfFloat32 = int(unsafe.Sizeof(float32(1)))
-const SizeOfMat4 = int(unsafe.Sizeof(mgl32.Ident4()))
 
 var cubeVao uint32 = 1<<32 - 1
 
@@ -37,13 +31,13 @@ func setupCube() {
 	gl.BindVertexArray(cubeVao)
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, len(verts)*SizeOfFloat32, gl.Ptr(verts), gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, len(verts)*utilities.SizeOfFloat32, gl.Ptr(verts), gl.STATIC_DRAW)
 
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
 	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(inds)*4, gl.Ptr(inds), gl.STATIC_DRAW)
 
 	gl.EnableVertexAttribArray(0)
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, int32(3*SizeOfFloat32), gl.PtrOffset(0))
+	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, int32(3*utilities.SizeOfFloat32), gl.PtrOffset(0))
 
 	gl.BindVertexArray(0)
 }

@@ -1,12 +1,10 @@
 package particle
 
 import (
-	"unsafe"
-
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/stojg/graphics/lib/components"
-	"github.com/stojg/graphics/lib/rendering/primitives"
 	"github.com/stojg/graphics/lib/rendering/shader"
+	"github.com/stojg/graphics/lib/utilities"
 )
 
 func NewRenderer(s components.RenderState) *Renderer {
@@ -43,25 +41,10 @@ func (r *Renderer) Render(objects components.Renderable) {
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	gl.DepthMask(false)
-	//gl.BindVertexArray(r.quadVao)
-	//gl.EnableVertexAttribArray(0)
-
 	objects.Render(r.RenderState.Camera(), r.shader, r.RenderState, components.R_PARTICLE)
-
-	//for _, p := range objects {
-	//	r.shader.UpdateUniform("model", p.Transform(r.Camera()))
-	//	r.shader.UpdateUniform("transparency", p.Transparency)
-	//	gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, gl.PtrOffset(0))
-	//	debug.Drawcall()
-	//}
-
-	//gl.DisableVertexAttribArray(0)
-	//gl.BindVertexArray(0)
 	gl.DepthMask(true)
 	gl.Disable(gl.BLEND)
 }
-
-const sizeOfUint32 = unsafe.Sizeof(uint32(0))
 
 func setupVAO() uint32 {
 	var quadVao uint32
@@ -83,13 +66,13 @@ func setupVAO() uint32 {
 
 	// load data into vertex buffer
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, len(quadVertices)*primitives.SizeOfFloat32*3, gl.Ptr(quadVertices), gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, len(quadVertices)*utilities.SizeOfFloat32*3, gl.Ptr(quadVertices), gl.STATIC_DRAW)
 
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
-	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(indices)*int(sizeOfUint32), gl.Ptr(indices), gl.STATIC_DRAW)
+	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(indices)*int(utilities.SizeOfUint32), gl.Ptr(indices), gl.STATIC_DRAW)
 
 	gl.EnableVertexAttribArray(0)
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, int32(primitives.SizeOfFloat32)*3, gl.PtrOffset(0))
+	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, int32(utilities.SizeOfFloat32)*3, gl.PtrOffset(0))
 
 	// reset the current bound vertex array so that no one else mistakenly changes the VAO
 	gl.BindVertexArray(0)
