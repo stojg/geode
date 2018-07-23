@@ -3,6 +3,7 @@ package core
 import (
 	"time"
 
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/physics"
 )
@@ -128,6 +129,18 @@ func (g *GameObject) IsVisible(camera components.Viewable) bool {
 
 func (g *GameObject) Transform() *physics.Transform {
 	return g.transform
+}
+
+func (g *GameObject) SetPos(x, y, z float32) {
+	g.transform.SetPos(mgl32.Vec3{x, y, z})
+}
+
+func (g *GameObject) SetScale(x, y, z float32) {
+	g.transform.SetScale(mgl32.Vec3{x, y, z})
+}
+
+func (g *GameObject) Rotate(axis mgl32.Vec3, radians float32) {
+	g.transform.Rotate(axis, radians)
 }
 
 func (g *GameObject) SetState(state components.RenderState) {

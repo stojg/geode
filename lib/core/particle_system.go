@@ -22,7 +22,7 @@ func NewParticleSystem(perSecond float64) *ParticleSystem {
 	o := NewGameObject(components.R_PARTICLE)
 	o.SetModel(model)
 
-	vbo := utilities.CreateEmptyVBO(vao, InstanceDataLength*MaxParticles, gl.STREAM_DRAW)
+	vbo := utilities.CreateEmptyFloatVBO(vao, InstanceDataLength*MaxParticles, gl.STREAM_DRAW)
 	utilities.AddInstancedAttribute(vao, vbo, 1, 4, InstanceDataLength, 0)
 	utilities.AddInstancedAttribute(vao, vbo, 2, 4, InstanceDataLength, 4)
 	utilities.AddInstancedAttribute(vao, vbo, 3, 4, InstanceDataLength, 8)

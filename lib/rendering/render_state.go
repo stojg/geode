@@ -19,21 +19,11 @@ func NewRenderState() *RenderState {
 		uniformsFloat: make(map[string]float32),
 	}
 
-	s.AddSamplerSlot("albedo")
-	s.AddSamplerSlot("metallic")
-	s.AddSamplerSlot("roughness")
-	s.AddSamplerSlot("normal")
-	s.AddSamplerSlot("x_filterTexture")
-	s.AddSamplerSlot("x_filterTexture2")
-	s.AddSamplerSlot("x_filterTexture3")
-	s.AddSamplerSlot("x_filterTexture4")
-
-	gl.GenBuffers(1, &s.uboMatrices)
-	index := uint32(0) // should be the same as in shader binding
 	size := int(3 * utilities.SizeOfMat4)
-	gl.BindBuffer(gl.UNIFORM_BUFFER, s.uboMatrices)
-	gl.BufferData(gl.UNIFORM_BUFFER, size, nil, gl.STATIC_DRAW)
-	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
+	s.uboMatrices = utilities.CreateEmptyUBO(size)
+	// @todo, this is hacky since the index must be the same as in shader binding, so really, we need to query it per
+	// @todo shader and manage it per shader, but we count on there only being one UBO block for now
+	index := uint32(0)
 	gl.BindBufferRange(gl.UNIFORM_BUFFER, index, s.uboMatrices, 0, size)
 
 	return s

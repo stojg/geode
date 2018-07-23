@@ -45,8 +45,8 @@ func (t *Transform) Update() {
 }
 
 // angle should be in radians
-func (t *Transform) Rotate(axis mgl32.Vec3, angle float32) {
-	t.rot = t.rot.Mul(mgl32.QuatRotate(angle, axis)).Normalize()
+func (t *Transform) Rotate(axis mgl32.Vec3, radians float32) {
+	t.rot = t.rot.Mul(mgl32.QuatRotate(radians, axis)).Normalize()
 }
 
 func (t *Transform) MoveBy(add mgl32.Vec3) {

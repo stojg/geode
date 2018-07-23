@@ -46,8 +46,7 @@ func run(l *logger) error {
 	engine.AddObject(terrainObj)
 
 	cameraObject := core.NewGameObject(components.R_NA)
-	cameraObject.Transform().SetPos(vec3(-10, terrainA.Height(10, -10)+20, -10))
-	cameraObject.Transform().SetScale(vec3(0.1, 0.1, 0.1))
+	cameraObject.SetPos(-10, terrainA.Height(10, -10)+20, -10)
 	cameraObject.AddComponent(components.NewCamera(75, engine.Width(), engine.Height(), 0.1, 512))
 	cameraObject.AddComponent(components.NewFreeMove(4))
 	cameraObject.AddComponent(components.NewFreelook(engine.Width(), engine.Height()))
@@ -56,28 +55,28 @@ func run(l *logger) error {
 	engine.AddObject(cameraObject)
 
 	p1 := core.NewParticleSystem(100)
-	p1.Transform().SetPos(vec3(10, terrainA.Height(10, 0), 0))
+	p1.SetPos(10, terrainA.Height(10, 0), 0)
 	engine.AddObject(p1)
 
 	sun := core.NewGameObject(components.R_LIGHT)
-	sun.Transform().SetPos(vec3(1, 0.75, 0))
+	sun.SetPos(1, 0.75, 0)
 	sun.Transform().LookAt(vec3(0, 0, 0), up())
 	sun.AddComponent(lights.NewDirectional(11, 0.9, 0.9, 0.9, 7))
 	engine.AddObject(sun)
 
 	spot := core.NewGameObject(components.R_LIGHT)
-	spot.Transform().SetPos(vec3(3, 3.5, 4.6))
+	spot.SetPos(3, 3.5, 4.6)
 	spot.Transform().LookAt(vec3(0, 1, 0), up())
 	spot.AddComponent(lights.NewSpot(0.9, 0.4, 0.1, 500, 65))
 	engine.AddObject(spot)
 
 	pointLightA := core.NewGameObject(components.R_LIGHT)
-	pointLightA.Transform().SetPos(vec3(-2, terrainA.Height(-2, 10)+0.5, 10))
+	pointLightA.SetPos(-2, terrainA.Height(-2, 10)+0.5, 10)
 	pointLightA.AddComponent(lights.NewPoint(0, 0.5, 1.0, 50))
 	engine.AddObject(pointLightA)
 
 	pointLightB := core.NewGameObject(components.R_LIGHT)
-	pointLightB.Transform().SetPos(vec3(-10, terrainA.Height(-10, 0)+0.5, 0))
+	pointLightB.SetPos(-10, terrainA.Height(-10, 0)+0.5, 0)
 	pointLightB.AddComponent(lights.NewPoint(0.0, 0.5, 1.0, 50))
 	engine.AddObject(pointLightB)
 
@@ -88,9 +87,9 @@ func run(l *logger) error {
 		p, err := loadModel("cube")
 		handleError(err)
 		x, z := rand.Float32()*tSize-tHalfSize, rand.Float32()*tSize-tHalfSize
-		p.Transform().SetPos(vec3(x, terrainA.Height(x, z)+0.5, z))
-		p.Transform().SetScale(vec3(0.5, 0.5, 0.5))
-		p.Transform().Rotate(up(), rand.Float32()*math.Pi*2)
+		p.SetPos(x, terrainA.Height(x, z)+0.5, z)
+		p.SetScale(0.5, 0.5, 0.5)
+		p.Rotate(up(), rand.Float32()*math.Pi*2)
 		engine.AddObject(p)
 	}
 
@@ -99,8 +98,8 @@ func run(l *logger) error {
 		p, err := loadModel("sphere")
 		handleError(err)
 		x, z := rand.Float32()*tSize-tHalfSize, rand.Float32()*tSize-tHalfSize
-		p.Transform().SetPos(vec3(x, terrainA.Height(x, z)+0.5, z))
-		p.Transform().SetScale(vec3(0.5, 0.5, 0.5))
+		p.SetPos(x, terrainA.Height(x, z)+0.5, z)
+		p.SetScale(0.5, 0.5, 0.5)
 		engine.AddObject(p)
 	}
 
@@ -109,16 +108,16 @@ func run(l *logger) error {
 		p, err := loadModel("ico")
 		handleError(err)
 		x, z := rand.Float32()*tSize-tHalfSize, rand.Float32()*tSize-tHalfSize
-		p.Transform().SetPos(vec3(x, terrainA.Height(x, z)+0.5, z))
-		p.Transform().SetScale(vec3(0.5, 0.5, 0.5))
-		p.Transform().Rotate(up(), rand.Float32()*math.Pi*2)
+		p.SetPos(x, terrainA.Height(x, z)+0.5, z)
+		p.SetScale(0.5, 0.5, 0.5)
+		p.Rotate(up(), rand.Float32()*math.Pi*2)
 		engine.AddObject(p)
 	}
 
 	bot, err := loadModel("bot")
 	handleError(err)
 	bot.AddComponent(components.NewRotator(vec3(0, -1, 0), 15))
-	bot.Transform().SetPos(vec3(0, terrainA.Height(0, 0), 0))
+	bot.SetPos(0, terrainA.Height(0, 0), 0)
 	engine.AddObject(bot)
 
 	defer profile.Start().Stop()
