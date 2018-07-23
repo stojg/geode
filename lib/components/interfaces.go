@@ -17,11 +17,16 @@ const (
 	R_SHADOWED
 )
 
-type Texture interface {
-	ID() uint32
-	Activate(samplerSlot uint32)
+type FBO interface {
 	BindFrameBuffer()
 	UnbindFrameBuffer()
+}
+
+type Texture interface {
+	FBO
+
+	ID() uint32
+	Activate(samplerSlot uint32)
 
 	Width() int32
 	Height() int32

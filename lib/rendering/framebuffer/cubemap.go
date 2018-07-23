@@ -138,15 +138,8 @@ func (cubeMap *CubeMap) loadEquiRectangular(filename string) {
 		return
 	}
 
-	captureProjection := mgl32.Perspective(float32((90*math.Pi)/180.0), 1, 0.1, 10)
-	captureViews := []mgl32.Mat4{
-		mgl32.LookAt(0, 0, 0, 1, 0, 0, 0, -1, 0),
-		mgl32.LookAt(0, 0, 0, -1, 0, 0, 0, -1, 0),
-		mgl32.LookAt(0, 0, 0, 0, 1, 0, 0, 0, 1),
-		mgl32.LookAt(0, 0, 0, 0, -1, 0, 0, 0, -1),
-		mgl32.LookAt(0, 0, 0, 0, 0, 1, 0, -1, 0),
-		mgl32.LookAt(0, 0, 0, 0, 0, -1, 0, -1, 0),
-	}
+	captureProjection := CubeProjection()
+	captureViews := CubeViews()
 
 	shad := shader.NewShader("equirectangular_to_cubemap")
 	shad.Bind()
@@ -168,6 +161,21 @@ func (cubeMap *CubeMap) loadEquiRectangular(filename string) {
 	gl.Enable(gl.CULL_FACE)
 
 	hdrTexture.Delete()
+}
+
+func CubeProjection() mgl32.Mat4 {
+	return mgl32.Perspective(float32((90*math.Pi)/180.0), 1, 0.1, 10)
+}
+
+func CubeViews() []mgl32.Mat4 {
+	return []mgl32.Mat4{
+		mgl32.LookAt(0, 0, 0, 1, 0, 0, 0, -1, 0),
+		mgl32.LookAt(0, 0, 0, -1, 0, 0, 0, -1, 0),
+		mgl32.LookAt(0, 0, 0, 0, 1, 0, 0, 0, 1),
+		mgl32.LookAt(0, 0, 0, 0, -1, 0, 0, 0, -1),
+		mgl32.LookAt(0, 0, 0, 0, 0, 1, 0, -1, 0),
+		mgl32.LookAt(0, 0, 0, 0, 0, -1, 0, -1, 0),
+	}
 }
 
 func (cubeMap *CubeMap) loadFromFiles(files [6]string) {
