@@ -62,12 +62,12 @@ func (g *Scene) Input(elapsed time.Duration) {
 	}
 
 	if input.KeyDown(glfw.KeyLeftBracket) {
-		g.exposure -= 0.1
+		g.exposure -= 0.2
 		g.state.SetFloat("x_exposure", g.exposure)
 		fmt.Printf("setting exposure to %0.1f\n", g.exposure)
 	}
 	if input.KeyDown(glfw.KeyRightBracket) {
-		g.exposure += 0.1
+		g.exposure += 0.2
 		g.state.SetFloat("x_exposure", g.exposure)
 		fmt.Printf("setting exposure to %0.1f\n", g.exposure)
 	}

@@ -5,14 +5,15 @@ import (
 	"github.com/stojg/graphics/lib/debug"
 )
 
+// NewHDRCubeMap returns a new CubeMap that has been loaded from aHDR Equirectangular image
 func NewHDRCubeMap(width, height int32, filename string) *CubeMap {
 	texture := &CubeMap{
 		attachment: gl.COLOR_ATTACHMENT0,
 		width:      width,
 		height:     height,
 	}
-	initCubeMap(texture, false)
-	loadEquirectangular(texture, filename)
+	texture.init(false)
+	texture.loadEquiRectangular(filename)
 
 	debug.CheckForError("framebuffer.HDRCubeMap end")
 	debug.FramebufferComplete("framebuffer.HDRCubeMap")
