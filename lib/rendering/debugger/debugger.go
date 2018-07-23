@@ -4,11 +4,12 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/rendering/framebuffer"
+	"github.com/stojg/graphics/lib/rendering/primitives"
 	"github.com/stojg/graphics/lib/rendering/shader"
 )
 
 const (
-	perRow       = 4
+	perRow       = 3
 	gutter int32 = 10
 )
 
@@ -16,11 +17,12 @@ var texture components.Texture
 var shaders map[string]components.Shader
 var w, h int32
 var panelWidth, panelHeight int32
-
+var state components.RenderState
 var numPanels int
 
-func New(width, height int) {
+func New(width, height int, s components.RenderState) {
 	w, h = int32(width), int32(height)
+	state = s
 	panelWidth = w/perRow - gutter
 	panelHeight = h/perRow - gutter
 	texture = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, gl.NEAREST, false)
@@ -36,19 +38,53 @@ func Clear() {
 	numPanels = 0
 }
 
-func AddTexture(in components.Texture, shaderName string, applyFilter func(s components.Shader, in, out components.Texture)) {
-	x := int32(numPanels % perRow)
-	y := int32(numPanels / perRow)
-	nextSlot()
+func AddRGBTexture(in, out components.Texture) {
+	posX, posY := getNextSlot()
 
-	posX := x*(panelWidth+gutter) + gutter/2
-	posY := y*(panelHeight+gutter) + gutter/2
-	posY = h - posY - panelHeight
+	gl.Disable(gl.DEPTH_TEST)
+
+	if out == nil {
+		//gl.Viewport(0, 0, int32(w), int32(h))
+		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+	} else {
+		out.BindFrameBuffer()
+	}
 
 	gl.Viewport(posX, posY, panelWidth, panelHeight)
 
+	rgbShader := shaders["rgb"]
+	in.Activate(0)
+	rgbShader.Bind()
+	primitives.DrawQuad()
+	if out != nil {
+		out.UnbindFrameBuffer()
+	}
+
+	gl.Enable(gl.DEPTH_TEST)
+}
+
+func AddShadowTexture(in, out components.Texture) {
+	posX, posY := getNextSlot()
+
 	gl.Disable(gl.DEPTH_TEST)
-	applyFilter(shaders[shaderName], in, texture)
+
+	if out == nil {
+		gl.Viewport(0, 0, int32(w), int32(h))
+		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+	} else {
+		out.BindFrameBuffer()
+	}
+
+	gl.Viewport(posX, posY, panelWidth, panelHeight)
+
+	rgbShader := shaders["shadow"]
+	in.Activate(0)
+	rgbShader.Bind()
+	primitives.DrawQuad()
+	if out != nil {
+		out.UnbindFrameBuffer()
+	}
+
 	gl.Enable(gl.DEPTH_TEST)
 }
 
@@ -56,14 +92,22 @@ func Texture() components.Texture {
 	return texture
 }
 
-func nextSlot() {
+func getNextSlot() (int32, int32) {
+	x := int32(numPanels % perRow)
+	y := int32(numPanels / perRow)
+
+	posX := x*(panelWidth+gutter) + gutter/2
+	posY := y*(panelHeight+gutter) + gutter/2
+	posY = h - posY - panelHeight
+
 	numPanels++
 
-	// make sure we leave a space in the middle
-	var clearSlots = []int{5, 6, 9, 10}
+	var clearSlots = []int{1, 3, 4, 5, 7}
 	for _, s := range clearSlots {
 		if numPanels == s {
 			numPanels++
 		}
 	}
+
+	return posX, posY
 }

@@ -69,7 +69,7 @@ func New(width, height, viewPortWidth, viewPortHeight int, logger components.Log
 
 	e.skybox = technique.NewSkyBox("res/textures/sky0016.hdr", e.state)
 
-	debugger.New(width, height)
+	debugger.New(width, height, e.state)
 
 	e.state.SetInteger("x_enable_env_map", 1)
 	e.state.SetInteger("x_enable_skybox", 1)
