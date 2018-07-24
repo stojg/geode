@@ -3,8 +3,6 @@ package physics
 // https://github.com/BennyQBD/3DGameEngine/blob/225fa8baf6637756ba03ccbc0444bf7751d87dbb/src/com/base/engine/core/Transform.java
 
 import (
-	"math"
-
 	x "github.com/stojg/graphics/lib/math"
 
 	"github.com/go-gl/mathgl/mgl32"
@@ -16,9 +14,8 @@ func NewTransform() *Transform {
 		rot:   mgl32.QuatIdent(),
 		scale: mgl32.Vec3{1, 1, 1},
 
-		oldPos:       mgl32.Vec3{math.MaxFloat32 - 1, math.MaxFloat32 - 1, math.MaxFloat32 - 1},
-		oldRot:       mgl32.Quat{W: math.MaxFloat32 - 1, V: mgl32.Vec3{math.MaxFloat32 - 1, math.MaxFloat32 - 1, math.MaxFloat32 - 1}},
 		parentMatrix: mgl32.Ident4(),
+		dirty:        true,
 	}
 }
 
@@ -30,34 +27,33 @@ type Transform struct {
 	rot   mgl32.Quat
 	scale mgl32.Vec3
 
-	oldPos   mgl32.Vec3
-	oldRot   mgl32.Quat
-	oldScale mgl32.Vec3
+	dirty bool
 
 	transformation mgl32.Mat4
 }
 
 func (t *Transform) Update() {
-	t.oldPos = t.pos
-	t.oldRot = t.rot
-	t.oldScale = t.scale
-	t.transformation = t.calcTransformation()
+	t.calcTransformation()
 }
 
 // angle should be in radians
 func (t *Transform) Rotate(axis mgl32.Vec3, radians float32) {
+	t.dirty = true
 	t.rot = t.rot.Mul(mgl32.QuatRotate(radians, axis)).Normalize()
 }
 
 func (t *Transform) MoveBy(add mgl32.Vec3) {
+	t.dirty = true
 	t.pos = t.pos.Add(add)
 }
 
 func (t *Transform) LookAt(point mgl32.Vec3, up mgl32.Vec3) {
+	t.dirty = true
 	t.rot = t.LookAtRotation(point, up)
 }
 
 func (t *Transform) LookAtRotation(point mgl32.Vec3, up mgl32.Vec3) mgl32.Quat {
+	t.dirty = true
 	eye := t.pos
 	center := point
 
@@ -82,37 +78,20 @@ func (t *Transform) LookAtRotation(point mgl32.Vec3, up mgl32.Vec3) mgl32.Quat {
 	return rotTarget // camera rotation should be inversed!
 }
 
-func (t *Transform) HasChanged() bool {
-	if t.parent != nil && t.parent.HasChanged() {
-		return true
-	}
-
-	if !t.pos.ApproxEqual(t.oldPos) {
-		return true
-	}
-
-	if !t.rot.ApproxEqual(t.rot) {
-		return true
-	}
-
-	if !t.scale.ApproxEqual(t.scale) {
-		return true
-	}
-	return false
-}
-
 var tmp1, tmp2 mgl32.Mat4
 
-func (t *Transform) calcTransformation() mgl32.Mat4 {
-	translationMatrix := mgl32.Translate3D(t.pos[0], t.pos[1], t.pos[2])
-	rotationMatrix := t.rot.Mat4()
-	scaleMatrix := mgl32.Scale3D(t.scale[0], t.scale[1], t.scale[2])
+func (t *Transform) calcTransformation() {
+	if t.dirty || (t.parent != nil && t.parent.dirty) {
+		translationMatrix := mgl32.Translate3D(t.pos[0], t.pos[1], t.pos[2])
+		rotationMatrix := t.rot.Mat4()
+		scaleMatrix := mgl32.Scale3D(t.scale[0], t.scale[1], t.scale[2])
 
-	x.Mul4(rotationMatrix, scaleMatrix, &tmp1)
-	x.Mul4(translationMatrix, tmp1, &tmp2)
-	x.Mul4(t.ParentMatrix(), tmp2, &tmp1)
-	return tmp1
-	//return t.ParentMatrix().Mul4(translationMatrix.Mul4(rotationMatrix.Mul4(scaleMatrix)))
+		x.Mul4(rotationMatrix, scaleMatrix, &tmp1)
+		x.Mul4(translationMatrix, tmp1, &tmp2)
+		x.Mul4(t.ParentMatrix(), tmp2, &tmp1)
+		t.transformation = tmp1
+		t.dirty = false
+	}
 }
 
 func (t *Transform) Transformation() mgl32.Mat4 {
@@ -120,13 +99,14 @@ func (t *Transform) Transformation() mgl32.Mat4 {
 }
 
 func (t *Transform) ParentMatrix() mgl32.Mat4 {
-	if t.parent != nil {
-		t.parentMatrix = t.parent.Transformation()
+	if t.parent == nil {
+		return mgl32.Ident4()
 	}
-	return t.parentMatrix
+	return t.parent.Transformation()
 }
 
 func (t *Transform) SetParent(parent *Transform) {
+	t.dirty = true
 	t.parent = parent
 }
 
@@ -147,6 +127,7 @@ func (t *Transform) Pos() mgl32.Vec3 {
 }
 
 func (t *Transform) SetPos(pos mgl32.Vec3) {
+	t.dirty = true
 	t.pos = pos
 }
 
@@ -155,6 +136,7 @@ func (t *Transform) Rot() mgl32.Quat {
 }
 
 func (t *Transform) SetRot(rot mgl32.Quat) {
+	t.dirty = true
 	t.rot = rot
 }
 
@@ -163,5 +145,6 @@ func (t *Transform) Scale() mgl32.Vec3 {
 }
 
 func (t *Transform) SetScale(scale mgl32.Vec3) {
+	t.dirty = true
 	t.scale = scale
 }
