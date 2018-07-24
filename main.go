@@ -12,6 +12,7 @@ import (
 	"github.com/stojg/graphics/lib/core"
 	"github.com/stojg/graphics/lib/lights"
 	"github.com/stojg/graphics/lib/rendering/terrain"
+	"github.com/stojg/graphics/lib/resources"
 )
 
 func main() {
@@ -42,6 +43,9 @@ func run(l *logger) error {
 
 	terrainA := terrain.New(float32(-0.5), float32(-0.5))
 	terrainObj, _ := loadModelFromMesh(terrainA.Mesh(), "dry-dirt", components.R_TERRAIN|components.R_SHADOWED)
+	txt := resources.NewTexture("res/textures/dry-dirt2/albedo.png", true)
+	terrainObj.Model().Material().AddTexture("albedo2", txt)
+
 	terrainObj.Transform().SetPos(vec3(terrainA.X(), 0, terrainA.Z()))
 	engine.AddObject(terrainObj)
 
@@ -61,13 +65,13 @@ func run(l *logger) error {
 	sun := core.NewGameObject(components.R_LIGHT)
 	sun.SetPos(1, 0.75, 0)
 	sun.Transform().LookAt(vec3(0, 0, 0), up())
-	sun.AddComponent(lights.NewDirectional(11, 0.9, 0.9, 0.9, 7))
+	sun.AddComponent(lights.NewDirectional(11, 0.996, 0.863, 0.533, 10))
 	engine.AddObject(sun)
 
 	spot := core.NewGameObject(components.R_LIGHT)
 	spot.SetPos(3, 3.5, 4.6)
 	spot.Transform().LookAt(vec3(0, 1, 0), up())
-	spot.AddComponent(lights.NewSpot(0.9, 0.4, 0.1, 500, 65))
+	spot.AddComponent(lights.NewSpot(0.9, 0.4, 0.1, 200, 65))
 	engine.AddObject(spot)
 
 	pointLightA := core.NewGameObject(components.R_LIGHT)

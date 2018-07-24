@@ -51,7 +51,9 @@ void main() {
     for (int i = 0; i < numLights; i++) {
         if (lights[i].constant == 0) {
             Lo += CalcDirectional(F0, vs_in.V_LightPositions[i], lights[i], mtrl, V_N, vs_in.V_Pos, V);
-            Lo *= ShadowCalculation(vs_in.FragPosLightSpace);
+            float shadow = ShadowCalculation(vs_in.FragPosLightSpace);
+            vec3 cshadow = pow( vec3(shadow), vec3(1.0, 1.2, 1.5) );
+            Lo *= cshadow;
         } else if (lights[i].cutoff > 0) {
             Lo += CalcSpot(F0, vs_in.V_LightPositions[i], lights[i], mtrl, V_N, vs_in.V_Pos, V);
         } else {
@@ -62,7 +64,7 @@ void main() {
     vec3 vv = normalize(x_camPos - vs_in.W_Pos);
     vec3 Reflection = -reflect(vv, W_N);
     if (x_enable_env_map == 1) {
-        Lo += CalcAmbient(W_N, vv, F0, mtrl, Reflection);
+        Lo += CalcAmbient(W_N, vv, F0, mtrl, Reflection) * 0.3;
     }
 
     Lo = fogCalc(Lo, vs_in.V_Pos);

@@ -13,7 +13,7 @@ import (
 func NewScene() *Scene {
 	g := &Scene{
 		vsync:    false,
-		exposure: 2.4,
+		exposure: 4.0,
 		effects:  true,
 	}
 	return g

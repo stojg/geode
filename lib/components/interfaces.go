@@ -92,6 +92,7 @@ type Model interface {
 	Unbindable
 	Bind(Shader, RenderState)
 	Draw()
+	Material() Material
 }
 
 type Object interface {

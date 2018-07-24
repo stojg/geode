@@ -126,6 +126,10 @@ func (p *ParticleModel) Bind(shader components.Shader, state components.RenderSt
 	p.mesh.Bind()
 }
 
+func (p *ParticleModel) Material() components.Material {
+	return p.material
+}
+
 func (p *ParticleModel) Draw() {
 	p.mesh.Draw()
 }

@@ -1,6 +1,7 @@
 #version 410 core
 
 uniform sampler2D albedo;
+uniform sampler2D albedo2;
 uniform sampler2D metallic;
 uniform sampler2D roughness;
 uniform sampler2D normal;
@@ -38,7 +39,9 @@ void main() {
     vec3 W_N = normalize(vs_in.W_TBN * N);
 
     Mtrl mtrl;
-    mtrl.albedo = texture(albedo, vs_in.TexCoord).rgb;
+    float factor = acos(dot(vec3(0,1,0), normalize(vs_in.Normal)))*2/3.1415;
+    factor = clamp(factor, 0.0, 1.0);
+    mtrl.albedo = mix(texture(albedo, vs_in.TexCoord).rgb, texture(albedo2, vs_in.TexCoord).rgb, factor);
     mtrl.metallic = texture(metallic, vs_in.TexCoord).r;
     mtrl.roughness = texture(roughness, vs_in.TexCoord).r;
 
@@ -51,7 +54,9 @@ void main() {
     for (int i = 0; i < numLights; i++) {
         if (lights[i].constant == 0) {
             Lo += CalcDirectional(F0, vs_in.V_LightPositions[i], lights[i], mtrl, V_N, vs_in.V_Pos, V);
-            Lo *= ShadowCalculation(vs_in.FragPosLightSpace);
+            float shadow = ShadowCalculation(vs_in.FragPosLightSpace);
+            vec3 cshadow = pow( vec3(shadow), vec3(1.0, 1.2, 1.5) );
+            Lo *= cshadow;
         } else if (lights[i].cutoff > 0) {
             Lo += CalcSpot(F0, vs_in.V_LightPositions[i], lights[i], mtrl, V_N, vs_in.V_Pos, V);
         } else {
@@ -62,7 +67,7 @@ void main() {
     vec3 vv = normalize(x_camPos - vs_in.W_Pos);
     vec3 Reflection = -reflect(vv, W_N);
     if (x_enable_env_map == 1) {
-        Lo += CalcAmbient(W_N, vv, F0, mtrl, Reflection);
+        Lo += CalcAmbient(W_N, vv, F0, mtrl, Reflection) * 0.2;
     }
 
     Lo = fogCalc(Lo, vs_in.V_Pos);

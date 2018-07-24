@@ -7,7 +7,7 @@ import (
 )
 
 const OCTAVES = 3
-const ROUGHNESS = 0.5
+const ROUGHNESS = 0.4
 const AMPLITUDE float64 = 30
 
 var xOffset float64

@@ -57,9 +57,13 @@ func New(width, height, viewPortWidth, viewPortHeight int, logger components.Log
 	}
 
 	e.state.AddSamplerSlot("albedo")
+	e.state.AddSamplerSlot("albedo2")
 	e.state.AddSamplerSlot("metallic")
+	e.state.AddSamplerSlot("metallic2")
 	e.state.AddSamplerSlot("roughness")
+	e.state.AddSamplerSlot("roughness2")
 	e.state.AddSamplerSlot("normal")
+	e.state.AddSamplerSlot("normal2")
 
 	e.standardRenderer = standard.NewRenderer(e.state)
 	e.shadowMap = shadow.NewRenderer(e.state)

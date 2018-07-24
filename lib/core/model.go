@@ -22,6 +22,10 @@ func (m *Model) Bind(shader components.Shader, engine components.RenderState) {
 	m.mesh.Bind()
 }
 
+func (m *Model) Material() components.Material {
+	return m.material
+}
+
 func (m *Model) Draw() {
 	m.mesh.Draw()
 }
