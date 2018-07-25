@@ -62,7 +62,6 @@ uniform Light lights[16];
 uniform int x_enable_env_map;
 
 layout (location = 0) out vec4 FragColor;
-layout (location = 1) out vec4 Bright_FragColor;
 
 vec3 calcCookTorrance(vec3 H, vec3 V, vec3 N, Mtrl material, vec3 F0, vec3 L, vec3 radiance) {
     vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
