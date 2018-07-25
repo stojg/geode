@@ -3,6 +3,7 @@ package primitives
 import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/stojg/graphics/lib/buffers"
+	"github.com/stojg/graphics/lib/debug"
 )
 
 var cubeVao uint32 = 1<<32 - 1
@@ -12,9 +13,11 @@ func DrawCube() {
 		setupCube()
 	}
 	gl.BindVertexArray(cubeVao)
+	debug.AddVertexBind()
 	gl.EnableVertexAttribArray(0)
 	gl.DrawElements(gl.TRIANGLES, 36, gl.UNSIGNED_INT, gl.PtrOffset(0))
 	gl.BindVertexArray(0)
+	debug.AddVertexBind()
 }
 
 func setupCube() {

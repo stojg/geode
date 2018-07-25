@@ -90,6 +90,7 @@ type Transformable interface {
 type Model interface {
 	AABB
 	Unbindable
+	//ID() uint
 	Bind(Shader, RenderState)
 	Draw()
 	Material() Material
@@ -100,8 +101,9 @@ type Object interface {
 	Model() Model
 	Input(elapsed time.Duration)
 	Update(elapsed time.Duration)
-	AllModels() map[Model][]Object
+	AllChildren() []Object
 	IsType(int) bool
+	Type() int
 	IsVisible(camera Viewable) bool
 	// @todo, the below method feels weird
 	SetState(state RenderState)

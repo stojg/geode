@@ -89,6 +89,7 @@ func (s *ParticleSystem) Draw(camera components.Viewable, shader components.Shad
 	buffers.UpdateFloatVBO(s.vao, s.vbo, len(instanceData), instanceData, gl.STREAM_DRAW)
 
 	gl.BindVertexArray(s.vao)
+	debug.AddVertexBind()
 	gl.DrawElementsInstanced(gl.TRIANGLES, 6, gl.UNSIGNED_INT, gl.PtrOffset(0), int32(len(s.particles)))
 	debug.Drawcall()
 
@@ -149,6 +150,7 @@ func (p *ParticleMesh) AABB() [3][2]float32 {
 
 func (p *ParticleMesh) Bind() {
 	gl.BindVertexArray(p.vao)
+	debug.AddVertexBind()
 	gl.EnableVertexAttribArray(0)
 	gl.EnableVertexAttribArray(1)
 	gl.EnableVertexAttribArray(2)
@@ -170,6 +172,7 @@ func (p *ParticleMesh) Unbind() {
 	gl.DisableVertexAttribArray(1)
 	gl.DisableVertexAttribArray(0)
 	gl.BindVertexArray(0)
+	debug.AddVertexBind()
 }
 
 func setupVAO() uint32 {

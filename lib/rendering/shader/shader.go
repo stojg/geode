@@ -156,6 +156,7 @@ func (s *Shader) updateUniformFromState(uniformType string, engine components.Re
 		samplerSlot := engine.SamplerSlot(name)
 		engine.Texture(name).Activate(samplerSlot)
 		gl.Uniform1i(s.resource.uniforms[name], int32(samplerSlot))
+		debug.AddUniformSet()
 		return
 	}
 

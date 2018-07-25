@@ -65,3 +65,15 @@ func GetUniformSet() uint64 {
 	uniformSet = 0
 	return t
 }
+
+var vertexbind uint64 = 0
+
+func AddVertexBind() {
+	vertexbind++
+}
+
+func GetVertexBind() uint64 {
+	t := vertexbind
+	vertexbind = 0
+	return t
+}

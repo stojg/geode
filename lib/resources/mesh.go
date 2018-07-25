@@ -29,6 +29,7 @@ func (m *Mesh) SetVertices(vertices []Vertex, indices []uint32) {
 	// Create buffers/arrays
 	gl.GenVertexArrays(1, &m.vao)
 	gl.BindVertexArray(m.vao)
+	debug.AddVertexBind()
 
 	m.num = int32(len(indices))
 
@@ -57,6 +58,7 @@ func (m *Mesh) AABB() [3][2]float32 {
 
 func (m *Mesh) Bind() {
 	gl.BindVertexArray(m.vao)
+	debug.AddVertexBind()
 	gl.EnableVertexAttribArray(0)
 	gl.EnableVertexAttribArray(1)
 	gl.EnableVertexAttribArray(2)
@@ -74,6 +76,7 @@ func (m *Mesh) Unbind() {
 	gl.DisableVertexAttribArray(1)
 	gl.DisableVertexAttribArray(0)
 	gl.BindVertexArray(0)
+	debug.AddVertexBind()
 }
 
 func (m *Mesh) CleanUp() {

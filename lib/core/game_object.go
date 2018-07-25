@@ -1,6 +1,7 @@
 package core
 
 import (
+	"sort"
 	"time"
 
 	"github.com/go-gl/mathgl/mgl32"
@@ -13,12 +14,14 @@ func NewGameObject(rtype int) *GameObject {
 		rtype:         rtype,
 		transform:     physics.NewTransform(),
 		modelEntities: make(map[components.Model][]components.Object),
+		childRtypes:   make(map[int][]components.Object),
 	}
 }
 
 type GameObject struct {
 	rtype         int
 	children      []components.Object
+	childRtypes   map[int][]components.Object
 	components    []components.Component
 	transform     *physics.Transform
 	state         components.RenderState
@@ -34,12 +37,17 @@ func (g *GameObject) IsType(a int) bool {
 	return g.rtype&a != 0
 }
 
+func (g *GameObject) Type() int {
+	return g.rtype
+}
+
 func (g *GameObject) SetModel(model components.Model) {
 	g.model = model
 }
 
 func (g *GameObject) AddChild(child components.Object) {
 	g.children = append(g.children, child)
+	g.childRtypes[child.Type()] = append(g.childRtypes[child.Type()], child)
 	child.SetState(g.state)
 	child.Transform().SetParent(g.Transform())
 	if child.Model() != nil {
@@ -62,15 +70,11 @@ func (g *GameObject) Input(elapsed time.Duration) {
 	}
 }
 
-func (g *GameObject) AllModels() map[components.Model][]components.Object {
-	a := make(map[components.Model][]components.Object)
+func (g *GameObject) AllChildren() []components.Object {
+	var a []components.Object
 	for _, c := range g.children {
-		for k, v := range c.AllModels() {
-			a[k] = append(a[k], v...)
-		}
-	}
-	for k, v := range g.modelEntities {
-		a[k] = append(a[k], v...)
+		a = append(a, c)
+		a = append(a, c.AllChildren()...)
 	}
 	return a
 }
@@ -85,32 +89,34 @@ func (g *GameObject) Update(elapsed time.Duration) {
 	}
 }
 
+type ByModel []components.Object
+
+func (a ByModel) Len() int      { return len(a) }
+func (a ByModel) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a ByModel) Less(i, j int) bool {
+	return a[i].Model() != a[j].Model()
+}
+
 func (g *GameObject) Render(camera components.Viewable, shader components.Shader, state components.RenderState, rtype int) {
-	list := g.AllModels()
+	list := g.AllChildren()
+	sort.Sort(ByModel(list))
 
-	for model, objects := range list {
-		var visible []int
-		for i := range objects {
-
-			if !objects[i].IsType(rtype) {
-				continue
-			}
-			if objects[i].IsVisible(camera) {
-				visible = append(visible, i)
-			}
-		}
-
-		if len(visible) == 0 {
+	shader.Bind()
+	var currentModel components.Model
+	for i := range list {
+		if !list[i].IsType(rtype) {
 			continue
 		}
-
-		shader.Bind()
-		model.Bind(shader, state)
-		for _, i := range visible {
-			objects[i].Draw(camera, shader, state)
+		if !list[i].IsVisible(camera) {
+			continue
 		}
-		model.Unbind()
+		if currentModel != list[i].Model() {
+			list[i].Model().Bind(shader, state)
+			currentModel = list[i].Model()
+		}
+		list[i].Draw(camera, shader, state)
 	}
+	shader.Unbind()
 }
 
 func (g *GameObject) Draw(camera components.Viewable, shader components.Shader, state components.RenderState) {
@@ -124,6 +130,9 @@ func (g *GameObject) render(shader components.Shader, state components.RenderSta
 }
 
 func (g *GameObject) IsVisible(camera components.Viewable) bool {
+	if g.model == nil {
+		return false
+	}
 	return IsVisible(camera.Planes(), g.model.AABB(), g.transform.Transformation())
 }
 

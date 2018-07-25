@@ -54,7 +54,6 @@ func run(l *logger) error {
 	cameraObject.AddComponent(components.NewCamera(75, engine.Width(), engine.Height(), 0.1, 512))
 	cameraObject.AddComponent(components.NewFreeMove(4))
 	cameraObject.AddComponent(components.NewFreelook(engine.Width(), engine.Height()))
-	//cameraObject.Transform().LookAt(vec3(0, terrainA.Height(0, 0)+3, 0), up())
 	cameraObject.AddComponent(components.NewHeadHeight(terrainA))
 	engine.AddObject(cameraObject)
 

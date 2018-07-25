@@ -3,6 +3,7 @@ package primitives
 import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/stojg/graphics/lib/buffers"
+	"github.com/stojg/graphics/lib/debug"
 )
 
 var quadVao uint32 = 1<<32 - 1
@@ -12,10 +13,12 @@ func DrawQuad() {
 		setupQuad()
 	}
 	gl.BindVertexArray(quadVao)
+	debug.AddVertexBind()
 	gl.EnableVertexAttribArray(0)
 	gl.EnableVertexAttribArray(1)
 	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
 	gl.BindVertexArray(0)
+	debug.AddVertexBind()
 
 }
 
