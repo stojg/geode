@@ -12,7 +12,7 @@ import (
 	"github.com/stojg/graphics/lib/resources"
 )
 
-const MaxParticles = 100000
+const MaxParticles = 10000
 const InstanceDataLength = 17 // floats (MAT4) + transparancy
 
 func NewParticleSystem(perSecond float64) *ParticleSystem {
