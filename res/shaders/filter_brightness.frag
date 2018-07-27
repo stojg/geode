@@ -13,5 +13,5 @@ void main()
     float luminance = dot(luminanceVector, texCol.rgb);
     luminance = (atan((luminance-1.9)*1024) / 3.141592) + 0.5;
     FragColor = vec4(texCol.rgb * luminance, 1.0);
-    FragColor = clamp(FragColor, 0, 5);
+    FragColor = clamp(FragColor, 0.0, 2.0);
 }

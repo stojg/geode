@@ -30,16 +30,14 @@ func New(s components.RenderState, width, height, vpWidth, vpHeight int) *Render
 
 	//r.pixelShader = shader.NewShader("filter_pixelator")
 
-	filterCount := 2
-	for i := uint(2); i < 2+3; i++ {
+	for i := uint(2); i < 5; i++ {
 		size := 1 << i // power of two, 1, 2, 4, 8, 16 and so on
-		s.AddSamplerSlot(fmt.Sprintf("x_filterTexture%d", filterCount))
-		filterCount++
-		texts := [2]*framebuffer.Texture{
+		s.AddSamplerSlot(fmt.Sprintf("x_filterTexture%d", i))
+		blurTextures := [2]*framebuffer.Texture{
 			framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width/size, height/size, gl.RGB, gl.RGB, gl.FLOAT, gl.LINEAR, false),
 			framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width/size, height/size, gl.RGB, gl.RGB, gl.FLOAT, gl.LINEAR, false),
 		}
-		r.blurTextures = append(r.blurTextures, texts)
+		r.blurTextures = append(r.blurTextures, blurTextures)
 	}
 	return r
 }
@@ -80,8 +78,8 @@ func (r *Renderer) Render(in *framebuffer.Texture, bypass bool) {
 		res = r.blur(res, t[0], t[1])
 		r.SetTexture(fmt.Sprintf("x_filterTexture%d", i+2), res)
 	}
-
 	r.applyFilter(r.combine, r.sourceTexture, r.scratch1)
+
 	if r.pixelShader != nil {
 		r.applyFilter(r.pixelShader, r.scratch1, r.scratch2)
 		r.applyFilter(r.toneMapShader, r.scratch2, nil)
@@ -94,7 +92,7 @@ func (r *Renderer) blur(in, t1, t2 *framebuffer.Texture) *framebuffer.Texture {
 	initial := true
 	x := true
 	from, to := t1, t2
-	for i := 0; i < 2; i++ {
+	for i := 0; i < 4; i++ {
 		var scale [3]float32
 		if x {
 			scale = [3]float32{1, 0, 0}
