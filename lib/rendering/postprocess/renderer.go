@@ -34,8 +34,8 @@ func New(s components.RenderState, width, height, vpWidth, vpHeight int) *Render
 		size := 1 << i // power of two, 1, 2, 4, 8, 16 and so on
 		s.AddSamplerSlot(fmt.Sprintf("x_filterTexture%d", i))
 		blurTextures := [2]*framebuffer.Texture{
-			framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width/size, height/size, gl.RGB, gl.RGB, gl.FLOAT, gl.LINEAR, false),
-			framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width/size, height/size, gl.RGB, gl.RGB, gl.FLOAT, gl.LINEAR, false),
+			framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width/size, height/size, gl.RGB, gl.RGB, gl.HALF_FLOAT, gl.LINEAR, false),
+			framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width/size, height/size, gl.RGB, gl.RGB, gl.HALF_FLOAT, gl.LINEAR, false),
 		}
 		r.blurTextures = append(r.blurTextures, blurTextures)
 	}
