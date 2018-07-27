@@ -12,7 +12,7 @@ func NewParticle(pos, vel [3]float32, scale, rotAngle, gravity, life float32) *P
 	return &Particle{
 		Position:     pos,
 		Velocity:     vel,
-		Gravity:      gravity,
+		Gravity:      Gravity * gravity,
 		LifeLength:   life,
 		Transparency: 1,
 		Rotation:     rotAngle,
@@ -34,7 +34,7 @@ type Particle struct {
 }
 
 func (p *Particle) Update(elapsed float32) bool {
-	p.Velocity[1] += Gravity * p.Gravity * elapsed
+	p.Velocity[1] += p.Gravity * elapsed
 	p.Position[0] += p.Velocity[0] * elapsed
 	p.Position[1] += p.Velocity[1] * elapsed
 	p.Position[2] += p.Velocity[2] * elapsed

@@ -12,7 +12,7 @@ import (
 	"github.com/stojg/graphics/lib/resources"
 )
 
-const MaxParticles = 10000
+const MaxParticles = 100000
 const InstanceDataLength = 17 // floats (MAT4) + transparancy
 
 func NewParticleSystem(perSecond float64) *ParticleSystem {
@@ -64,7 +64,9 @@ func (s *ParticleSystem) Update(elapsed time.Duration) {
 	posZ := s.Transform().Pos()[2]
 
 	for i := 0; i < int(toCreate); i++ {
-		s.addParticle([3]float32{posX + rand.Float32()*100 - 50, posY, posZ + rand.Float32()*100 - 50}, [3]float32{rand.Float32()*0.5 - 0.25, rand.Float32() * 5, rand.Float32()*0.5 - 0.25}, rand.Float32()*0.05+0.025, rand.Float32()*45, 0.01, rand.Float32()*9+1)
+		if len(s.particles) < MaxParticles {
+			s.addParticle([3]float32{posX + rand.Float32()*100 - 50, posY, posZ + rand.Float32()*100 - 50}, [3]float32{rand.Float32()*0.5 - 0.25, rand.Float32() * 5, rand.Float32()*0.5 - 0.25}, rand.Float32()*0.05+0.025, rand.Float32()*45, 0.01, rand.Float32()*9+1)
+		}
 	}
 }
 
@@ -74,17 +76,11 @@ var instanceData = make([]float32, MaxParticles*InstanceDataLength, MaxParticles
 func (s *ParticleSystem) Draw(camera components.Viewable, shader components.Shader, state components.RenderState) {
 
 	count := 0
-
-	for _, p := range s.particles {
-		x := p.Transform(camera)
-		for i := 0; i < 4; i++ {
-			for _, j := range x.Col(i) {
-				instanceData[count] = j
-				count++
-			}
-		}
-		instanceData[count] = p.Transparency
-		count++
+	for i := range s.particles {
+		x := s.particles[i].Transform(camera)
+		copy(instanceData[count:], x[0:16])
+		instanceData[count+16] = s.particles[i].Transparency
+		count += 17
 	}
 	buffers.UpdateFloatVBO(s.vao, s.vbo, len(instanceData), instanceData, gl.STREAM_DRAW)
 
