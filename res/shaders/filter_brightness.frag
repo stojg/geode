@@ -1,17 +1,19 @@
 #version 410 core
 
-out vec4 FragColor;
+out vec3 FragColor;
 
 in vec2 TexCoords;
 
 uniform sampler2D x_filterTexture;
 
+float min = 0.8;
+float max = 2.0;
+
 void main()
 {
-    vec3 luminanceVector = vec3(0.2125, 0.7154, 0.0721);
     vec3 texCol = texture(x_filterTexture, TexCoords).rgb;
-    float luminance = dot(luminanceVector, texCol.rgb);
-    luminance = (atan((luminance-1.9)*1024) / 3.141592) + 0.5;
-    FragColor = vec4(texCol.rgb * luminance, 1.0);
-    FragColor = clamp(FragColor, 0.0, 2.0);
+    vec3 luminanceVector = vec3(0.2125, 0.7154, 0.0721);
+    float luminance = dot(texCol.rgb, luminanceVector);
+    FragColor = texCol * 4.0 * smoothstep(min, max, luminance);
+    FragColor = clamp(FragColor, 0.0, 16);
 }
