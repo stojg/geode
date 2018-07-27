@@ -12,7 +12,7 @@ import (
 	"github.com/stojg/graphics/lib/resources"
 )
 
-const MaxParticles = 10000
+const MaxParticles = 25000
 const InstanceDataLength = 17 // floats (MAT4) + transparancy
 
 func NewParticleSystem(perSecond float64) *ParticleSystem {
@@ -39,14 +39,23 @@ func NewParticleSystem(perSecond float64) *ParticleSystem {
 
 type ParticleSystem struct {
 	GameObject
-	perSecond float64
-	reminder  float64
-	particles []*Particle
-	vao, vbo  uint32
+	perSecond   float64
+	reminder    float64
+	particles   []*Particle
+	vao, vbo    uint32
+	timeElapsed float64
 }
 
 func (s *ParticleSystem) Update(elapsed time.Duration) {
-	secs := float32(elapsed.Seconds())
+	s.timeElapsed += elapsed.Seconds()
+}
+
+var instanceData = make([]float32, MaxParticles*InstanceDataLength, MaxParticles*InstanceDataLength)
+
+// @todo sort particles from back to front to fix blending
+func (s *ParticleSystem) Draw(camera components.Viewable, shader components.Shader, state components.RenderState) {
+
+	secs := float32(s.timeElapsed)
 	for i := len(s.particles) - 1; i >= 0; i-- {
 		alive := s.particles[i].Update(secs)
 		// @todo better deletion to minimise allocations
@@ -55,7 +64,7 @@ func (s *ParticleSystem) Update(elapsed time.Duration) {
 		}
 	}
 
-	s.reminder += elapsed.Seconds() * s.perSecond
+	s.reminder += s.timeElapsed * s.perSecond
 	toCreate, reminder := math.Modf(s.reminder)
 	s.reminder = reminder
 
@@ -63,17 +72,14 @@ func (s *ParticleSystem) Update(elapsed time.Duration) {
 	posY := s.Transform().Pos()[1]
 	posZ := s.Transform().Pos()[2]
 
+	x, z := rand.Float32()*512-512/2, rand.Float32()*512-512/2
 	for i := 0; i < int(toCreate); i++ {
 		if len(s.particles) < MaxParticles {
-			s.addParticle([3]float32{posX + rand.Float32()*100 - 50, posY, posZ + rand.Float32()*100 - 50}, [3]float32{rand.Float32()*0.5 - 0.25, rand.Float32() * 5, rand.Float32()*0.5 - 0.25}, rand.Float32()*0.05+0.025, rand.Float32()*45, 0.01, rand.Float32()*9+1)
+			s.addParticle([3]float32{posX + rand.Float32()*x, posY, posZ + rand.Float32()*z}, [3]float32{rand.Float32()*0.5 - 0.25, rand.Float32() * 5, rand.Float32()*0.5 - 0.25}, rand.Float32()*0.05+0.025, rand.Float32()*45, 0.01, rand.Float32()*9+1)
 		}
 	}
-}
 
-var instanceData = make([]float32, MaxParticles*InstanceDataLength, MaxParticles*InstanceDataLength)
-
-// @todo sort particles from back to front to fix blending
-func (s *ParticleSystem) Draw(camera components.Viewable, shader components.Shader, state components.RenderState) {
+	s.timeElapsed = 0
 
 	count := 0
 	for i := range s.particles {
