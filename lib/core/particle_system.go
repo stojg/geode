@@ -90,7 +90,7 @@ func (s *ParticleSystem) Draw(camera components.Viewable, shader components.Shad
 
 	gl.BindVertexArray(s.vao)
 	debug.AddVertexBind()
-	gl.DrawElementsInstanced(gl.TRIANGLES, 6, gl.UNSIGNED_INT, gl.PtrOffset(0), int32(len(s.particles)))
+	gl.DrawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, int32(len(s.particles)))
 	debug.Drawcall()
 
 }
@@ -160,7 +160,7 @@ func (p *ParticleMesh) Bind() {
 }
 
 func (p *ParticleMesh) Draw() {
-	gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, gl.PtrOffset(0))
+	gl.DrawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, 1)
 	debug.Drawcall()
 }
 
@@ -178,12 +178,11 @@ func (p *ParticleMesh) Unbind() {
 func setupVAO() uint32 {
 
 	quadVertices := []float32{
-		-0.5, 0.5, 0, // top left
-		-0.5, -0.5, 0, // bottom left
-		0.5, 0.5, 0, // top right
-		0.5, -0.5, 0, // bottom right
+		-0.5, -0.5, 0.0,
+		0.5, -0.5, 0.0,
+		-0.5, 0.5, 0.0,
+		0.5, 0.5, 0.0,
 	}
-	indices := []uint32{0, 1, 2, 1, 3, 2}
 
 	// create arrays
 	var vao uint32
@@ -192,8 +191,5 @@ func setupVAO() uint32 {
 	// load data into vertex buffer
 	vbo := buffers.CreateFloatVBO(vao, len(quadVertices), quadVertices, gl.STATIC_DRAW)
 	buffers.AddAttribute(vao, vbo, 0, 3, 3, 0)
-
-	buffers.CreateIntEBO(vao, len(indices), indices, gl.STATIC_DRAW)
-
 	return vao
 }
