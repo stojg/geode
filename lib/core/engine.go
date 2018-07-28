@@ -111,7 +111,7 @@ func (m *Engine) run() {
 			ss := debug.GetShaderSwitches() / uint64(renderFrames)
 			us := debug.GetUniformSet() / uint64(renderFrames)
 			vb := debug.GetVertexBind() / uint64(renderFrames)
-			logLine := fmt.Sprintf("%0.1fms - %0.0f%%, %d draw calls, %d shader switches, %d uniform updates, %d vertex binds", msPerFrame, percent, dc, ss, us, vb)
+			logLine := fmt.Sprintf("%0.1fms - %0.0f%%, %d draw calls, %d shader switches, %d uniform updates, %d vertex binds, %d particles", msPerFrame, percent, dc, ss, us, vb, debug.GetParticles())
 			fmt.Println(logLine)
 			m.logger.Println(logLine)
 			renderFrames = 0

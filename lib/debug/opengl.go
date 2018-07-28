@@ -77,3 +77,15 @@ func GetVertexBind() uint64 {
 	vertexbind = 0
 	return t
 }
+
+var particles uint64
+
+func SetParticles(num uint64) {
+	particles = num
+}
+
+func GetParticles() uint64 {
+	t := particles
+	particles = 0
+	return t
+}
