@@ -3,6 +3,7 @@ package core
 import (
 	"math"
 	"math/rand"
+	"sort"
 	"time"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
@@ -13,19 +14,20 @@ import (
 )
 
 const MaxParticles = 500000
-const InstanceDataLength = 4
+const InstanceDataLength = 5
 
 type particleData struct {
-	aliveCount   int
-	velocity     [MaxParticles][3]float32
-	gravity      [MaxParticles]float32
-	position     [MaxParticles][3]float32
-	transparency [MaxParticles]float32
-	rotation     [MaxParticles]float32
-	scale        [MaxParticles]float32
-	elapsedTime  [MaxParticles]float32
-	alive        [MaxParticles]bool
-	lifeLength   [MaxParticles]float32
+	aliveCount       int
+	velocity         [MaxParticles][3]float32
+	gravity          [MaxParticles]float32
+	position         [MaxParticles][3]float32
+	transparency     [MaxParticles]float32
+	rotation         [MaxParticles]float32
+	scale            [MaxParticles]float32
+	elapsedTime      [MaxParticles]float32
+	alive            [MaxParticles]bool
+	lifeLength       [MaxParticles]float32
+	distanceToCamera [MaxParticles]float32
 }
 
 func (p *particleData) add(pos, vel [3]float32, scale, rotAngle, gravity, life float32) {
@@ -41,7 +43,7 @@ func (p *particleData) add(pos, vel [3]float32, scale, rotAngle, gravity, life f
 	p.gravity[p.aliveCount] = gravity * Gravity
 	p.lifeLength[p.aliveCount] = life
 	p.elapsedTime[p.aliveCount] = 0
-
+	p.distanceToCamera[p.aliveCount] = 0
 	p.aliveCount++
 }
 
@@ -61,7 +63,12 @@ func (p *particleData) swap(a, b int) {
 	p.elapsedTime[a], p.elapsedTime[b] = p.elapsedTime[b], p.elapsedTime[a]
 	p.alive[a], p.alive[b] = p.alive[b], p.alive[a]
 	p.lifeLength[a], p.lifeLength[b] = p.lifeLength[b], p.lifeLength[a]
+	p.distanceToCamera[a], p.distanceToCamera[b] = p.distanceToCamera[b], p.distanceToCamera[a]
 }
+
+func (a *particleData) Len() int           { return a.aliveCount }
+func (a *particleData) Swap(i, j int)      { a.swap(i, j) }
+func (a *particleData) Less(i, j int) bool { return a.distanceToCamera[i] > a.distanceToCamera[j] }
 
 func NewParticleSystem(perSecond float64) *ParticleSystem {
 
@@ -72,6 +79,7 @@ func NewParticleSystem(perSecond float64) *ParticleSystem {
 
 	vbo := buffers.CreateEmptyFloatVBO(vao, InstanceDataLength*MaxParticles, gl.STREAM_DRAW)
 	buffers.AddInstancedAttribute(vao, vbo, 1, 4, InstanceDataLength, 0)
+	buffers.AddInstancedAttribute(vao, vbo, 2, 4, InstanceDataLength, 4)
 
 	return &ParticleSystem{
 		GameObject: *o,
@@ -82,7 +90,7 @@ func NewParticleSystem(perSecond float64) *ParticleSystem {
 	}
 }
 
-func simpleUpdater(data *particleData, elapsed float32) {
+func simpleUpdater(data *particleData, elapsed float32, camera components.Viewable) {
 	for i := 0; i < data.aliveCount; i++ {
 		data.velocity[i][1] += data.gravity[i] * elapsed
 	}
@@ -95,6 +103,10 @@ func simpleUpdater(data *particleData, elapsed float32) {
 
 	for i := 0; i < data.aliveCount; i++ {
 		data.elapsedTime[i] += elapsed
+	}
+
+	for i := 0; i < data.aliveCount; i++ {
+		data.distanceToCamera[i] = camera.Pos().Sub(data.position[i]).Len()
 	}
 
 	for i := 0; i < data.aliveCount; i++ {
@@ -125,7 +137,6 @@ func (s *ParticleSystem) Update(elapsed time.Duration) {
 
 var instanceData = make([]float32, MaxParticles*InstanceDataLength, MaxParticles*InstanceDataLength)
 
-// @todo sort particles from back to front to fix blending
 func (s *ParticleSystem) Draw(camera components.Viewable, shader components.Shader, state components.RenderState) {
 
 	elapsed := float32(s.timeElapsed)
@@ -138,7 +149,8 @@ func (s *ParticleSystem) Draw(camera components.Viewable, shader components.Shad
 		s.data.add([3]float32{posX, posY, posZ}, [3]float32{rand.Float32()*0.5 - 0.25, rand.Float32() * 15, rand.Float32()*0.5 - 0.25}, rand.Float32()*0.05+0.025, 0, 1, rand.Float32()*4+1)
 	}
 
-	simpleUpdater(s.data, elapsed)
+	simpleUpdater(s.data, elapsed, camera)
+	sort.Sort(s.data)
 
 	s.updateInstanceData()
 	buffers.UpdateFloatVBO(s.vao, s.vbo, len(instanceData), instanceData, gl.STREAM_DRAW)
@@ -167,7 +179,8 @@ func (s *ParticleSystem) updateInstanceData() {
 	count := 0
 	for i := 0; i < s.data.aliveCount; i++ {
 		copy(instanceData[count:], s.data.position[i][0:3])
-		instanceData[count+InstanceDataLength-1] = s.data.transparency[i]
+		instanceData[count+InstanceDataLength-2] = s.data.transparency[i]
+		instanceData[count+InstanceDataLength-1] = s.data.scale[i]
 		count += InstanceDataLength
 	}
 }
@@ -239,6 +252,7 @@ func (p *ParticleMesh) Bind() {
 	debug.AddVertexBind()
 	gl.EnableVertexAttribArray(0)
 	gl.EnableVertexAttribArray(1)
+	gl.EnableVertexAttribArray(2)
 }
 
 func (p *ParticleMesh) Draw() {
@@ -249,6 +263,7 @@ func (p *ParticleMesh) Draw() {
 func (p *ParticleMesh) Unbind() {
 	gl.DisableVertexAttribArray(2)
 	gl.DisableVertexAttribArray(1)
+	gl.DisableVertexAttribArray(0)
 	gl.BindVertexArray(0)
 	debug.AddVertexBind()
 }

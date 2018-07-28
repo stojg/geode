@@ -57,7 +57,7 @@ func run(l *logger) error {
 	cameraObject.AddComponent(components.NewHeadHeight(terrainA))
 	engine.AddObject(cameraObject)
 
-	p1 := core.NewParticleSystem(3000)
+	p1 := core.NewParticleSystem(5000)
 	p1.SetPos(10, terrainA.Height(10, terrainA.Height(10, 0)), 0)
 	engine.AddObject(p1)
 
