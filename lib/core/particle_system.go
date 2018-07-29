@@ -14,7 +14,7 @@ import (
 )
 
 const MaxParticles = 500000
-const InstanceDataLength = 5
+const InstanceDataLength = 8
 
 type particleData struct {
 	aliveCount       int
@@ -28,9 +28,10 @@ type particleData struct {
 	alive            [MaxParticles]bool
 	lifeLength       [MaxParticles]float32
 	distanceToCamera [MaxParticles]float32
+	colour           [MaxParticles][3]float32
 }
 
-func (p *particleData) add(pos, vel [3]float32, scale, rotAngle, gravity, life float32) {
+func (p *particleData) add(pos, vel, colour [3]float32, scale, rotAngle, gravity, life float32) {
 	if p.aliveCount >= MaxParticles {
 		return
 	}
@@ -44,6 +45,7 @@ func (p *particleData) add(pos, vel [3]float32, scale, rotAngle, gravity, life f
 	p.lifeLength[p.aliveCount] = life
 	p.elapsedTime[p.aliveCount] = 0
 	p.distanceToCamera[p.aliveCount] = 0
+	p.colour[p.aliveCount] = colour
 	p.aliveCount++
 }
 
@@ -64,6 +66,7 @@ func (p *particleData) swap(a, b int) {
 	p.alive[a], p.alive[b] = p.alive[b], p.alive[a]
 	p.lifeLength[a], p.lifeLength[b] = p.lifeLength[b], p.lifeLength[a]
 	p.distanceToCamera[a], p.distanceToCamera[b] = p.distanceToCamera[b], p.distanceToCamera[a]
+	p.colour[a], p.colour[b] = p.colour[b], p.colour[a]
 }
 
 func (a *particleData) Len() int           { return a.aliveCount }
@@ -146,7 +149,8 @@ func (s *ParticleSystem) Draw(camera components.Viewable, shader components.Shad
 	posY := s.Transform().Pos()[1]
 	posZ := s.Transform().Pos()[2]
 	for i := 0; i < int(toCreate); i++ {
-		s.data.add([3]float32{posX, posY, posZ}, [3]float32{rand.Float32()*0.5 - 0.25, rand.Float32() * 15, rand.Float32()*0.5 - 0.25}, rand.Float32()*0.05+0.025, 0, 1, rand.Float32()*4+1)
+		colour := [3]float32{2, 2, rand.Float32()*7 + 3}
+		s.data.add([3]float32{posX, posY, posZ}, [3]float32{rand.Float32()*1 - 0.5, rand.Float32() * 15, rand.Float32()*1 - 0.5}, colour, rand.Float32()*0.05+0.025, 0, 0.5, rand.Float32()*4+1)
 	}
 
 	simpleUpdater(s.data, elapsed, camera)
@@ -179,8 +183,9 @@ func (s *ParticleSystem) updateInstanceData() {
 	count := 0
 	for i := 0; i < s.data.aliveCount; i++ {
 		copy(instanceData[count:], s.data.position[i][0:3])
-		instanceData[count+InstanceDataLength-2] = s.data.transparency[i]
-		instanceData[count+InstanceDataLength-1] = s.data.scale[i]
+		instanceData[count+3] = s.data.scale[i]
+		copy(instanceData[count+4:], s.data.colour[i][0:3])
+		instanceData[count+7] = s.data.transparency[i]
 		count += InstanceDataLength
 	}
 }

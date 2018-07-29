@@ -2,9 +2,9 @@
 
 out vec4 FragColor;
 
-in float transp;
+in vec4 colour;
 
 void main()
 {
-    FragColor = vec4(10,10,8,transp);
+    FragColor = colour;
 }
