@@ -57,7 +57,7 @@ func run(l *logger) error {
 	cameraObject.AddComponent(components.NewHeadHeight(terrainA))
 	engine.AddObject(cameraObject)
 
-	p1 := core.NewParticleSystem(5000)
+	p1 := core.NewParticleSystem(1000)
 	p1.SetPos(10, terrainA.Height(10, terrainA.Height(10, 0)), 0)
 	engine.AddObject(p1)
 
@@ -89,7 +89,7 @@ func run(l *logger) error {
 		p, err := loadModel("cube")
 		handleError(err)
 		x, z := rand.Float32()*terrainSize-terrainSize/2, rand.Float32()*terrainSize-terrainSize/2
-		p.SetPos(x, terrainA.Height(x, z)+0.5, z)
+		p.SetPos(x, terrainA.Height(x, z)+0.25, z)
 		p.SetScale(0.5, 0.5, 0.5)
 		p.Rotate(up(), rand.Float32()*math.Pi*2)
 		engine.AddObject(p)

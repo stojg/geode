@@ -1,25 +1,35 @@
 package core
 
-import "github.com/stojg/graphics/lib/components"
+import (
+	"time"
+
+	"github.com/stojg/graphics/lib/components"
+)
 
 func NewModel(mesh components.Drawable, material components.Material) *Model {
 	return &Model{
-		mesh:         mesh,
-		material:     material,
-		numberOfRows: 1,
+		mesh:     mesh,
+		material: material,
 	}
 }
 
 type Model struct {
-	components.GameComponent
-	mesh         components.Drawable
-	material     components.Material
-	numberOfRows uint32
+	mesh     components.Drawable
+	material components.Material
 }
 
 func (m *Model) Bind(shader components.Shader, engine components.RenderState) {
 	shader.UpdateUniforms(m.material, engine)
 	m.mesh.Bind()
+}
+
+func (m *Model) Update(time.Duration) {}
+
+func max(x, b float32) float32 {
+	if x > b {
+		return x
+	}
+	return b
 }
 
 func (m *Model) Material() components.Material {
@@ -34,9 +44,6 @@ func (m *Model) Unbind() {
 	m.mesh.Unbind()
 }
 
-func (m *Model) AABB() [3][2]float32 {
-	if m.mesh == nil {
-		panic("no mesh?!")
-	}
+func (m *Model) AABB() components.AABB {
 	return m.mesh.AABB()
 }

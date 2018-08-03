@@ -39,8 +39,7 @@ func New(width, height, viewPortWidth, viewPortHeight int, logger components.Log
 	gl.ClearColor(0.01, 0.01, 0.01, 1)
 
 	gl.FrontFace(gl.CCW)
-	gl.CullFace(gl.BACK)
-	gl.Disable(gl.CULL_FACE)
+
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LESS)
 

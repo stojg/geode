@@ -84,6 +84,9 @@ func (g *GameObject) Update(elapsed time.Duration) {
 	for _, c := range g.components {
 		c.Update(elapsed)
 	}
+	if g.model != nil {
+		g.model.Update(elapsed)
+	}
 	for _, o := range g.children {
 		o.Update(elapsed)
 	}
@@ -133,7 +136,21 @@ func (g *GameObject) IsVisible(camera components.Viewable) bool {
 	if g.model == nil {
 		return false
 	}
-	return IsVisible(camera.Planes(), g.model.AABB(), g.transform.Transformation())
+
+	var bc mgl32.Vec3
+	var br mgl32.Vec3
+
+	for i := 0; i < 3; i++ {
+		bc[i] = g.transform.Transformation().At(i, 3)
+		for j := 0; j < 3; j++ {
+			bc[i] += g.transform.Transformation().At(i, j) * g.model.AABB().C()[j]
+			br[i] += abs(g.transform.Transformation().At(i, j)) * g.model.AABB().R()[i]
+		}
+	}
+	b := &physics.AABB{}
+	b.SetC(bc)
+	b.SetR(br)
+	return IsVisible(camera.Planes(), b, g.transform.Transformation())
 }
 
 func (g *GameObject) Transform() *physics.Transform {

@@ -10,6 +10,7 @@ import (
 	"github.com/stojg/graphics/lib/buffers"
 	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/debug"
+	"github.com/stojg/graphics/lib/physics"
 	"github.com/stojg/graphics/lib/resources"
 )
 
@@ -144,7 +145,7 @@ func (s *ParticleSystem) Draw(camera components.Viewable, shader components.Shad
 
 	elapsed := float32(s.timeElapsed)
 	toCreate := s.calculateToCreate()
-	//x, z := rand.Float32()*0, rand.Float32()*0
+
 	posX := s.Transform().Pos()[0]
 	posY := s.Transform().Pos()[1]
 	posZ := s.Transform().Pos()[2]
@@ -222,7 +223,7 @@ type ParticleModel struct {
 	material components.Material
 }
 
-func (p *ParticleModel) AABB() [3][2]float32 {
+func (p *ParticleModel) AABB() components.AABB {
 	return p.mesh.AABB()
 }
 
@@ -239,6 +240,10 @@ func (p *ParticleModel) Draw() {
 	p.mesh.Draw()
 }
 
+func (m *ParticleModel) Update(time.Duration) {
+	//fmt.Println("update")
+}
+
 func (p *ParticleModel) Unbind() {
 	p.mesh.Unbind()
 }
@@ -248,8 +253,8 @@ type ParticleMesh struct {
 	vpb uint32
 }
 
-func (p *ParticleMesh) AABB() [3][2]float32 {
-	return [3][2]float32{}
+func (p *ParticleMesh) AABB() components.AABB {
+	return &physics.AABB{}
 }
 
 func (p *ParticleMesh) Bind() {

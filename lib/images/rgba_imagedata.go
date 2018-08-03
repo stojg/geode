@@ -13,7 +13,7 @@ import (
 func RGBAImagedata(filename string) (*image.RGBA, error) {
 	imgFile, err := os.Open(filename)
 	if err != nil {
-		return nil, fmt.Errorf("texture %q not found on disk: %v", filename, err)
+		return nil, fmt.Errorf("image %q not found on disk: %v", filename, err)
 	}
 	defer imgFile.Close()
 	img, _, err := image.Decode(imgFile)

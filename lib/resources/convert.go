@@ -25,7 +25,7 @@ func ConvertToVertices(meshdata []float32, indices []uint32) []Vertex {
 		copy(vertices[i/stride].TexCoords[:], meshdata[i+6:i+8])
 	}
 
-	// 2. calculate tangents from the texture UVs so we can properly use bumpmap texture on meshes (we can calculate the bi-tangents
+	// 2. calculate tangents from the texture UVs so we can properly use bumpmaps texture on meshes (we can calculate the bi-tangents
 	// in the vertex shader when we need it)
 
 	for indexPos := 0; indexPos < len(indices); indexPos += 3 {

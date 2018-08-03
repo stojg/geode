@@ -4,8 +4,11 @@ import (
 	"math"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/graphics/lib/buffers"
+	"github.com/stojg/graphics/lib/components"
 	"github.com/stojg/graphics/lib/debug"
+	"github.com/stojg/graphics/lib/physics"
 )
 
 // @todo check http://ogldev.atspace.co.uk/www/tutorial33/tutorial33.html for proper instanced rendering
@@ -17,11 +20,11 @@ func NewMesh() *Mesh {
 }
 
 type Mesh struct {
-	vbo       uint32
-	vao       uint32
-	ebo       uint32
-	num       int32
-	halfWidth [3][2]float32
+	vbo  uint32
+	vao  uint32
+	ebo  uint32
+	num  int32
+	aabb *physics.AABB
 }
 
 func (m *Mesh) SetVertices(vertices []Vertex, indices []uint32) {
@@ -47,13 +50,20 @@ func (m *Mesh) SetVertices(vertices []Vertex, indices []uint32) {
 	// tangents
 	buffers.AddAttribute(m.vao, m.vbo, 3, 3, 11, 8)
 
-	m.halfWidth[0] = HalfWidth(vertices, [3]float32{1, 0, 0})
-	m.halfWidth[1] = HalfWidth(vertices, [3]float32{0, 1, 0})
-	m.halfWidth[2] = HalfWidth(vertices, [3]float32{0, 0, 1})
+	m.aabb = &physics.AABB{}
+
+	center := mgl32.Vec3{}
+	extent := mgl32.Vec3{}
+
+	center[0], extent[0] = halfWidth(vertices, [3]float32{1, 0, 0})
+	center[1], extent[1] = halfWidth(vertices, [3]float32{0, 1, 0})
+	center[2], extent[2] = halfWidth(vertices, [3]float32{0, 0, 1})
+	m.aabb.SetC(center)
+	m.aabb.SetR(extent)
 }
 
-func (m *Mesh) AABB() [3][2]float32 {
-	return m.halfWidth
+func (m *Mesh) AABB() components.AABB {
+	return m.aabb
 }
 
 func (m *Mesh) Bind() {
@@ -85,7 +95,7 @@ func (m *Mesh) CleanUp() {
 	gl.DeleteVertexArrays(1, &m.vao)
 }
 
-func HalfWidth(in []Vertex, direction [3]float32) [2]float32 {
+func halfWidth(in []Vertex, direction [3]float32) (float32, float32) {
 	min, max := float32(math.MaxFloat32), float32(-math.MaxFloat32)
 	var proj float32
 	for i := 0; i < len(in); i++ {
@@ -97,7 +107,10 @@ func HalfWidth(in []Vertex, direction [3]float32) [2]float32 {
 			max = proj
 		}
 	}
-	return [2]float32{(max - min) / 2, (max + min) / 2}
+
+	center := 0.5 * (max + min)
+	extent := 0.5 * (max - min)
+	return center, extent
 
 }
 

@@ -32,6 +32,10 @@ type Texture interface {
 	Height() int32
 }
 
+type Updatable interface {
+	Update(time.Duration)
+}
+
 type Material interface {
 	Texture(name string) Texture
 	Textures() map[string]Texture
@@ -57,11 +61,12 @@ type Unbindable interface {
 }
 
 type AABB interface {
-	AABB() [3][2]float32
+	C() mgl32.Vec3
+	R() mgl32.Vec3
 }
 
 type Component interface {
-	Update(time.Duration)
+	Updatable
 	Input(time.Duration)
 	AddToEngine(state RenderState)
 	SetParent(Object)
@@ -69,7 +74,7 @@ type Component interface {
 
 // ie mesh
 type Drawable interface {
-	AABB
+	AABB() AABB
 	Bindable
 	Unbindable
 	Draw()
@@ -88,8 +93,9 @@ type Transformable interface {
 }
 
 type Model interface {
-	AABB
+	AABB() AABB
 	Unbindable
+	Updatable
 	//ID() uint
 	Bind(Shader, RenderState)
 	Draw()
@@ -98,9 +104,9 @@ type Model interface {
 
 type Object interface {
 	Transformable
+	Updatable
 	Model() Model
 	Input(elapsed time.Duration)
-	Update(elapsed time.Duration)
 	AllChildren() []Object
 	IsType(int) bool
 	Type() int
