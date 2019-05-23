@@ -15,12 +15,12 @@ var zOffset float64
 
 func NewHeightGenerator(seed int64) *HeightGenerator {
 	return &HeightGenerator{
-		noiseGen: opensimplex.NewWithSeed(seed),
+		noiseGen: opensimplex.New(seed),
 	}
 }
 
 type HeightGenerator struct {
-	noiseGen *opensimplex.Noise
+	noiseGen opensimplex.Noise
 }
 
 func (h *HeightGenerator) Height(x, z float64) float32 {
