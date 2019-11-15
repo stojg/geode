@@ -50,7 +50,6 @@ type Renderer struct {
 	scratch1          *framebuffer.Texture
 	scratch2          *framebuffer.Texture
 	blurTextures      [][2]*framebuffer.Texture
-	brightnessTex     *framebuffer.Texture
 	toneMapShader     *shader.Shader
 	gaussShader       *shader.Shader
 	brightness        *shader.Shader

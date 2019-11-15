@@ -25,13 +25,6 @@ func (m *Model) Bind(shader components.Shader, engine components.RenderState) {
 
 func (m *Model) Update(time.Duration) {}
 
-func max(x, b float32) float32 {
-	if x > b {
-		return x
-	}
-	return b
-}
-
 func (m *Model) Material() components.Material {
 	return m.material
 }

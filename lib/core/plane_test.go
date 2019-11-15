@@ -10,9 +10,8 @@ import (
 func TestDistanceToPoint(t *testing.T) {
 
 	type pos [3]float32
-	var plane [4]float32
+	plane := [4]float32{0, 0, -1, 1}
 
-	plane = [4]float32{0, 0, -1, 1}
 	point := pos{0, 0, 1}
 	var d float32
 	dotPlane(plane, point, &d)

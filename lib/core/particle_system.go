@@ -140,7 +140,7 @@ func (s *ParticleSystem) Update(elapsed time.Duration) {
 	s.timeElapsed += elapsed.Seconds()
 }
 
-var instanceData = make([]float32, MaxParticles*InstanceDataLength, MaxParticles*InstanceDataLength)
+var instanceData = make([]float32, MaxParticles*InstanceDataLength)
 
 func (s *ParticleSystem) Draw(camera components.Viewable, shader components.Shader, state components.RenderState) {
 
@@ -251,7 +251,6 @@ func (p *ParticleModel) Unbind() {
 
 type ParticleMesh struct {
 	vao uint32
-	vpb uint32
 }
 
 func (p *ParticleMesh) AABB() components.AABB {

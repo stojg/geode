@@ -95,8 +95,6 @@ type Renderer struct {
 	skybox           *technique.SkyBox
 
 	multiSampledTexture *framebuffer.Texture
-
-	fullScreenTemp *framebuffer.Texture
 }
 
 func (e *Renderer) State() components.RenderState {

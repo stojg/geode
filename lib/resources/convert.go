@@ -16,7 +16,7 @@ func ConvertToVertices(meshdata []float32, indices []uint32) []Vertex {
 	if len(meshdata)%stride != 0 {
 		panic("the mesh data is not a multiple of 8, want [3]Pos, [3]Normals, [2]TexCoords")
 	}
-	vertices := make([]Vertex, len(meshdata)/stride, len(meshdata)/stride)
+	vertices := make([]Vertex, len(meshdata)/stride)
 
 	// 1. Add Pos, Normal and TexCoords to all Vertices
 	for i := 0; i < len(meshdata); i += stride {

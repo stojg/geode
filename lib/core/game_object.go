@@ -127,11 +127,6 @@ func (g *GameObject) Draw(camera components.Viewable, shader components.Shader, 
 	g.Model().Draw()
 }
 
-func (g *GameObject) render(shader components.Shader, state components.RenderState) {
-	shader.UpdateTransform(g.Transform(), state)
-	g.model.Draw()
-}
-
 func (g *GameObject) IsVisible(camera components.Viewable) bool {
 	if g.model == nil {
 		return false

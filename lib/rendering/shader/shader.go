@@ -213,11 +213,6 @@ func (s *Shader) addIncludes(shaderText string) (string, error) {
 	return result, nil
 }
 
-func (s *Shader) setUniformBaseLight(uniformName string, baseLight components.Light) {
-	s.UpdateUniform(uniformName+".color", baseLight.Color())
-	s.UpdateUniform(uniformName+".maxDistance", baseLight.MaxDistance())
-}
-
 func (s *Shader) addVertexShader(shader string) uint32 {
 	return s.createProgram(shader, gl.VERTEX_SHADER)
 }

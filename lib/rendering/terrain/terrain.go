@@ -31,7 +31,6 @@ type Terrain struct {
 	heights        [VertexCount][VertexCount]float32
 	gridSizeSquare float32
 	mesh           components.Drawable
-	texture        interface{}
 }
 
 func (t *Terrain) generateTerrain(gridX, gridZ float32) ([]float32, []uint32) {

@@ -18,7 +18,6 @@ func NewRenderer(s components.RenderState) *Renderer {
 type Renderer struct {
 	components.RenderState
 	shader components.Shader
-	mesh   components.Drawable
 }
 
 func (r *Renderer) Render(objects components.Renderable) {

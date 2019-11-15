@@ -17,12 +17,10 @@ var texture components.Texture
 var shaders map[string]components.Shader
 var w, h int32
 var panelWidth, panelHeight int32
-var state components.RenderState
 var numPanels int
 
 func New(width, height int, s components.RenderState) {
 	w, h = int32(width), int32(height)
-	state = s
 	panelWidth = w/perRow - gutter
 	panelHeight = h/perRow - gutter
 	texture = framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, width, height, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, gl.NEAREST, false)

@@ -42,7 +42,7 @@ func BenchmarkLoad(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		Load("_testdata/sphere.obj")
+		_, _, _ = Load("_testdata/sphere.obj")
 	}
 }
 
