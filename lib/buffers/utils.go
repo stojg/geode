@@ -2,7 +2,7 @@ package buffers
 
 import (
 	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/stojg/graphics/lib/debug"
+	"github.com/stojg/geode/lib/debug"
 )
 
 func AddInstancedAttribute(vao, vbo uint32, attribute uint32, dataSizeInFloats int32, instanceDataLength int, offset int) {

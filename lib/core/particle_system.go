@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/stojg/graphics/lib/buffers"
-	"github.com/stojg/graphics/lib/components"
-	"github.com/stojg/graphics/lib/debug"
-	"github.com/stojg/graphics/lib/physics"
-	"github.com/stojg/graphics/lib/resources"
+	"github.com/stojg/geode/lib/buffers"
+	"github.com/stojg/geode/lib/components"
+	"github.com/stojg/geode/lib/debug"
+	"github.com/stojg/geode/lib/physics"
+	"github.com/stojg/geode/lib/resources"
 )
 
 const MaxParticles = 500000

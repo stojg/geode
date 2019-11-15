@@ -3,7 +3,7 @@ package core
 import (
 	"time"
 
-	"github.com/stojg/graphics/lib/components"
+	"github.com/stojg/geode/lib/components"
 )
 
 func NewModel(mesh components.Drawable, material components.Material) *Model {

@@ -2,7 +2,7 @@ package framebuffer
 
 import (
 	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/stojg/graphics/lib/debug"
+	"github.com/stojg/geode/lib/debug"
 )
 
 // NewLDRCubeMap returns a new CubeMap that has been loaded from six LDR images

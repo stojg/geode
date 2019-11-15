@@ -2,8 +2,8 @@ package primitives
 
 import (
 	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/stojg/graphics/lib/buffers"
-	"github.com/stojg/graphics/lib/debug"
+	"github.com/stojg/geode/lib/buffers"
+	"github.com/stojg/geode/lib/debug"
 )
 
 var quadVao uint32 = 1<<32 - 1

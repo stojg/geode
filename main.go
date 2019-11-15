@@ -8,11 +8,11 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/pkg/profile"
-	"github.com/stojg/graphics/lib/components"
-	"github.com/stojg/graphics/lib/core"
-	"github.com/stojg/graphics/lib/lights"
-	"github.com/stojg/graphics/lib/rendering/terrain"
-	"github.com/stojg/graphics/lib/resources"
+	"github.com/stojg/geode/lib/components"
+	"github.com/stojg/geode/lib/core"
+	"github.com/stojg/geode/lib/lights"
+	"github.com/stojg/geode/lib/rendering/terrain"
+	"github.com/stojg/geode/lib/resources"
 )
 
 func main() {

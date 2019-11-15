@@ -5,8 +5,8 @@ import (
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
-	"github.com/stojg/graphics/lib/debug"
-	"github.com/stojg/graphics/lib/images"
+	"github.com/stojg/geode/lib/debug"
+	"github.com/stojg/geode/lib/images"
 )
 
 func NewTexture(filename string, srgb bool) *Texture {

@@ -6,10 +6,10 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/stojg/graphics/lib/components"
-	"github.com/stojg/graphics/lib/core"
-	"github.com/stojg/graphics/lib/rendering/loader"
-	"github.com/stojg/graphics/lib/resources"
+	"github.com/stojg/geode/lib/components"
+	"github.com/stojg/geode/lib/core"
+	"github.com/stojg/geode/lib/rendering/loader"
+	"github.com/stojg/geode/lib/resources"
 )
 
 var models map[string][]components.Model

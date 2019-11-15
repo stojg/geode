@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/go-gl/glfw/v3.2/glfw"
-	"github.com/stojg/graphics/lib/components"
-	"github.com/stojg/graphics/lib/input"
-	"github.com/stojg/graphics/lib/rendering"
+	"github.com/stojg/geode/lib/components"
+	"github.com/stojg/geode/lib/input"
+	"github.com/stojg/geode/lib/rendering"
 )
 
 func NewScene() *Scene {

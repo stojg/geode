@@ -3,7 +3,7 @@ package physics
 // https://github.com/BennyQBD/3DGameEngine/blob/225fa8baf6637756ba03ccbc0444bf7751d87dbb/src/com/base/engine/core/Transform.java
 
 import (
-	x "github.com/stojg/graphics/lib/math"
+	x "github.com/stojg/geode/lib/math"
 
 	"github.com/go-gl/mathgl/mgl32"
 )

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/stojg/graphics/lib/components"
+	"github.com/stojg/geode/lib/components"
 )
 
 func NewSpot(r, g, b, intensity, viewAngle float32) *Spot {

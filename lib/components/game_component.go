@@ -3,7 +3,7 @@ package components
 import (
 	"time"
 
-	"github.com/stojg/graphics/lib/physics"
+	"github.com/stojg/geode/lib/physics"
 )
 
 type GameComponent struct {

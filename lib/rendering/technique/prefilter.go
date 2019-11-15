@@ -4,11 +4,11 @@ import (
 	"math"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/stojg/graphics/lib/components"
-	"github.com/stojg/graphics/lib/debug"
-	"github.com/stojg/graphics/lib/rendering/framebuffer"
-	"github.com/stojg/graphics/lib/rendering/primitives"
-	"github.com/stojg/graphics/lib/rendering/shader"
+	"github.com/stojg/geode/lib/components"
+	"github.com/stojg/geode/lib/debug"
+	"github.com/stojg/geode/lib/rendering/framebuffer"
+	"github.com/stojg/geode/lib/rendering/primitives"
+	"github.com/stojg/geode/lib/rendering/shader"
 )
 
 func Prefilter(src, dest components.Texture) {

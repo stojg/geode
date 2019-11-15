@@ -1,4 +1,4 @@
-module github.com/stojg/graphics
+module github.com/stojg/geode
 
 go 1.13
 

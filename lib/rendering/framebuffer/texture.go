@@ -2,7 +2,7 @@ package framebuffer
 
 import (
 	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/stojg/graphics/lib/debug"
+	"github.com/stojg/geode/lib/debug"
 )
 
 func NewMultiSampledTexture(attachment uint32, width int, height int, internalFormat int32, format, xtype uint32, filter int32, clamp bool) *Texture {

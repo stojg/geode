@@ -4,8 +4,8 @@ import (
 	"math"
 
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/stojg/graphics/lib/components"
-	"github.com/stojg/graphics/lib/resources"
+	"github.com/stojg/geode/lib/components"
+	"github.com/stojg/geode/lib/resources"
 )
 
 const Size float32 = 512

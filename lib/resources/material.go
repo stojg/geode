@@ -2,7 +2,7 @@ package resources
 
 import (
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/stojg/graphics/lib/components"
+	"github.com/stojg/geode/lib/components"
 )
 
 func NewMaterial() *Material {

@@ -2,9 +2,9 @@ package technique
 
 import (
 	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/stojg/graphics/lib/rendering/framebuffer"
-	"github.com/stojg/graphics/lib/rendering/primitives"
-	"github.com/stojg/graphics/lib/rendering/shader"
+	"github.com/stojg/geode/lib/rendering/framebuffer"
+	"github.com/stojg/geode/lib/rendering/primitives"
+	"github.com/stojg/geode/lib/rendering/shader"
 )
 
 func BrdfLutTexture() *framebuffer.Texture {

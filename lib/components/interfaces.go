@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/stojg/graphics/lib/physics"
+	"github.com/stojg/geode/lib/physics"
 )
 
 const (

@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/stojg/graphics/lib/components"
-	"github.com/stojg/graphics/lib/physics"
+	"github.com/stojg/geode/lib/components"
+	"github.com/stojg/geode/lib/physics"
 )
 
 func NewGameObject(rtype int) *GameObject {

@@ -3,17 +3,17 @@ package rendering
 import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
-	"github.com/stojg/graphics/lib/components"
-	"github.com/stojg/graphics/lib/debug"
-	"github.com/stojg/graphics/lib/particle"
-	"github.com/stojg/graphics/lib/rendering/debugger"
-	"github.com/stojg/graphics/lib/rendering/framebuffer"
-	"github.com/stojg/graphics/lib/rendering/postprocess"
-	"github.com/stojg/graphics/lib/rendering/shader"
-	"github.com/stojg/graphics/lib/rendering/shadow"
-	"github.com/stojg/graphics/lib/rendering/standard"
-	"github.com/stojg/graphics/lib/rendering/technique"
-	"github.com/stojg/graphics/lib/rendering/terrain"
+	"github.com/stojg/geode/lib/components"
+	"github.com/stojg/geode/lib/debug"
+	"github.com/stojg/geode/lib/particle"
+	"github.com/stojg/geode/lib/rendering/debugger"
+	"github.com/stojg/geode/lib/rendering/framebuffer"
+	"github.com/stojg/geode/lib/rendering/postprocess"
+	"github.com/stojg/geode/lib/rendering/shader"
+	"github.com/stojg/geode/lib/rendering/shadow"
+	"github.com/stojg/geode/lib/rendering/standard"
+	"github.com/stojg/geode/lib/rendering/technique"
+	"github.com/stojg/geode/lib/rendering/terrain"
 )
 
 func New(width, height, viewPortWidth, viewPortHeight int, logger components.Logger) *Renderer {

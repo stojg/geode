@@ -5,10 +5,10 @@ import (
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/stojg/graphics/lib/buffers"
-	"github.com/stojg/graphics/lib/components"
-	"github.com/stojg/graphics/lib/debug"
-	"github.com/stojg/graphics/lib/physics"
+	"github.com/stojg/geode/lib/buffers"
+	"github.com/stojg/geode/lib/components"
+	"github.com/stojg/geode/lib/debug"
+	"github.com/stojg/geode/lib/physics"
 )
 
 // @todo check http://ogldev.atspace.co.uk/www/tutorial33/tutorial33.html for proper instanced rendering

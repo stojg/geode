@@ -2,7 +2,7 @@ package core
 
 import (
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/stojg/graphics/lib/components"
+	"github.com/stojg/geode/lib/components"
 )
 
 func IsVisible(planes [6][4]float32, aabb components.AABB, transform mgl32.Mat4) bool {

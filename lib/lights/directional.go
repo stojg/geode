@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/stojg/graphics/lib/components"
+	"github.com/stojg/geode/lib/components"
 )
 
 func NewDirectional(shadowSize int, r, g, b, intensity float32) *Directional {

@@ -2,8 +2,8 @@ package particle
 
 import (
 	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/stojg/graphics/lib/components"
-	"github.com/stojg/graphics/lib/rendering/shader"
+	"github.com/stojg/geode/lib/components"
+	"github.com/stojg/geode/lib/rendering/shader"
 )
 
 func NewRenderer(s components.RenderState) *Renderer {

@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/stojg/graphics/lib/components"
-	"github.com/stojg/graphics/lib/debug"
-	"github.com/stojg/graphics/lib/input"
-	"github.com/stojg/graphics/lib/rendering"
+	"github.com/stojg/geode/lib/components"
+	"github.com/stojg/geode/lib/debug"
+	"github.com/stojg/geode/lib/input"
+	"github.com/stojg/geode/lib/rendering"
 )
 
 func NewEngine(width, height int, title string, l components.Logger) (*Engine, error) {
