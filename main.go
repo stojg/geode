@@ -85,7 +85,6 @@ func run(l *logger) error {
 
 	terrainSize := float32(terrain.Size)
 	for i := 0; i < 200; i++ {
-		p := core.NewGameObject(components.R_DEFAULT | components.R_SHADOWED)
 		p, err := loadModel("cube")
 		handleError(err)
 		x, z := rand.Float32()*terrainSize-terrainSize/2, rand.Float32()*terrainSize-terrainSize/2
@@ -96,7 +95,6 @@ func run(l *logger) error {
 	}
 
 	for i := 0; i < 200; i++ {
-		p := core.NewGameObject(components.R_DEFAULT | components.R_SHADOWED)
 		p, err := loadModel("sphere")
 		handleError(err)
 		x, z := rand.Float32()*terrainSize-terrainSize/2, rand.Float32()*terrainSize-terrainSize/2
@@ -106,7 +104,6 @@ func run(l *logger) error {
 	}
 
 	for i := 0; i < 200; i++ {
-		p := core.NewGameObject(components.R_DEFAULT | components.R_SHADOWED)
 		p, err := loadModel("ico")
 		handleError(err)
 		x, z := rand.Float32()*terrainSize-terrainSize/2, rand.Float32()*terrainSize-terrainSize/2
