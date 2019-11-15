@@ -3,14 +3,21 @@ package core
 import (
 	"testing"
 	"time"
+
+	"github.com/stojg/geode/lib/components"
 )
 
 func Test_simpleUpdater(t *testing.T) {
 	data := &particleData{}
 
-	data.add([3]float32{1, 0, 0}, [3]float32{0, 0, 0}, 1, 0, 1, 1)
+	data.add([3]float32{1, 0, 0}, [3]float32{0, 0, 0}, [3]float32{1, 1, 1}, 0, 1, 1, 1)
 
-	simpleUpdater(data, 0.1)
+	cameraObject := NewGameObject(components.R_NA)
+	cameraObject.SetPos(0, 0, 0)
+	cam := components.NewCamera(75, 320, 240, 0.1, 512)
+	cameraObject.AddComponent(cam)
+
+	simpleUpdater(data, 0.1, cam)
 
 	if data.aliveCount != 1 {
 		t.Errorf("expected 1 alive particle")
@@ -20,7 +27,7 @@ func Test_simpleUpdater(t *testing.T) {
 		t.Errorf("expected particle idx 0 to be alive")
 	}
 
-	data.add([3]float32{2, 0, 0}, [3]float32{0, 0, 0}, 1, 0, 1, 1)
+	data.add([3]float32{2, 0, 0}, [3]float32{0, 0, 0}, [3]float32{1, 1, 1}, 0, 1, 1, 1)
 
 	if data.aliveCount != 2 {
 		t.Errorf("expected 2 alive particles")
@@ -30,7 +37,7 @@ func Test_simpleUpdater(t *testing.T) {
 		t.Errorf("expected particle idx 1 to be alive")
 	}
 
-	simpleUpdater(data, 1.0)
+	simpleUpdater(data, 1.0, cam)
 
 	if data.aliveCount != 1 {
 		t.Errorf("expected 1 alive particles")

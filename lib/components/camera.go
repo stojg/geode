@@ -8,7 +8,6 @@ import (
 )
 
 func NewCamera(fovy float32, width, height int, near, far float32) *Camera {
-
 	return &Camera{
 		projection: mgl32.Perspective(mgl32.DegToRad(fovy), float32(width/height), near, far),
 		view:       mgl32.Ident4(),

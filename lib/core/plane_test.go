@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/stojg/geode/lib/physics"
 )
 
 func TestDistanceToPoint(t *testing.T) {
@@ -60,9 +61,9 @@ func BenchmarkIsVisible(b *testing.B) {
 		{0.4773718, -0.07955561, -0.8750926, 498.57483},
 	}
 
-	aabb := [3][2]float32{
-		{256, 256}, {10.220467, -0.55961514}, {256, 256},
-	}
+	aabb := &physics.AABB{}
+	aabb.SetR(mgl32.Vec3{512, 10, 512})
+	aabb.SetC(mgl32.Vec3{0, 5, 0})
 
 	transform := mgl32.Mat4{
 		1.000000, 0.000000, 0.000000, -256.000000,
