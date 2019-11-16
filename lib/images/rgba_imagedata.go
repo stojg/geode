@@ -52,7 +52,7 @@ func Flip(src *image.RGBA) {
 		copy(scratchBuffer[:], src.Pix[bottom:bottom+stride])
 		// copy top row to bottom row
 		copy(src.Pix[bottom:bottom+stride], src.Pix[top:top+stride])
-		// copy buffer (bottom) to top row
+		// copy buffer (previous bottom) to top row
 		copy(src.Pix[top:top+stride], scratchBuffer[:])
 	}
 }

@@ -6,7 +6,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"path/filepath"
 	"testing"
@@ -23,7 +22,6 @@ EXPOSURE=          1.0000000000000
 -Y 2000 +X 4000
 `
 	r := bytes.NewBufferString(testData)
-	t.Log(r)
 	reader := bufio.NewReader(r)
 	width, height, err := readHeader(reader)
 	if err != nil {
@@ -38,26 +36,30 @@ EXPOSURE=          1.0000000000000
 func Test_readPixelsRLE(t *testing.T) {
 
 	tests := []struct {
-		name string
-		w, h int
-		data []byte
-		err  error
+		name   string
+		w, h   int
+		data   []byte
+		err    error
+		outLen int
 	}{
-		{name: "basic", w: 10, h: 10, data: []byte{1, 2, 3, 4}},
-		{name: "corrupt", w: 10, h: 10, data: []byte{99, 99, 99}, err: newError(memoryError, errors.New(""))},
+		{name: "a", w: 10, h: 10, outLen: 300, data: makeSimple(10, 10, []byte{1, 2, 3, 4})},
+		{name: "b", w: 10, h: 10, outLen: 1, data: makeSimple(10, 10, []byte{1, 1, 1}), err: newErrorf(memoryError, "requires 300 floats but only got 1 floats available")},
+		{name: "c", w: 10, h: 10, outLen: 300, data: makeSimple(10, 10, []byte{1, 1, 1}), err: newErrorf(readError, "read pixels EOF")},
+		{name: "d", w: 10, h: 10, outLen: 300, data: []byte{2, 2, 0x0f, 0xa0}, err: newErrorf(formatError, "wrong scanline width, got 4000, but expected 10")},
+		{name: "e", w: 100, h: 100, outLen: 30000, data: read(t, "too_short_scanline_data_rle"), err: newErrorf(formatError, "not enough data in scanline for rle")},
+		{name: "f", w: 100, h: 100, outLen: 30000, data: read(t, "too_short_scanline_data"), err: newErrorf(formatError, "not enough data in scanline")},
+		{name: "g", w: 100, h: 100, outLen: 30000, data: read(t, "read_pixel_err"), err: newErrorf(readError, "read pixels EOF")},
+		{name: "h", w: 100, h: 100, outLen: 30000, data: read(t, "41edef25f25b31c67bbe0d8c842e4bdd792e641b-12"), err: newErrorf(readError, "readfull #1 EOF")},
+		{name: "i", w: 10, h: 10, outLen: 300, data: []byte{2, 2, 0, 10}, err: newErrorf(readError, "readfull #2 EOF")},
+		{name: "j", w: 100, h: 100, outLen: 30000, data: read(t, "71436d85e41d24e5b70985d22249eaf90d0f392a-6"), err: newErrorf(readError, "readfull #3 EOF")},
+		{name: "k", w: 7, h: 10, outLen: 210, data: makeSimple(7, 10, []byte{1, 2, 3, 4})},
+		{name: "l", w: 8, h: 1, outLen: 24, data: []byte{2, 2, 0, 8, 132, 1, 132, 2, 132, 3, 132, 4, 132, 5, 132, 6, 132, 7, 132, 8}},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(subT *testing.T) {
-			var in []byte
-			for i := 0; i < tc.w; i++ {
-				for j := 0; j < tc.h; j++ {
-					in = append(in, tc.data...)
-				}
-			}
-
-			reader := bytes.NewBuffer(in)
-			out := make([]float32, tc.w*tc.h*3)
+			reader := bytes.NewBuffer(tc.data)
+			out := make([]float32, tc.outLen)
 			err := readPixelsRLE(reader, tc.w, tc.h, out)
 
 			if tc.err == nil && err != nil {
@@ -69,7 +71,7 @@ func Test_readPixelsRLE(t *testing.T) {
 				}
 
 				if !errors.Is(err, tc.err) {
-					subT.Fatalf("Expected error %+v, got %+v", tc.err, err)
+					subT.Fatalf("Expected error '%+v', got '%+v'", tc.err, err)
 				}
 				return
 			}
@@ -78,7 +80,7 @@ func Test_readPixelsRLE(t *testing.T) {
 			if *update {
 				subT.Logf("updating golden file %s", goldenFile)
 				gdata := float32ToBytes(subT, out)
-
+				t.Logf("'%s'", gdata.Bytes())
 				if err := ioutil.WriteFile(goldenFile, gdata.Bytes(), 0644); err != nil {
 					subT.Fatalf("failed to update golden file: %s", err)
 				}
@@ -98,11 +100,39 @@ func Test_readPixelsRLE(t *testing.T) {
 	}
 }
 
+func makeSimple(w, h int, template []byte) []byte {
+	var res []byte
+	for i := 0; i < w; i++ {
+		for j := 0; j < h; j++ {
+			res = append(res, template...)
+		}
+	}
+	return res
+}
+
+func read(t *testing.T, name string) []byte {
+	d, err := ioutil.ReadFile("testdata/" + name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return d
+}
+
 func Test_rgbeToFloat(t *testing.T) {
 	expected := [3]float32{0.005859375, 0.009765625, 0.013671875}
 	var actual [3]float32
 	actual[0], actual[1], actual[2] = rgbeToFloat(1, 2, 3, 128)
-	fmt.Println(actual)
+	for i, tc := range expected {
+		if tc != actual[i] {
+			t.Errorf("Expected index %d to be %v, got %v", i, tc, actual[i])
+		}
+	}
+}
+
+func Test_rgbeToFloatZeroExp(t *testing.T) {
+	expected := [3]float32{0, 0, 0}
+	var actual [3]float32
+	actual[0], actual[1], actual[2] = rgbeToFloat(1, 2, 3, 0)
 	for i, tc := range expected {
 		if tc != actual[i] {
 			t.Errorf("Expected index %d to be %v, got %v", i, tc, actual[i])
