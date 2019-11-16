@@ -49,18 +49,6 @@ func parse(src io.Reader) (*objectFile, int, error) {
 		// Force GC and release mem to OS for >1 million
 		// line source files, every million lines.
 		//
-		// @todo We should also do data structure optimizations to handle
-		// multiple gig source files without swapping on low mem machines.
-		// A 4.5gb 82 million line test source file starts swapping on my 8gb
-		// mem machine (though this app used ~5gb) at about the 40 million line mark.
-		//
-		// Above should be done when actualy users have a real use case for such
-		// large files :)
-		//if currentLine%1000000 == 0 {
-		//	rt := time.Now()
-		//	debug.FreeOSMemory()
-		//	fmt.Println("%s lines parsed - Forced GC took %s", rt)
-		//}
 
 		switch t {
 
@@ -148,9 +136,9 @@ func parse(src io.Reader) (*objectFile, int, error) {
 
 			// unknown
 		case tUnkown:
-			return nil, currentLine, wrapErrorLine(fmt.Errorf("Unsupported line '%s'\n", line), currentLine)
+			return nil, currentLine, wrapErrorLine(fmt.Errorf("unsupported line '%s'", line), currentLine)
 		default:
-			return nil, currentLine, wrapErrorLine(fmt.Errorf("Unsupported line '%s'\n", line), currentLine)
+			return nil, currentLine, wrapErrorLine(fmt.Errorf("unsupported line '%s'", line), currentLine)
 		}
 	}
 	if err := scanner.Err(); err != nil {

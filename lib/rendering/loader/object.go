@@ -96,7 +96,7 @@ func parseFaceVertexData(str string, strict bool) (vt *vertexData, err error) {
 		dest := vt.index(iMain)
 		if dest == nil {
 			if strict {
-				return nil, fmt.Errorf("Invalid face index %d in %s", iMain, str)
+				return nil, fmt.Errorf("invalid face index %d in %s", iMain, str)
 			}
 			break
 		}
@@ -118,7 +118,7 @@ func parseFaceVertexData(str string, strict bool) (vt *vertexData, err error) {
 				dest.normal = value
 			default:
 				if strict {
-					return nil, fmt.Errorf("Invalid face vertex data index %d.%d in %s", iMain, iPart, str)
+					return nil, fmt.Errorf("invalid face vertex data index %d.%d in %s", iMain, iPart, str)
 				}
 			}
 		}
@@ -150,7 +150,7 @@ func parseListVertexData(t dataType, str string, strict bool) (*vertexData, erro
 				decl.uv = value
 			default:
 				if strict {
-					return nil, fmt.Errorf("Invalid face vertex data index %d.%d in %s", iMain, iPart, str)
+					return nil, fmt.Errorf("invalid face vertex data index %d.%d in %s", iMain, iPart, str)
 				}
 			}
 		}
