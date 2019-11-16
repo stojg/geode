@@ -16,7 +16,7 @@ import (
 
 const MaxParticles = 500000
 const InstanceDataLength = 8
-const Gravity = 9.98
+const Gravity = -9.82
 
 type particleData struct {
 	aliveCount       int
