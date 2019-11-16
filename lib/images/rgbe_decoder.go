@@ -5,7 +5,6 @@ package images
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"io"
 	"math"
@@ -28,22 +27,20 @@ func DecodeRGBE(r io.Reader) (int, int, []float32, error) {
 
 func readHeader(r *bufio.Reader) (int, int, error) {
 	line, err := r.ReadString('\n')
-
 	if err != nil {
-		return 0, 0, newError(readError, err.Error())
+		return 0, 0, newError(readError, err)
 	}
 
 	if line[0] != '#' || line[1] != '?' {
-		return 0, 0, newError(formatError, "Bad initial token.")
+		return 0, 0, newError(formatError, fmt.Errorf("bad initial token '%d'", line[1]))
 	}
 
 	formatSpecifier := false
 
 	for {
 		line, err = r.ReadString('\n')
-
 		if err != nil {
-			return 0, 0, newError(readError, err.Error())
+			return 0, 0, newError(readError, err)
 		}
 
 		if line[0] == 0 || line[0] == '\n' {
@@ -55,18 +52,17 @@ func readHeader(r *bufio.Reader) (int, int, error) {
 	}
 
 	if !formatSpecifier {
-		return 0, 0, newError(formatError, "No FORMAT specifier found.")
+		return 0, 0, newError(formatError, fmt.Errorf("no FORMAT specifier found"))
 	}
 
 	line, err = r.ReadString('\n')
-
 	if err != nil {
-		return 0, 0, newError(readError, err.Error())
+		return 0, 0, newError(readError, err)
 	}
 
 	width, height := 0, 0
 	if n, err := fmt.Sscanf(line, "-Y %d +X %d", &height, &width); n < 2 || err != nil {
-		return 0, 0, newError(formatError, "Missing image size specifier.")
+		return 0, 0, newError(formatError, fmt.Errorf("missing image size specifier"))
 	}
 
 	return width, height, nil
@@ -85,7 +81,7 @@ func readPixelsRLE(r io.Reader, scanlineWidth, numScanlines int, data []float32)
 
 	for ; numScanlines > 0; numScanlines-- {
 		if _, err := io.ReadFull(r, rgbe); err != nil {
-			return newError(readError, err.Error())
+			return newError(readError, err)
 		}
 
 		if rgbe[0] != 2 || rgbe[1] != 2 || (rgbe[2]&0x80) != 0 {
@@ -96,7 +92,7 @@ func readPixelsRLE(r io.Reader, scanlineWidth, numScanlines int, data []float32)
 		}
 
 		if int(rgbe[2])<<8|int(rgbe[3]) != scanlineWidth {
-			return newError(formatError, "Wrong scanline width.")
+			return newError(formatError, fmt.Errorf("wrong scanline width."))
 		}
 
 		// read each of the four channels for the scanline into the buffer
@@ -106,7 +102,7 @@ func readPixelsRLE(r io.Reader, scanlineWidth, numScanlines int, data []float32)
 
 			for index < end {
 				if _, err := io.ReadFull(r, buf); err != nil {
-					return newError(readError, err.Error())
+					return newError(readError, err)
 				}
 
 				if buf[0] > 128 {
@@ -114,7 +110,7 @@ func readPixelsRLE(r io.Reader, scanlineWidth, numScanlines int, data []float32)
 					count := int(buf[0]) - 128
 
 					if count == 0 || count > end-index {
-						return newError(formatError, "Bad scanline data.")
+						return newError(formatError, fmt.Errorf("bad scanline data"))
 					}
 
 					for ; count > 0; count-- {
@@ -126,7 +122,7 @@ func readPixelsRLE(r io.Reader, scanlineWidth, numScanlines int, data []float32)
 					count := int(buf[0])
 
 					if count == 0 || count > end-index {
-						return newError(formatError, "Bad scanline data.")
+						return newError(formatError, fmt.Errorf("bad scanline data"))
 					}
 
 					scanlineBuffer[index] = buf[1]
@@ -135,7 +131,7 @@ func readPixelsRLE(r io.Reader, scanlineWidth, numScanlines int, data []float32)
 					count--
 					if count > 0 {
 						if _, err := io.ReadFull(r, scanlineBuffer[index:index+count]); err != nil {
-							return newError(readError, err.Error())
+							return newError(readError, err)
 						}
 
 						index += count
@@ -165,13 +161,11 @@ func readPixels(r io.Reader, numPixels int, data []float32) error {
 
 	for ; numPixels > 0; numPixels-- {
 		if _, err := io.ReadFull(r, rgbe); err != nil {
-			return newError(memoryError, err.Error())
+			return newError(memoryError, err)
 		}
-
 		data[offset], data[offset+1], data[offset+2] = rgbeToFloat(rgbe[0], rgbe[1], rgbe[2], rgbe[3])
 		offset += 3
 	}
-
 	return nil
 }
 
@@ -188,23 +182,48 @@ func rgbeToFloat(r, g, b, e byte) (float32, float32, float32) {
 }
 
 const (
-	readError   = iota
-	writeError  = iota
-	formatError = iota
-	memoryError = iota
+	readError = iota
+	writeError
+	formatError
+	memoryError
 )
 
-func newError(code int, text string) error {
-	switch code {
+type DecoderError struct {
+	Type int
+	Err  error
+}
+
+func (d *DecoderError) Error() string {
+	switch d.Type {
 	case readError:
-		return errors.New("RGBE read error: " + text)
+		return fmt.Sprintf("RGBE decoder read error: " + d.Err.Error())
 	case writeError:
-		return errors.New("RGBE write error: " + text)
+		return fmt.Sprintf("RGBE decoder write error: " + d.Err.Error())
 	case formatError:
-		return errors.New("RGBE bad file format: " + text)
+		return fmt.Sprintf("RGBE decoder bad file format: " + d.Err.Error())
 	case memoryError:
 		fallthrough
 	default:
-		return errors.New("RGBE error: " + text)
+		return fmt.Sprintf("RGBE decoder error: " + d.Err.Error())
+	}
+}
+
+func (d *DecoderError) Unwrap() error {
+	return d.Err
+}
+
+func (d *DecoderError) Is(target error) bool {
+	t, ok := target.(*DecoderError)
+	if !ok {
+		return false
+	}
+
+	return t.Type == d.Type
+}
+
+func newError(code int, text error) error {
+	return &DecoderError{
+		Type: code,
+		Err:  text,
 	}
 }

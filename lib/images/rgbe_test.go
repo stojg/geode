@@ -37,11 +37,6 @@ func BenchmarkFlip(b *testing.B) {
 	rgba := image.NewRGBA(image.Rect(0, 0, 3, 2))
 	rgba.Pix = src
 
-	//rgba, err := RGBAImagedata("../../res/textures/scuffed-plastic/scuffed-plastic-ao.png")
-	//if err != nil {
-	//	b.Fatal(err)
-	//}
-
 	b.ReportAllocs()
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
@@ -69,10 +64,6 @@ func TestFlipRaw(t *testing.T) {
 // BenchmarkFlipRaw-8   	     100	  10292038 ns/op	   49152 B/op	       1 allocs/op - sky0016.hdr
 // BenchmarkFlipRaw-8   	30000000	        43.2 ns/op	      48 B/op	       1 allocs/op - small
 func BenchmarkFlipRaw(b *testing.B) {
-	//w, h, in, err := RGBEImagedata("../../res/textures/sky0016.hdr")
-	//if err != nil {
-	//	b.Fatal(err)
-	//}
 	src := []float32{
 		1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, // width 4
 		13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, //
