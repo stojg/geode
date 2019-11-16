@@ -1,12 +1,5 @@
 package images
 
-import (
-	"bufio"
-	"fmt"
-	"io"
-	"math"
-)
-
 // RGBE or Radiance HDR is an image format invented by Gregory Ward Larson for the Radiance
 // rendering system. It stores pixels as one byte each for RGB (red, green, and blue) values with
 // a one byte shared exponent. Thus it stores four bytes per pixel.
@@ -26,6 +19,14 @@ import (
 // http://www.graphics.cornell.edu/~bjw/rgbe
 // https://github.com/Opioid/rgbe/blob/master/decode.go
 
+import (
+	"bufio"
+	"fmt"
+	"io"
+	"math"
+)
+
+// DecodeRGBE reads from input and returns the width, height, image data in float32 and an error
 func DecodeRGBE(r io.Reader) (int, int, []float32, error) {
 	br := bufio.NewReader(r)
 
@@ -44,11 +45,11 @@ func DecodeRGBE(r io.Reader) (int, int, []float32, error) {
 func readHeader(r *bufio.Reader) (int, int, error) {
 	line, err := r.ReadString('\n')
 	if err != nil {
-		return 0, 0, newErrorf(readError, "header #1 %s", err)
+		return 0, 0, newDecoderErr(readError, "header #1 %s", err)
 	}
 
 	if line[0] != '#' || line[1] != '?' {
-		return 0, 0, newError(formatError, fmt.Errorf("bad initial token '%d'", line[1]))
+		return 0, 0, newDecoderErr(formatError, "bad initial token '%d'", line[1])
 	}
 
 	formatSpecifier := false
@@ -56,7 +57,7 @@ func readHeader(r *bufio.Reader) (int, int, error) {
 	for {
 		line, err = r.ReadString('\n')
 		if err != nil {
-			return 0, 0, newErrorf(readError, "header #2 %s", err)
+			return 0, 0, newDecoderErr(readError, "header #2 %s", err)
 		}
 
 		if line[0] == 0 || line[0] == '\n' {
@@ -68,68 +69,68 @@ func readHeader(r *bufio.Reader) (int, int, error) {
 	}
 
 	if !formatSpecifier {
-		return 0, 0, newError(formatError, fmt.Errorf("no FORMAT specifier found"))
+		return 0, 0, newDecoderErr(formatError, "no FORMAT specifier found")
 	}
 
 	line, err = r.ReadString('\n')
 	if err != nil {
-		return 0, 0, newErrorf(readError, "header #3 %s", err)
+		return 0, 0, newDecoderErr(readError, "header #3 %s", err)
 	}
 
 	width, height := 0, 0
 	if n, err := fmt.Sscanf(line, "-Y %d +X %d", &height, &width); n < 2 || err != nil {
-		return 0, 0, newError(formatError, fmt.Errorf("missing image size specifier"))
+		return 0, 0, newDecoderErr(formatError, "missing image size specifier")
 	}
 
 	return width, height, nil
 }
 
-func readPixelsRLE(r io.Reader, scanlineWidth, numScanlines int, result []float32) error {
-	if len(result) < scanlineWidth*numScanlines*3 {
-		return newError(memoryError, fmt.Errorf("requires %d floats but only got %d floats available", scanlineWidth*numScanlines*3, len(result)))
+func readPixelsRLE(r io.Reader, width, height int, result []float32) error {
+	if len(result) < width*height*3 {
+		return newDecoderErr(memoryError, "requires %d floats but only got %d floats available", width*height*3, len(result))
 	}
 
-	if scanlineWidth < 8 || scanlineWidth > 0x7fff {
-		// run length encoding is not allowed so read flat
-		return readPixels(r, scanlineWidth*numScanlines, result)
+	// Run Length Encoding is not allowed so read flat
+	if width < 8 || width > 0x7fff {
+		return readPixels(r, width*height, result)
 	}
 
 	offset := 0
 	rgbe := make([]byte, 4)
-	scanlineBuffer := make([]byte, 4*scanlineWidth)
+	scanlineBuffer := make([]byte, 4*width)
 	buf := make([]byte, 2)
 
-	for ; numScanlines > 0; numScanlines-- {
+	for ; height > 0; height-- {
 		if _, err := io.ReadFull(r, rgbe); err != nil {
-			return newErrorf(readError, "readfull #1 %s", err)
+			return newDecoderErr(readError, "readfull #1 %s", err)
 		}
 
-		// this file is not run length encoded if
+		// this line is not RLE so read the rest of the file as flat
 		if rgbe[0] != 2 || rgbe[1] != 2 || (rgbe[2]&0x80) != 0 {
 			result[0], result[1], result[2] = rgbeToFloat(rgbe[0], rgbe[1], rgbe[2], rgbe[3])
-			return readPixels(r, scanlineWidth*numScanlines-1, result[3:])
+			return readPixels(r, width*height-1, result[3:])
 		}
 
-		if int(rgbe[2])<<8|int(rgbe[3]) != scanlineWidth {
-			return newError(formatError, fmt.Errorf("wrong scanline width, got %d, but expected %d", int(rgbe[2])<<8|int(rgbe[3]), scanlineWidth))
+		// the 3rd and 4th byte should match the width
+		if int(rgbe[2])<<8|int(rgbe[3]) != width {
+			return newDecoderErr(formatError, "wrong scanline width, got %d, but expected %d", int(rgbe[2])<<8|int(rgbe[3]), width)
 		}
 
 		// read each of the four channels for the scanline into the buffer
 		index := 0
 		for i := 0; i < 4; i++ {
-			end := (i + 1) * scanlineWidth
+			end := (i + 1) * width
 
 			for index < end {
 				if _, err := io.ReadFull(r, buf); err != nil {
-					return newErrorf(readError, "readfull #2 %s", err)
+					return newDecoderErr(readError, "readfull #2 %s", err)
 				}
 
 				if buf[0] > 128 {
-					// a run of the same value
 					count := int(buf[0]) - 128
 
 					if count == 0 || count > end-index {
-						return newError(formatError, fmt.Errorf("not enough data in scanline for rle"))
+						return newDecoderErr(formatError, "not enough data in scanline for rle")
 					}
 
 					for ; count > 0; count-- {
@@ -141,7 +142,7 @@ func readPixelsRLE(r io.Reader, scanlineWidth, numScanlines int, result []float3
 					count := int(buf[0])
 
 					if count == 0 || count > end-index {
-						return newError(formatError, fmt.Errorf("not enough data in scanline"))
+						return newDecoderErr(formatError, "not enough data in scanline")
 					}
 
 					scanlineBuffer[index] = buf[1]
@@ -150,7 +151,7 @@ func readPixelsRLE(r io.Reader, scanlineWidth, numScanlines int, result []float3
 					count--
 					if count > 0 {
 						if _, err := io.ReadFull(r, scanlineBuffer[index:index+count]); err != nil {
-							return newErrorf(readError, "readfull #3 %s", err)
+							return newDecoderErr(readError, "readfull #3 %s", err)
 						}
 
 						index += count
@@ -160,11 +161,11 @@ func readPixelsRLE(r io.Reader, scanlineWidth, numScanlines int, result []float3
 		}
 
 		// now convert data from buffer into floats
-		for i := 0; i < scanlineWidth; i++ {
+		for i := 0; i < width; i++ {
 			r := scanlineBuffer[i]
-			g := scanlineBuffer[i+scanlineWidth]
-			b := scanlineBuffer[i+2*scanlineWidth]
-			e := scanlineBuffer[i+3*scanlineWidth]
+			g := scanlineBuffer[i+width]
+			b := scanlineBuffer[i+2*width]
+			e := scanlineBuffer[i+3*width]
 
 			result[offset], result[offset+1], result[offset+2] = rgbeToFloat(r, g, b, e)
 			offset += 3
@@ -180,7 +181,7 @@ func readPixels(r io.Reader, numPixels int, data []float32) error {
 
 	for ; numPixels > 0; numPixels-- {
 		if _, err := io.ReadFull(r, rgbe); err != nil {
-			return newError(readError, fmt.Errorf("read pixels %s", err))
+			return newDecoderErr(readError, "read pixels %s", err)
 		}
 		data[offset], data[offset+1], data[offset+2] = rgbeToFloat(rgbe[0], rgbe[1], rgbe[2], rgbe[3])
 		offset += 3
@@ -196,78 +197,17 @@ func readPixels(r io.Reader, numPixels int, data []float32) error {
 // > rarely be the necessary. This file format covers about 76 orders of magnitude with 1% relative accuracy.
 // > - https://www.cg.tuwien.ac.at/research/theses/matkovic/node84.html
 func rgbeToFloat(r, g, b, e byte) (float32, float32, float32) {
-	if e > 0 {
-		// the below is if the values are needed in a [0,1] range
-		// f := float32(math.Ldexp(1, int(e) - (128 + 8)))
-		// return float32(r) * f, float32(g) * f, float32(b) * f
-		r := math.Ldexp(float64(r)+0.5, int(e)-(128+8))
-		g := math.Ldexp(float64(g)+0.5, int(e)-(128+8))
-		b := math.Ldexp(float64(b)+0.5, int(e)-(128+8))
-		return float32(r), float32(g), float32(b)
-	}
-	return 0, 0, 0
-}
-
-// like rgbeToFloat but normalised to [0, 1]
-func rgbeToFloatNormalised(r, g, b, e byte) (float32, float32, float32) {
 	if e == 0 {
 		return 0, 0, 0
 	}
-	// the below is if the values are needed in a [0,1] range
-	f := float32(math.Ldexp(1, int(e)-(128+8)))
-	return float32(r) * f, float32(g) * f, float32(b) * f
-}
 
-const (
-	readError = iota
-	writeError
-	formatError
-	memoryError
-)
+	exp := int(e) - (128 + 8)
 
-type DecoderError struct {
-	Type int
-	Err  error
-}
-
-func (d *DecoderError) Error() string {
-	switch d.Type {
-	case readError:
-		return fmt.Sprintf("RGBE decoder read error: " + d.Err.Error())
-	case writeError:
-		return fmt.Sprintf("RGBE decoder write error: " + d.Err.Error())
-	case formatError:
-		return fmt.Sprintf("RGBE decoder bad file format: " + d.Err.Error())
-	case memoryError:
-		fallthrough
-	default:
-		return fmt.Sprintf("RGBE decoder error: " + d.Err.Error())
-	}
-}
-
-func (d *DecoderError) Unwrap() error {
-	return d.Err
-}
-
-func (d *DecoderError) Is(target error) bool {
-	t, ok := target.(*DecoderError)
-	if !ok {
-		return false
-	}
-
-	return t.Type == d.Type && t.Err.Error() == d.Err.Error()
-}
-
-func newError(code int, text error) error {
-	return &DecoderError{
-		Type: code,
-		Err:  text,
-	}
-}
-
-func newErrorf(code int, text string, args ...interface{}) error {
-	return &DecoderError{
-		Type: code,
-		Err:  fmt.Errorf(text, args...),
-	}
+	// if the values needs to be normalised to [0,1] range instead of being in float32
+	// f := float32(math.Ldexp(1, exp))
+	// return float32(r) * f, float32(g) * f, float32(b) * f
+	red := math.Ldexp(float64(r)+0.5, exp)
+	green := math.Ldexp(float64(g)+0.5, exp)
+	blue := math.Ldexp(float64(b)+0.5, exp)
+	return float32(red), float32(green), float32(blue)
 }

@@ -31,12 +31,12 @@ func RGBAImagedata(filename string) (*image.RGBA, error) {
 }
 
 func RGBEImagedata(filename string) (int, int, []float32, error) {
-	imgFile, err := os.Open(filename)
+	f, err := os.Open(filename)
 	if err != nil {
-		return 0, 0, nil, fmt.Errorf("texture %q not found on disk: %v", filename, err)
+		return 0, 0, nil, fmt.Errorf("error while reading texture '%s': %s", filename, err)
 	}
-	defer imgFile.Close()
-	return DecodeRGBE(imgFile)
+	defer f.Close()
+	return DecodeRGBE(f)
 }
 
 // Flip the image upside down so that OpenGL can use it as a texture properly
