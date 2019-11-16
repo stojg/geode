@@ -1,6 +1,7 @@
 package images
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/binary"
 	"errors"
@@ -12,6 +13,27 @@ import (
 )
 
 var update = flag.Bool("update", false, "update .golden files")
+
+func Test_readHeader(t *testing.T) {
+	testData := `#?RADIANCE
+# Made with 100% pure HDR Shop
+FORMAT=32-bit_rle_rgbe
+EXPOSURE=          1.0000000000000
+
+-Y 2000 +X 4000
+`
+	r := bytes.NewBufferString(testData)
+	t.Log(r)
+	reader := bufio.NewReader(r)
+	width, height, err := readHeader(reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if width != 4000 || height != 2000 {
+		t.Errorf("Expected dim (%d X %d) got (%d X %d)", 4000, 2000, width, height)
+	}
+}
 
 func Test_readPixelsRLE(t *testing.T) {
 
@@ -49,7 +71,6 @@ func Test_readPixelsRLE(t *testing.T) {
 				if !errors.Is(err, tc.err) {
 					subT.Fatalf("Expected error %+v, got %+v", tc.err, err)
 				}
-				fmt.Println(err, tc.err)
 				return
 			}
 
