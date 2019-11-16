@@ -42,9 +42,9 @@ func Test_readPixelsRLE(t *testing.T) {
 		err    error
 		outLen int
 	}{
-		{name: "a", w: 10, h: 10, outLen: 300, data: makeSimple(10, 10, []byte{1, 2, 3, 4})},
-		{name: "b", w: 10, h: 10, outLen: 1, data: makeSimple(10, 10, []byte{1, 1, 1}), err: newDecoderErr(memoryError, "requires 300 floats but only got 1 floats available")},
-		{name: "c", w: 10, h: 10, outLen: 300, data: makeSimple(10, 10, []byte{1, 1, 1}), err: newDecoderErr(readError, "read pixels EOF")},
+		{name: "a", w: 10, h: 10, outLen: 300, data: makeSimple(10, []byte{1, 2, 3, 4})},
+		{name: "b", w: 10, h: 10, outLen: 1, data: makeSimple(10, []byte{1, 1, 1}), err: newDecoderErr(memoryError, "requires 300 floats but only got 1 floats available")},
+		{name: "c", w: 10, h: 10, outLen: 300, data: makeSimple(10, []byte{1, 1, 1}), err: newDecoderErr(readError, "read pixels EOF")},
 		{name: "d", w: 10, h: 10, outLen: 300, data: []byte{2, 2, 0x0f, 0xa0}, err: newDecoderErr(formatError, "wrong scanline width, got 4000, but expected 10")},
 		{name: "e", w: 100, h: 100, outLen: 30000, data: read(t, "too_short_scanline_data_rle"), err: newDecoderErr(formatError, "not enough data in scanline for rle")},
 		{name: "f", w: 100, h: 100, outLen: 30000, data: read(t, "too_short_scanline_data"), err: newDecoderErr(formatError, "not enough data in scanline")},
@@ -52,7 +52,7 @@ func Test_readPixelsRLE(t *testing.T) {
 		{name: "h", w: 100, h: 100, outLen: 30000, data: read(t, "41edef25f25b31c67bbe0d8c842e4bdd792e641b-12"), err: newDecoderErr(readError, "readfull #1 EOF")},
 		{name: "i", w: 10, h: 10, outLen: 300, data: []byte{2, 2, 0, 10}, err: newDecoderErr(readError, "readfull #2 EOF")},
 		{name: "j", w: 100, h: 100, outLen: 30000, data: read(t, "71436d85e41d24e5b70985d22249eaf90d0f392a-6"), err: newDecoderErr(readError, "readfull #3 EOF")},
-		{name: "k", w: 7, h: 10, outLen: 210, data: makeSimple(7, 10, []byte{1, 2, 3, 4})},
+		{name: "k", w: 7, h: 10, outLen: 210, data: makeSimple(7, []byte{1, 2, 3, 4})},
 		{name: "l", w: 8, h: 1, outLen: 24, data: []byte{2, 2, 0, 8, 132, 1, 132, 2, 132, 3, 132, 4, 132, 5, 132, 6, 132, 7, 132, 8}},
 	}
 
@@ -100,10 +100,10 @@ func Test_readPixelsRLE(t *testing.T) {
 	}
 }
 
-func makeSimple(w, h int, template []byte) []byte {
+func makeSimple(w int, template []byte) []byte {
 	var res []byte
 	for i := 0; i < w; i++ {
-		for j := 0; j < h; j++ {
+		for j := 0; j < 10; j++ {
 			res = append(res, template...)
 		}
 	}

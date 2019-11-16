@@ -42,7 +42,7 @@ func run(l *logger) error {
 	}
 
 	terrainA := terrain.New(float32(-0.5), float32(-0.5))
-	terrainObj, _ := loadModelFromMesh(terrainA.Mesh(), "dry-dirt", components.R_TERRAIN|components.R_SHADOWED)
+	terrainObj := loadModelFromMesh(terrainA.Mesh(), "dry-dirt", components.R_TERRAIN|components.R_SHADOWED)
 	txt := resources.NewTexture("res/textures/dry-dirt2/albedo.png", true)
 	terrainObj.Model().Material().AddTexture("albedo2", txt)
 
