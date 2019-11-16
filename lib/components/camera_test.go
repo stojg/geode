@@ -4,20 +4,13 @@ import (
 	"testing"
 
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/stojg/geode/lib/geometry"
 )
 
-func TestNormalisePlane(t *testing.T) {
-	plane := [4]float32{3, 0, 0, 9}
-	normalisePlane(&plane)
-	if plane[3] != 3 {
-		t.Errorf("normalisePlane failed: %f", plane[3])
-	}
-}
-
-var lres [6][4]float32
+var lres geometry.Frustum
 
 func BenchmarkExtractPlanesFromProjection(b *testing.B) {
-	var l [6][4]float32
+	var l geometry.Frustum
 	fov := float32(90)
 	width, height := 100, 100
 	near := float32(1)

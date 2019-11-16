@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/stojg/geode/lib/components"
+	"github.com/stojg/geode/lib/geometry"
 	"github.com/stojg/geode/lib/physics"
 )
 
@@ -100,7 +101,7 @@ func (a ByModel) Less(i, j int) bool {
 	return a[i].Model() != a[j].Model()
 }
 
-func (g *GameObject) Render(camera components.Viewable, shader components.Shader, state components.RenderState, rtype int) {
+func (g *GameObject) Render(camera components.Viewer, shader components.Shader, state components.RenderState, rtype int) {
 	list := g.AllChildren()
 	sort.Sort(ByModel(list))
 
@@ -122,12 +123,12 @@ func (g *GameObject) Render(camera components.Viewable, shader components.Shader
 	shader.Unbind()
 }
 
-func (g *GameObject) Draw(camera components.Viewable, shader components.Shader, state components.RenderState) {
+func (g *GameObject) Draw(camera components.Viewer, shader components.Shader, state components.RenderState) {
 	shader.UpdateTransform(g.Transform(), state)
 	g.Model().Draw()
 }
 
-func (g *GameObject) IsVisible(camera components.Viewable) bool {
+func (g *GameObject) IsVisible(camera components.Viewer) bool {
 	if g.model == nil {
 		return false
 	}
@@ -142,10 +143,11 @@ func (g *GameObject) IsVisible(camera components.Viewable) bool {
 			br[i] += abs(g.transform.Transformation().At(i, j)) * g.model.AABB().R()[i]
 		}
 	}
-	b := &physics.AABB{}
+	b := &geometry.AABB{}
 	b.SetC(bc)
 	b.SetR(br)
-	return IsVisible(camera.Planes(), b, g.transform.Transformation())
+
+	return camera.Frustum().AABBInside(b)
 }
 
 func (g *GameObject) Transform() *physics.Transform {
@@ -174,4 +176,11 @@ func (g *GameObject) SetState(state components.RenderState) {
 			c.SetState(state)
 		}
 	}
+}
+
+func abs(x float32) float32 {
+	if x > 0 {
+		return x
+	}
+	return -x
 }

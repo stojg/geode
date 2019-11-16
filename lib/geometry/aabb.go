@@ -1,4 +1,4 @@
-package physics
+package geometry
 
 import "github.com/go-gl/mathgl/mgl32"
 

@@ -30,7 +30,7 @@ func NewRenderState() *RenderState {
 }
 
 type RenderState struct {
-	mainCamera    components.Viewable
+	mainCamera    components.Viewer
 	uboMatrices   uint32
 	lights        []components.Light
 	activeLight   components.Light
@@ -120,11 +120,11 @@ func (e *RenderState) Vector3f(name string) mgl32.Vec3 {
 	return v
 }
 
-func (e *RenderState) SetCamera(c components.Viewable) {
+func (e *RenderState) SetCamera(c components.Viewer) {
 	e.mainCamera = c
 }
 
-func (e *RenderState) Camera() components.Viewable {
+func (e *RenderState) Camera() components.Viewer {
 	return e.mainCamera
 }
 

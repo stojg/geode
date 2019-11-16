@@ -10,7 +10,7 @@ import (
 	"github.com/stojg/geode/lib/buffers"
 	"github.com/stojg/geode/lib/components"
 	"github.com/stojg/geode/lib/debug"
-	"github.com/stojg/geode/lib/physics"
+	"github.com/stojg/geode/lib/geometry"
 	"github.com/stojg/geode/lib/resources"
 )
 
@@ -95,7 +95,7 @@ func NewParticleSystem(perSecond float64) *ParticleSystem {
 	}
 }
 
-func simpleUpdater(data *particleData, elapsed float32, camera components.Viewable) {
+func simpleUpdater(data *particleData, elapsed float32, camera components.Viewer) {
 	for i := 0; i < data.aliveCount; i++ {
 		data.velocity[i][1] += data.gravity[i] * elapsed
 	}
@@ -142,7 +142,7 @@ func (s *ParticleSystem) Update(elapsed time.Duration) {
 
 var instanceData = make([]float32, MaxParticles*InstanceDataLength)
 
-func (s *ParticleSystem) Draw(camera components.Viewable, shader components.Shader, state components.RenderState) {
+func (s *ParticleSystem) Draw(camera components.Viewer, shader components.Shader, state components.RenderState) {
 
 	elapsed := float32(s.timeElapsed)
 	toCreate := s.calculateToCreate()
@@ -192,7 +192,7 @@ func (s *ParticleSystem) updateInstanceData() {
 	}
 }
 
-func (s *ParticleSystem) IsVisible(camera components.Viewable) bool {
+func (s *ParticleSystem) IsVisible(camera components.Viewer) bool {
 	return true
 }
 
@@ -254,7 +254,7 @@ type ParticleMesh struct {
 }
 
 func (p *ParticleMesh) AABB() components.AABB {
-	return &physics.AABB{}
+	return &geometry.AABB{}
 }
 
 func (p *ParticleMesh) Bind() {

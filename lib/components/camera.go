@@ -1,10 +1,10 @@
 package components
 
 import (
-	"math"
 	"time"
 
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/stojg/geode/lib/geometry"
 )
 
 func NewCamera(fovy float32, width, height int, near, far float32) *Camera {
@@ -19,10 +19,10 @@ type Camera struct {
 
 	projection mgl32.Mat4
 	view       mgl32.Mat4
-	planes     [6][4]float32
+	planes     geometry.Frustum
 }
 
-func (c *Camera) Planes() [6][4]float32 {
+func (c *Camera) Frustum() geometry.Frustum {
 	return c.planes
 }
 
@@ -62,8 +62,8 @@ func calcView(c *Camera) mgl32.Mat4 {
 	return cameraRotation.Mul4(cameraTranslation)
 }
 
-func extractPlanesFromProjection(projection mgl32.Mat4, normalise bool) [6][4]float32 {
-	var res [6][4]float32
+func extractPlanesFromProjection(projection mgl32.Mat4, normalise bool) geometry.Frustum {
+	var res geometry.Frustum
 	for i := 0; i < 4; i++ {
 		f := projection[3+i*4]
 		res[0][i] = f + projection[i*4+0] // left
@@ -75,20 +75,7 @@ func extractPlanesFromProjection(projection mgl32.Mat4, normalise bool) [6][4]fl
 	}
 
 	if normalise {
-		normalisePlane(&res[0])
-		normalisePlane(&res[1])
-		normalisePlane(&res[2])
-		normalisePlane(&res[3])
-		normalisePlane(&res[4])
-		normalisePlane(&res[5])
+		res.Normalise()
 	}
 	return res
-}
-
-func normalisePlane(a *[4]float32) {
-	l := float32(math.Sqrt(float64(a[0]*a[0] + a[1]*a[1] + a[2]*a[2])))
-	a[0] /= l
-	a[1] /= l
-	a[2] /= l
-	a[3] /= l
 }

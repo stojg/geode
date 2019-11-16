@@ -8,7 +8,7 @@ import (
 	"github.com/stojg/geode/lib/buffers"
 	"github.com/stojg/geode/lib/components"
 	"github.com/stojg/geode/lib/debug"
-	"github.com/stojg/geode/lib/physics"
+	"github.com/stojg/geode/lib/geometry"
 )
 
 // @todo check http://ogldev.atspace.co.uk/www/tutorial33/tutorial33.html for proper instanced rendering
@@ -24,7 +24,7 @@ type Mesh struct {
 	vao  uint32
 	ebo  uint32
 	num  int32
-	aabb *physics.AABB
+	aabb *geometry.AABB
 }
 
 func (m *Mesh) SetVertices(vertices []Vertex, indices []uint32) {
@@ -50,7 +50,7 @@ func (m *Mesh) SetVertices(vertices []Vertex, indices []uint32) {
 	// tangents
 	buffers.AddAttribute(m.vao, m.vbo, 3, 3, 11, 8)
 
-	m.aabb = &physics.AABB{}
+	m.aabb = &geometry.AABB{}
 
 	center := mgl32.Vec3{}
 	extent := mgl32.Vec3{}

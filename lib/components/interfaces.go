@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/stojg/geode/lib/geometry"
 	"github.com/stojg/geode/lib/physics"
 )
 
@@ -110,18 +111,18 @@ type Object interface {
 	AllChildren() []Object
 	IsType(int) bool
 	Type() int
-	IsVisible(camera Viewable) bool
+	IsVisible(camera Viewer) bool
 	// @todo, the below method feels weird
 	SetState(state RenderState)
-	Draw(camera Viewable, shader Shader, state RenderState)
+	Draw(camera Viewer, shader Shader, state RenderState)
 }
 
 type Renderable interface {
-	Render(camera Viewable, shader Shader, state RenderState, rtype int)
+	Render(camera Viewer, shader Shader, state RenderState, rtype int)
 }
 
-type Viewable interface {
-	Planes() [6][4]float32
+type Viewer interface {
+	Frustum() geometry.Frustum
 	View() mgl32.Mat4
 	Projection() mgl32.Mat4
 	Pos() mgl32.Vec3
@@ -155,8 +156,8 @@ type Light interface {
 type RenderState interface {
 	Update()
 
-	Camera() Viewable
-	SetCamera(camera Viewable)
+	Camera() Viewer
+	SetCamera(camera Viewer)
 
 	SamplerSlot(name string) uint32
 	AddSamplerSlot(name string)
