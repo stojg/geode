@@ -20,5 +20,5 @@ type Renderer struct {
 
 func (r *Renderer) Render(object components.Renderable) {
 	gl.Enable(gl.DEPTH_TEST)
-	object.Render(r.Camera(), r.shader, r, components.R_TERRAIN)
+	object.Render(r.Camera(), r.shader, r, components.ResourceTerrain)
 }

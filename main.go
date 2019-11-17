@@ -42,14 +42,14 @@ func run(l components.Logger) error {
 	}
 
 	terrainA := terrain.New(float32(-0.5), float32(-0.5))
-	terrainObj := loadModelFromMesh(terrainA.Mesh(), "dry-dirt", components.R_TERRAIN|components.R_SHADOWED)
+	terrainObj := loadModelFromMesh(terrainA.Mesh(), "dry-dirt", components.ResourceTerrain|components.Shadowed)
 	txt := resources.NewTexture("res/textures/dry-dirt2/albedo.png", true)
 	terrainObj.Model().Material().AddTexture("albedo2", txt)
 
 	terrainObj.Transform().SetPos(vec3(terrainA.X(), 0, terrainA.Z()))
 	engine.AddObject(terrainObj)
 
-	cameraObject := core.NewGameObject(components.R_NA)
+	cameraObject := core.NewGameObject(components.ResourceNA)
 	cameraObject.SetPos(-10, terrainA.Height(10, -10)+20, -10)
 	cameraObject.AddComponent(components.NewCamera(75, engine.Width(), engine.Height(), 0.1, 512))
 	cameraObject.AddComponent(components.NewFreeMove(4))
@@ -61,24 +61,24 @@ func run(l components.Logger) error {
 	p1.SetPos(10, terrainA.Height(10, terrainA.Height(10, 0)), 0)
 	engine.AddObject(p1)
 
-	sun := core.NewGameObject(components.R_LIGHT)
+	sun := core.NewGameObject(components.ResourceLight)
 	sun.SetPos(1, 0.75, 0)
 	sun.Transform().LookAt(vec3(0, 0, 0), up())
 	sun.AddComponent(lights.NewDirectional(11, 0.996, 0.863, 0.533, 10))
 	engine.AddObject(sun)
 
-	spot := core.NewGameObject(components.R_LIGHT)
+	spot := core.NewGameObject(components.ResourceLight)
 	spot.SetPos(3, 3.5, 4.6)
 	spot.Transform().LookAt(vec3(0, 1, 0), up())
 	spot.AddComponent(lights.NewSpot(0.9, 0.4, 0.1, 200, 65))
 	engine.AddObject(spot)
 
-	pointLightA := core.NewGameObject(components.R_LIGHT)
+	pointLightA := core.NewGameObject(components.ResourceLight)
 	pointLightA.SetPos(-2, terrainA.Height(-2, 10)+0.5, 10)
 	pointLightA.AddComponent(lights.NewPoint(0, 0.5, 1.0, 50))
 	engine.AddObject(pointLightA)
 
-	pointLightB := core.NewGameObject(components.R_LIGHT)
+	pointLightB := core.NewGameObject(components.ResourceLight)
 	pointLightB.SetPos(-10, terrainA.Height(-10, 0)+0.5, 0)
 	pointLightB.AddComponent(lights.NewPoint(0.0, 0.5, 1.0, 50))
 	engine.AddObject(pointLightB)

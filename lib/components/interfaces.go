@@ -8,14 +8,15 @@ import (
 	"github.com/stojg/geode/lib/physics"
 )
 
+// The following constants are set on Gameobject and can be combines with binary | to decide which features they have
 const (
-	_    = iota // ignore first value by assigning to blank identifier
-	R_NA = 1 << iota
-	R_DEFAULT
-	R_TERRAIN
-	R_LIGHT
-	R_PARTICLE
-	R_SHADOWED
+	_          = iota // ignore first value by assigning to blank identifier
+	ResourceNA = 1 << iota
+	StandardRender
+	ResourceTerrain
+	ResourceLight
+	ParticleRender
+	Shadowed
 )
 
 type FBO interface {

@@ -85,7 +85,7 @@ func (g *Scene) Render(r *rendering.Renderer) {
 
 func (g *Scene) rootObject() *GameObject {
 	if g.root == nil {
-		g.root = NewGameObject(components.R_NA)
+		g.root = NewGameObject(components.ResourceNA)
 	}
 	return g.root
 }

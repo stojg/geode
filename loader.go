@@ -57,9 +57,9 @@ func loadModel(modelName string) (*core.GameObject, error) {
 		models[modelName] = localModels
 	}
 
-	p := core.NewGameObject(components.R_DEFAULT | components.R_SHADOWED)
+	p := core.NewGameObject(components.StandardRender | components.Shadowed)
 	for _, model := range localModels {
-		g := core.NewGameObject(components.R_DEFAULT | components.R_SHADOWED)
+		g := core.NewGameObject(components.StandardRender | components.Shadowed)
 		g.SetModel(model)
 		p.AddChild(g)
 	}

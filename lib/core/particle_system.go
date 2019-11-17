@@ -78,7 +78,7 @@ func (pd *particleData) Less(i, j int) bool { return pd.distanceToCamera[i] > pd
 func NewParticleSystem(perSecond float64) *ParticleSystem {
 	model, vao := NewParticleModel()
 
-	o := NewGameObject(components.R_PARTICLE)
+	o := NewGameObject(components.ParticleRender)
 	o.SetModel(model)
 
 	vbo := buffers.CreateEmptyFloatVBO(vao, InstanceDataLength*MaxParticles, gl.STREAM_DRAW)

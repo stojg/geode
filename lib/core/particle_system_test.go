@@ -12,7 +12,7 @@ func Test_simpleUpdater(t *testing.T) {
 
 	data.add([3]float32{1, 0, 0}, [3]float32{0, 0, 0}, [3]float32{1, 1, 1}, 0, 1, 1, 1)
 
-	cameraObject := NewGameObject(components.R_NA)
+	cameraObject := NewGameObject(components.ResourceNA)
 	cameraObject.SetPos(0, 0, 0)
 	cam := components.NewCamera(75, 320, 240, 0.1, 512)
 	cameraObject.AddComponent(cam)

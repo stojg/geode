@@ -49,7 +49,7 @@ func (r *Renderer) Render(objects components.Renderable) {
 	r.shadowTextures[idx].BindFrameBuffer()
 	gl.ClearColor(1, 1, 1, 1)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-	objects.Render(r.Camera(), r.shader, r, components.R_SHADOWED)
+	objects.Render(r.Camera(), r.shader, r, components.Shadowed)
 	//terrains.Render(r.Camera(), r.shader, r)
 	//e.blurShadowMap(idx, 1)
 }
