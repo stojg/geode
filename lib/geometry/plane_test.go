@@ -11,7 +11,6 @@ func TestNormalisePlane(t *testing.T) {
 }
 
 func TestDistanceToPoint(t *testing.T) {
-
 	type pos [3]float32
 	plane := Plane{0, 0, -1, 1}
 

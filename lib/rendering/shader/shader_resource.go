@@ -7,8 +7,8 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
-func NewShaderResource() *ShaderResource {
-	s := &ShaderResource{
+func NewResource() *Resource {
+	s := &Resource{
 		Program:  gl.CreateProgram(),
 		refCount: 1,
 		uniforms: make(map[string]int32),
@@ -21,7 +21,7 @@ func NewShaderResource() *ShaderResource {
 	return s
 }
 
-type ShaderResource struct {
+type Resource struct {
 	Program      uint32
 	refCount     int
 	uniforms     map[string]int32
@@ -29,15 +29,15 @@ type ShaderResource struct {
 	uniformTypes []string
 }
 
-func (r *ShaderResource) AddReference() {
+func (r *Resource) AddReference() {
 	r.refCount++
 }
 
-func (r *ShaderResource) Cleanup() {
+func (r *Resource) Cleanup() {
 	gl.DeleteBuffers(1, &r.Program)
 }
 
-func (r *ShaderResource) UniformExists(name string) bool {
+func (r *Resource) UniformExists(name string) bool {
 	for _, n := range r.uniformNames {
 		if name == n {
 			return true
@@ -45,10 +45,10 @@ func (r *ShaderResource) UniformExists(name string) bool {
 	}
 	return false
 }
-func (r *ShaderResource) AddUniformName(name string) {
+func (r *Resource) AddUniformName(name string) {
 	r.uniformNames = append(r.uniformNames, name)
 }
 
-func (r *ShaderResource) AdduniformType(t string) {
+func (r *Resource) AdduniformType(t string) {
 	r.uniformTypes = append(r.uniformTypes, t)
 }

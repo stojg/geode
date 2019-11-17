@@ -11,12 +11,12 @@ func (f Frustum) Normalise() {
 	f[5].Normalise()
 }
 
-func (f Frustum) AABBInside(A *AABB) bool {
+func (f Frustum) AABBInside(aabb *AABB) bool {
 	for i := 0; i < 6; i++ {
 		// compute distance of box center from plane
-		d := f[i].Dot(A.C())
+		d := f[i].Dot(aabb.C())
 		// compute the projection interval radius of b onto plane
-		r := A.R()[0]*abs(f[i][0]) + A.R()[1]*abs(f[i][1]) + A.R()[2]*abs(f[i][2])
+		r := aabb.R()[0]*abs(f[i][0]) + aabb.R()[1]*abs(f[i][1]) + aabb.R()[2]*abs(f[i][2])
 		if d+r <= -f[i][3] {
 			return false
 		}

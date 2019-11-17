@@ -6,11 +6,10 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 )
 
-// ConvertToVertices takes an slice of float32 and turnes them into nice Vertexes.
-// It requires that the indata is packed in this order: [3] position, [3] normals, [2] texture coordinates. If the
+// ConvertToVertices takes an slice of float32 and turns them into nice Vertexes.
+// It requires that the in data is packed in this order: [3] position, [3] normals, [2] texture coordinates. If the
 // in data doesn't follow this convention, there will be tears and possibly your GPU will implode.
 func ConvertToVertices(meshdata []float32, indices []uint32) []Vertex {
-
 	const stride = 8
 
 	if len(meshdata)%stride != 0 {

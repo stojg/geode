@@ -8,21 +8,21 @@ type AABB struct {
 }
 
 // C returns the center point of the AABB
-func (A *AABB) C() mgl32.Vec3 {
-	return A.c
+func (a *AABB) C() mgl32.Vec3 {
+	return a.c
 }
 
 // SetC sets the center point of the AABB
-func (A *AABB) SetC(c mgl32.Vec3) {
-	A.c = c
+func (a *AABB) SetC(c mgl32.Vec3) {
+	a.c = c
 }
 
 // R return the radius, or half width extents, of the AABB
-func (A *AABB) R() mgl32.Vec3 {
-	return A.r
+func (a *AABB) R() mgl32.Vec3 {
+	return a.r
 }
 
 // SetR set set the radius, or half width extents, of the AABB
-func (A *AABB) SetR(r mgl32.Vec3) {
-	A.r = r
+func (a *AABB) SetR(r mgl32.Vec3) {
+	a.r = r
 }

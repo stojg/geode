@@ -108,5 +108,4 @@ func CreateEmptyUBO(size int) uint32 {
 	gl.BufferData(gl.UNIFORM_BUFFER, size, nil, gl.STATIC_DRAW)
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
 	return bufferObject
-
 }

@@ -8,7 +8,6 @@ import (
 )
 
 func TestShader_NewShader(t *testing.T) {
-
 	defer setupOpenGL(t)()
 
 	shaderFolder = "./testdata/"

@@ -88,7 +88,6 @@ func (l *BaseLight) Projection() mgl32.Mat4 {
 }
 
 func (l *BaseLight) calcRange() {
-
 	max := l.color[0]
 	if l.color[1] > max {
 		max = l.color[1]

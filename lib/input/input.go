@@ -20,7 +20,6 @@ var (
 var inst *glfw.Window
 
 func SetWindow(window *glfw.Window) {
-
 	inst = window
 	currentKeys = make(map[glfw.Key]bool)
 	downKeys = make(map[glfw.Key]bool)

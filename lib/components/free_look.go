@@ -22,7 +22,6 @@ type FreeLook struct {
 }
 
 func (c *FreeLook) Input(elapsed time.Duration) {
-
 	if input.ButtonDown(glfw.MouseButton1) && !c.locked {
 		c.locked = true
 		input.HideCursor()

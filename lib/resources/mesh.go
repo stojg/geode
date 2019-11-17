@@ -28,7 +28,6 @@ type Mesh struct {
 }
 
 func (m *Mesh) SetVertices(vertices []Vertex, indices []uint32) {
-
 	// Create buffers/arrays
 	gl.GenVertexArrays(1, &m.vao)
 	gl.BindVertexArray(m.vao)
@@ -111,7 +110,6 @@ func halfWidth(in []Vertex, direction [3]float32) (float32, float32) {
 	center := 0.5 * (max + min)
 	extent := 0.5 * (max - min)
 	return center, extent
-
 }
 
 func CalcMinMax(in []Vertex, direction [3]float32) [2]float32 {

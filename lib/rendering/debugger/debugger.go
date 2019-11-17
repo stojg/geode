@@ -67,7 +67,7 @@ func AddShadowTexture(in, out components.Texture) {
 	gl.Disable(gl.DEPTH_TEST)
 
 	if out == nil {
-		gl.Viewport(0, 0, int32(w), int32(h))
+		gl.Viewport(0, 0, w, h)
 		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 	} else {
 		out.BindFrameBuffer()

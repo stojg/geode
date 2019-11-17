@@ -17,7 +17,6 @@ import (
 )
 
 func New(width, height, viewPortWidth, viewPortHeight int, logger components.Logger) *Renderer {
-
 	// @todo add more output
 	var nrAttributes int32
 	gl.GetIntegerv(gl.MAX_VERTEX_ATTRIBS, &nrAttributes)

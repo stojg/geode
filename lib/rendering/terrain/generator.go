@@ -28,7 +28,7 @@ func (h *HeightGenerator) Height(x, z float64) float32 {
 	d := math.Pow(2, OCTAVES-1)
 	for i := 0.0; i < OCTAVES; i++ {
 		freq := math.Pow(2, i) / d
-		amp := math.Pow(ROUGHNESS, float64(i)) * AMPLITUDE
+		amp := math.Pow(ROUGHNESS, i) * AMPLITUDE
 		total += h.getInterpolatedNoise((x+xOffset)*freq, (z+zOffset)*freq) * amp
 	}
 	return float32(total)

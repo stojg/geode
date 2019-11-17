@@ -25,5 +25,4 @@ func TestTransform_Update(t *testing.T) {
 	if tr.dirty {
 		t.Error("Expected dirty to be false after update")
 	}
-
 }

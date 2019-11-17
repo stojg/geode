@@ -51,7 +51,6 @@ func parse(src io.Reader) (*objectFile, int, error) {
 		//
 
 		switch t {
-
 		// comments - #
 		case tComment:
 			if currentObject == nil && len(root.MaterialLibraries) == 0 {

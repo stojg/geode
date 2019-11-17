@@ -19,7 +19,6 @@ func DrawQuad() {
 	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
 	gl.BindVertexArray(0)
 	debug.AddVertexBind()
-
 }
 
 func setupQuad() {
@@ -38,5 +37,4 @@ func setupQuad() {
 	instanceDataLength := int32(5) // 3 pos, 2 TexCoords
 	buffers.AddAttribute(quadVao, vbo, 0, 3, instanceDataLength, 0)
 	buffers.AddAttribute(quadVao, vbo, 1, 2, instanceDataLength, 3)
-
 }

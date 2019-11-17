@@ -10,7 +10,6 @@ import (
 
 // Convolute takes a cubemap texture and convolutes
 func Convolute(src, dest components.Texture) {
-
 	shad := shader.NewShader("convolute")
 	shad.Bind()
 

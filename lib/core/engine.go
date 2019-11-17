@@ -12,7 +12,6 @@ import (
 )
 
 func NewEngine(width, height int, title string, l components.Logger) (*Engine, error) {
-
 	window, err := NewWindow(width, height, title, false)
 	if err != nil {
 		return nil, err
@@ -32,7 +31,6 @@ func NewEngine(width, height int, title string, l components.Logger) (*Engine, e
 	engine.scene.SetState(renderer.State())
 
 	return engine, nil
-
 }
 
 type Engine struct {
@@ -47,24 +45,24 @@ func (e *Engine) Renderer() components.Renderer {
 	return e.renderer
 }
 
-func (m *Engine) Start() {
-	m.run()
+func (e *Engine) Start() {
+	e.run()
 }
 
-func (m *Engine) Width() int {
-	return m.window.width
+func (e *Engine) Width() int {
+	return e.window.width
 }
 
-func (m *Engine) Height() int {
-	return m.window.height
+func (e *Engine) Height() int {
+	return e.window.height
 }
 
-func (m *Engine) AddObject(object components.Object) {
-	m.scene.AddObject(object)
+func (e *Engine) AddObject(object components.Object) {
+	e.scene.AddObject(object)
 }
 
-func (m *Engine) run() {
-	m.isRunning = true
+func (e *Engine) run() {
+	e.isRunning = true
 
 	var renderFrames int
 	var frameCounter time.Duration
@@ -75,10 +73,9 @@ func (m *Engine) run() {
 	currentTime := time.Now()
 	var accumulator time.Duration
 
-	defer m.window.Close()
+	defer e.window.Close()
 
-	for m.isRunning {
-
+	for e.isRunning {
 		newTime := time.Now()
 		frameTime := newTime.Sub(currentTime)
 		currentTime = newTime
@@ -86,19 +83,19 @@ func (m *Engine) run() {
 		accumulator += frameTime
 
 		for accumulator >= frameTime {
-			if m.window.ShouldClose() {
-				m.isRunning = false
+			if e.window.ShouldClose() {
+				e.isRunning = false
 			}
 			input.Update()
-			m.scene.Input(dt)
-			m.scene.Update(dt)
+			e.scene.Input(dt)
+			e.scene.Update(dt)
 			accumulator -= dt
 			t += dt
 			frameCounter += dt
 		}
 
-		m.scene.Render(m.renderer)
-		m.window.Maintenance()
+		e.scene.Render(e.renderer)
+		e.window.Maintenance()
 
 		renderFrames++
 
@@ -113,7 +110,7 @@ func (m *Engine) run() {
 			vb := debug.GetVertexBind() / uint64(renderFrames)
 			logLine := fmt.Sprintf("%0.1fms - %0.0f%%, %d draw calls, %d shader switches, %d uniform updates, %d vertex binds, %d particles", msPerFrame, percent, dc, ss, us, vb, debug.GetParticles())
 			fmt.Println(logLine)
-			m.logger.Println(logLine)
+			e.logger.Println(logLine)
 			renderFrames = 0
 			frameCounter = 0
 		}

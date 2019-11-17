@@ -17,12 +17,11 @@ import (
 	"github.com/stojg/geode/lib/physics"
 )
 
-var loadedShaders = make(map[string]*ShaderResource)
+var loadedShaders = make(map[string]*Resource)
 var shaderInUse uint32 = 2 ^ 32 - 1
 var shaderFolder = "./res/shaders/"
 
 func NewShader(fileName string) *Shader {
-
 	s := &Shader{
 		filename: fileName,
 	}
@@ -31,7 +30,7 @@ func NewShader(fileName string) *Shader {
 		s.resource = oldResource
 		s.resource.AddReference()
 	} else {
-		s.resource = NewShaderResource()
+		s.resource = NewResource()
 	}
 
 	vertexShaderText, err := s.loadShader(fileName + ".vert")
@@ -68,7 +67,7 @@ func NewShader(fileName string) *Shader {
 
 type Shader struct {
 	filename string
-	resource *ShaderResource
+	resource *Resource
 }
 
 func (s *Shader) Bind() {
@@ -95,7 +94,6 @@ func (s *Shader) UpdateTransform(transform *physics.Transform, engine components
 }
 
 func (s *Shader) UpdateUniforms(material components.Material, state components.RenderState) {
-
 	for i, name := range s.resource.uniformNames {
 		uniformType := s.resource.uniformTypes[i]
 
@@ -184,7 +182,6 @@ func (s *Shader) loadShader(filepath string) (string, error) {
 }
 
 func (s *Shader) addIncludes(shaderText string) (string, error) {
-
 	var re = regexp.MustCompile(`^#include\s"([^"]*)"`)
 
 	var result string
@@ -255,7 +252,6 @@ func (s *Shader) findAllUniforms(shaderText string) {
 				s.resource.AdduniformType(uType)
 				s.findUniformLocation(uType, newName, uniformStructs)
 			}
-
 		}
 	}
 }
@@ -313,7 +309,6 @@ func (s Shader) findUniformStructs(shaderText string) map[string][]glslStruct {
 }
 
 func (s *Shader) compile() {
-
 	gl.LinkProgram(s.resource.Program)
 
 	var status int32
@@ -335,7 +330,6 @@ func (s *Shader) cleanUp(shader uint32) {
 }
 
 func (s *Shader) createProgram(text string, shaderType uint32) uint32 {
-
 	shader := gl.CreateShader(shaderType)
 
 	if shader == 0 {

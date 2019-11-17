@@ -10,7 +10,6 @@ import (
 )
 
 func NewRenderState() *RenderState {
-
 	s := &RenderState{
 		samplerMap:    make(map[string]uint32),
 		textures:      make(map[string]components.Texture),
@@ -19,7 +18,7 @@ func NewRenderState() *RenderState {
 		uniformsFloat: make(map[string]float32),
 	}
 
-	size := int(3 * buffers.SizeOfMat4)
+	size := 3 * buffers.SizeOfMat4
 	s.uboMatrices = buffers.CreateEmptyUBO(size)
 	// @todo, this is hacky since the index must be the same as in shader binding, so really, we need to query it per
 	// @todo shader and manage it per shader, but we count on there only being one UBO block for now

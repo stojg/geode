@@ -28,7 +28,6 @@ func CubeViews() []mgl32.Mat4 {
 }
 
 func NewCubeMap(width, height int32, mipMap bool) *CubeMap {
-
 	if width == 0 || height == 0 {
 		panic("texture cannot have zero height or width")
 	}
@@ -129,11 +128,9 @@ func (cubeMap *CubeMap) reserve() {
 	for i := 0; i < 6; i++ {
 		gl.TexImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X+uint32(i), 0, gl.RGB16F, cubeMap.width, cubeMap.height, 0, gl.RGB, gl.FLOAT, nil)
 	}
-
 }
 
 func (cubeMap *CubeMap) loadEquiRectangular(filename string) {
-
 	if cubeMap.width == 0 || cubeMap.height == 0 {
 		panic("texture cannot have zero height or width")
 	}

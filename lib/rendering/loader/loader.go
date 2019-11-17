@@ -27,8 +27,8 @@ func Load(filename string) ([][]float32, [][]uint32, error) {
 		return nil, nil, fmt.Errorf("error in '%s' at line: %d", filename, num)
 	}
 
-	var perObjectVertices [][]float32
-	var perObjectIndices [][]uint32
+	perObjectVertices := make([][]float32, len(obj.Objects))
+	perObjectIndices := make([][]uint32, len(obj.Objects))
 
 	for _, object := range obj.Objects {
 		indices, uniqueVertices := calculateIndices(object)

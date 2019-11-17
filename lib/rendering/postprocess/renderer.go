@@ -59,7 +59,6 @@ type Renderer struct {
 }
 
 func (r *Renderer) Render(in *framebuffer.Texture, bypass bool) {
-
 	gl.Disable(gl.DEPTH_TEST)
 	if bypass {
 		in.ResolveToFBO(r.sourceTexture)

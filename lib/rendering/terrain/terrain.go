@@ -65,9 +65,9 @@ func (t *Terrain) generateTerrain(gridX, gridZ float32) ([]float32, []uint32) {
 	for gz := 0; gz < VertexCount-1; gz++ {
 		for gx := 0; gx < VertexCount-1; gx++ {
 			topLeft := uint32((gz * VertexCount) + gx)
-			topRight := uint32(topLeft + 1)
+			topRight := topLeft + 1
 			bottomLeft := uint32(((gz + 1) * VertexCount) + gx)
-			bottomRight := uint32(bottomLeft + 1)
+			bottomRight := bottomLeft + 1
 
 			indices = append(indices, topLeft)
 			indices = append(indices, bottomLeft)

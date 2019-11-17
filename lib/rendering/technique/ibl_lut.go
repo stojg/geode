@@ -8,7 +8,6 @@ import (
 )
 
 func BrdfLutTexture() *framebuffer.Texture {
-
 	texture := framebuffer.NewTexture(gl.COLOR_ATTACHMENT0, 512, 512, gl.RG16F, gl.RG, gl.FLOAT, gl.LINEAR, false)
 
 	shad := shader.NewShader("ibl_brdf")

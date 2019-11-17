@@ -94,9 +94,8 @@ func loadLDRTexture(filename string, srgb bool) (*TextureResource, error) {
 
 	if srgb {
 		return createTextureResource(rgba.Rect.Size().X, rgba.Rect.Size().Y, gl.SRGB_ALPHA, gl.UNSIGNED_BYTE, rgba.Pix), nil
-	} else {
-		return createTextureResource(rgba.Rect.Size().X, rgba.Rect.Size().Y, gl.RGBA8, gl.UNSIGNED_BYTE, rgba.Pix), nil
 	}
+	return createTextureResource(rgba.Rect.Size().X, rgba.Rect.Size().Y, gl.RGBA8, gl.UNSIGNED_BYTE, rgba.Pix), nil
 }
 
 func loadMetallicTexture(filename string) (*TextureResource, error) {

@@ -26,7 +26,6 @@ func init() {
 func loadModel(modelName string) (*core.GameObject, error) {
 	localModels, ok := models[modelName]
 	if !ok {
-
 		var mi struct {
 			Mesh     string   `json:"mesh"`
 			Textures []string `json:"textures"`
@@ -68,13 +67,11 @@ func loadModel(modelName string) (*core.GameObject, error) {
 }
 
 func loadModelFromMesh(mesh components.Drawable, texture string, resourceType int) *core.GameObject {
-
 	material := loadMaterial(texture)
 	m := core.NewModel(mesh, material)
 	p := core.NewGameObject(resourceType)
 	p.SetModel(m)
 	return p
-
 }
 
 func loadMaterial(texture string) *resources.Material {
@@ -117,11 +114,11 @@ func loadMeshesFromObj(obj string, material []*resources.Material) []*resources.
 	if len(objVert) != len(material) {
 		fmt.Printf("Have %d meshes in object, but only %d materials\n", len(objVert), len(material))
 	}
-	var meshes []*resources.Mesh
+	meshes := make([]*resources.Mesh, len(objVert))
 	for i, data := range objVert {
 		mesh := resources.NewMesh()
 		mesh.SetVertices(resources.ConvertToVertices(data, objInd[i]), objInd[i])
-		meshes = append(meshes, mesh)
+		meshes[i] = mesh
 	}
 	return meshes
 }

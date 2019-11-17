@@ -33,50 +33,49 @@ type particleData struct {
 	colour           [MaxParticles][3]float32
 }
 
-func (p *particleData) add(pos, vel, colour [3]float32, scale, rotAngle, gravity, life float32) {
-	if p.aliveCount >= MaxParticles {
+func (pd *particleData) add(pos, vel, colour [3]float32, scale, rotAngle, gravity, life float32) {
+	if pd.aliveCount >= MaxParticles {
 		return
 	}
-	p.alive[p.aliveCount] = true
-	p.transparency[p.aliveCount] = 1.0
-	p.position[p.aliveCount] = pos
-	p.velocity[p.aliveCount] = vel
-	p.scale[p.aliveCount] = scale
-	p.rotation[p.aliveCount] = rotAngle
-	p.gravity[p.aliveCount] = gravity * Gravity
-	p.lifeLength[p.aliveCount] = life
-	p.elapsedTime[p.aliveCount] = 0
-	p.distanceToCamera[p.aliveCount] = 0
-	p.colour[p.aliveCount] = colour
-	p.aliveCount++
+	pd.alive[pd.aliveCount] = true
+	pd.transparency[pd.aliveCount] = 1.0
+	pd.position[pd.aliveCount] = pos
+	pd.velocity[pd.aliveCount] = vel
+	pd.scale[pd.aliveCount] = scale
+	pd.rotation[pd.aliveCount] = rotAngle
+	pd.gravity[pd.aliveCount] = gravity * Gravity
+	pd.lifeLength[pd.aliveCount] = life
+	pd.elapsedTime[pd.aliveCount] = 0
+	pd.distanceToCamera[pd.aliveCount] = 0
+	pd.colour[pd.aliveCount] = colour
+	pd.aliveCount++
 }
 
-func (p *particleData) remove(id int) {
-	p.alive[id] = false
-	p.swap(id, p.aliveCount-1)
-	p.aliveCount--
+func (pd *particleData) remove(id int) {
+	pd.alive[id] = false
+	pd.swap(id, pd.aliveCount-1)
+	pd.aliveCount--
 }
 
-func (p *particleData) swap(a, b int) {
-	p.velocity[a], p.velocity[b] = p.velocity[b], p.velocity[a]
-	p.gravity[a], p.gravity[b] = p.gravity[b], p.gravity[a]
-	p.position[a], p.position[b] = p.position[b], p.position[a]
-	p.transparency[a], p.transparency[b] = p.transparency[b], p.transparency[a]
-	p.rotation[a], p.rotation[b] = p.rotation[b], p.rotation[a]
-	p.scale[a], p.scale[b] = p.scale[b], p.scale[a]
-	p.elapsedTime[a], p.elapsedTime[b] = p.elapsedTime[b], p.elapsedTime[a]
-	p.alive[a], p.alive[b] = p.alive[b], p.alive[a]
-	p.lifeLength[a], p.lifeLength[b] = p.lifeLength[b], p.lifeLength[a]
-	p.distanceToCamera[a], p.distanceToCamera[b] = p.distanceToCamera[b], p.distanceToCamera[a]
-	p.colour[a], p.colour[b] = p.colour[b], p.colour[a]
+func (pd *particleData) swap(a, b int) {
+	pd.velocity[a], pd.velocity[b] = pd.velocity[b], pd.velocity[a]
+	pd.gravity[a], pd.gravity[b] = pd.gravity[b], pd.gravity[a]
+	pd.position[a], pd.position[b] = pd.position[b], pd.position[a]
+	pd.transparency[a], pd.transparency[b] = pd.transparency[b], pd.transparency[a]
+	pd.rotation[a], pd.rotation[b] = pd.rotation[b], pd.rotation[a]
+	pd.scale[a], pd.scale[b] = pd.scale[b], pd.scale[a]
+	pd.elapsedTime[a], pd.elapsedTime[b] = pd.elapsedTime[b], pd.elapsedTime[a]
+	pd.alive[a], pd.alive[b] = pd.alive[b], pd.alive[a]
+	pd.lifeLength[a], pd.lifeLength[b] = pd.lifeLength[b], pd.lifeLength[a]
+	pd.distanceToCamera[a], pd.distanceToCamera[b] = pd.distanceToCamera[b], pd.distanceToCamera[a]
+	pd.colour[a], pd.colour[b] = pd.colour[b], pd.colour[a]
 }
 
-func (a *particleData) Len() int           { return a.aliveCount }
-func (a *particleData) Swap(i, j int)      { a.swap(i, j) }
-func (a *particleData) Less(i, j int) bool { return a.distanceToCamera[i] > a.distanceToCamera[j] }
+func (pd *particleData) Len() int           { return pd.aliveCount }
+func (pd *particleData) Swap(i, j int)      { pd.swap(i, j) }
+func (pd *particleData) Less(i, j int) bool { return pd.distanceToCamera[i] > pd.distanceToCamera[j] }
 
 func NewParticleSystem(perSecond float64) *ParticleSystem {
-
 	model, vao := NewParticleModel()
 
 	o := NewGameObject(components.R_PARTICLE)
@@ -143,7 +142,6 @@ func (s *ParticleSystem) Update(elapsed time.Duration) {
 var instanceData = make([]float32, MaxParticles*InstanceDataLength)
 
 func (s *ParticleSystem) Draw(camera components.Viewer, shader components.Shader, state components.RenderState) {
-
 	elapsed := float32(s.timeElapsed)
 	toCreate := s.calculateToCreate()
 
@@ -170,7 +168,6 @@ func (s *ParticleSystem) Draw(camera components.Viewer, shader components.Shader
 	gl.DrawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, int32(s.data.aliveCount))
 	debug.Drawcall()
 	debug.SetParticles(uint64(s.data.aliveCount))
-
 }
 
 func (s *ParticleSystem) calculateToCreate() float64 {
@@ -197,7 +194,6 @@ func (s *ParticleSystem) IsVisible(camera components.Viewer) bool {
 }
 
 func NewParticleModel() (components.Model, uint32) {
-
 	quadVertices := []float32{
 		-0.5, -0.5, 0.0,
 		0.5, -0.5, 0.0,
@@ -224,29 +220,29 @@ type ParticleModel struct {
 	material components.Material
 }
 
-func (p *ParticleModel) AABB() components.AABB {
-	return p.mesh.AABB()
+func (pm *ParticleModel) AABB() components.AABB {
+	return pm.mesh.AABB()
 }
 
-func (p *ParticleModel) Bind(shader components.Shader, state components.RenderState) {
-	shader.UpdateUniforms(p.material, state)
-	p.mesh.Bind()
+func (pm *ParticleModel) Bind(shader components.Shader, state components.RenderState) {
+	shader.UpdateUniforms(pm.material, state)
+	pm.mesh.Bind()
 }
 
-func (p *ParticleModel) Material() components.Material {
-	return p.material
+func (pm *ParticleModel) Material() components.Material {
+	return pm.material
 }
 
-func (p *ParticleModel) Draw() {
-	p.mesh.Draw()
+func (pm *ParticleModel) Draw() {
+	pm.mesh.Draw()
 }
 
-func (m *ParticleModel) Update(time.Duration) {
+func (pm *ParticleModel) Update(time.Duration) {
 	//fmt.Println("update")
 }
 
-func (p *ParticleModel) Unbind() {
-	p.mesh.Unbind()
+func (pm *ParticleModel) Unbind() {
+	pm.mesh.Unbind()
 }
 
 type ParticleMesh struct {

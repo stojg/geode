@@ -44,7 +44,6 @@ func (o *object) readVertexData(t dataType, value string, strict bool) (*vertexD
 	// Negative values are relative from the end of currently declared geometry. Convert relative values to absolute.
 	geomStats := o.parent.Geometry.stats()
 	for _, decl := range vt.Declarations {
-
 		if decl.vertex != 0 {
 			if decl.vertex < 0 {
 				decl.vertex = decl.vertex + geomStats.Vertices + 1

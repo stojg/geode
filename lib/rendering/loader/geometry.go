@@ -69,7 +69,7 @@ func (g *geometry) readValue(t dataType, value string, strict bool) (*geometryVa
 	case tParam:
 		g.Params = append(g.Params, gv)
 	default:
-		return nil, fmt.Errorf("unkown geometry value type %d %s", t, t)
+		return nil, fmt.Errorf("unknown geometry value type %d %s", t, t)
 	}
 	return gv, nil
 }

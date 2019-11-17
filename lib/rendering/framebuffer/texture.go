@@ -64,7 +64,7 @@ func (t *Texture) Activate(textureSlot uint32) {
 // rendered after this will be rendered to this FBO, and not to the screen.
 func (t *Texture) BindFrameBuffer() {
 	gl.BindFramebuffer(gl.FRAMEBUFFER, t.fbo)
-	gl.Viewport(0, 0, int32(t.width), int32(t.height))
+	gl.Viewport(0, 0, t.width, t.height)
 }
 
 func (t *Texture) UnbindFrameBuffer() {
@@ -153,14 +153,14 @@ func createMultiSampledColourAttachment(texture *Texture, width int, height int)
 }
 
 // Adds a depth buffer to the FBO in the form of a texture, which can later be sampled.
-func createDepthTextureAttachment(texture *Texture, width, height int) {
-	gl.GenTextures(1, &texture.depthTexture)
-	gl.BindTexture(gl.TEXTURE_2D, texture.depthTexture)
-	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT24, int32(width), int32(height), 0, gl.DEPTH_COMPONENT, gl.FLOAT, nil)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, texture.depthTexture, 0)
-}
+//func createDepthTextureAttachment(texture *Texture, width, height int) {
+//	gl.GenTextures(1, &texture.depthTexture)
+//	gl.BindTexture(gl.TEXTURE_2D, texture.depthTexture)
+//	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT24, int32(width), int32(height), 0, gl.DEPTH_COMPONENT, gl.FLOAT, nil)
+//	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+//	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+//	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, texture.depthTexture, 0)
+//}
 
 //  * Adds a depth buffer to the FBO in the form of a render buffer. This can't be used for sampling in the shaders.
 func createDepthBufferAttachment(texture *Texture, width int, height int) {

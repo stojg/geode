@@ -49,11 +49,11 @@ func Flip(src *image.RGBA) {
 		top := y * stride
 		bottom := (height - y - 1) * stride
 		// copy bottom row to buffer
-		copy(scratchBuffer[:], src.Pix[bottom:bottom+stride])
+		copy(scratchBuffer, src.Pix[bottom:bottom+stride])
 		// copy top row to bottom row
 		copy(src.Pix[bottom:bottom+stride], src.Pix[top:top+stride])
 		// copy buffer (previous bottom) to top row
-		copy(src.Pix[top:top+stride], scratchBuffer[:])
+		copy(src.Pix[top:top+stride], scratchBuffer)
 	}
 }
 
@@ -70,10 +70,10 @@ func FlipRaw(width, height int, src []float32) {
 		top := y * stride
 		bottom := (height - y - 1) * stride
 		// copy bottom row to buffer
-		copy(scratchBuffer[:], src[bottom:bottom+stride])
+		copy(scratchBuffer, src[bottom:bottom+stride])
 		// copy top row to bottom row
 		copy(src[bottom:bottom+stride], src[top:top+stride])
 		// copy buffer (bottom) to top row
-		copy(src[top:top+stride], scratchBuffer[:])
+		copy(src[top:top+stride], scratchBuffer)
 	}
 }

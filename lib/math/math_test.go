@@ -9,7 +9,6 @@ import (
 var R mgl32.Mat4
 
 func BenchmarkMul4(b *testing.B) {
-
 	matA := mgl32.Ident4()
 	matB := mgl32.Ident4()
 

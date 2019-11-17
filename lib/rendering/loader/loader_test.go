@@ -26,7 +26,6 @@ func TestCalculateIndices(t *testing.T) {
 
 // BenchmarkCalculateIndices-8   	  200000	      5567 ns/op	    4332 B/op	      19 allocs/op
 func BenchmarkCalculateIndices(b *testing.B) {
-
 	obj, err := getObject("cube.obj")
 	if err != nil {
 		b.Fatal(err)
@@ -47,7 +46,6 @@ func BenchmarkLoad(b *testing.B) {
 }
 
 func getObject(name string) (*objectFile, error) {
-
 	f, err := os.Open("_testdata/" + name)
 	if err != nil {
 		return nil, err

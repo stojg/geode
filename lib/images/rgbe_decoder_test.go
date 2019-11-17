@@ -34,7 +34,6 @@ EXPOSURE=          1.0000000000000
 }
 
 func Test_readPixelsRLE(t *testing.T) {
-
 	tests := []struct {
 		name   string
 		w, h   int

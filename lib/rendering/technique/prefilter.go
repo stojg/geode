@@ -12,12 +12,11 @@ import (
 )
 
 func Prefilter(src, dest components.Texture) {
+	shad := shader.NewShader("ibl_prefilter")
+	shad.Bind()
 
-	shader := shader.NewShader("ibl_prefilter")
-	shader.Bind()
-
-	shader.UpdateUniform("projection", framebuffer.CubeProjection())
-	shader.UpdateUniform("environmentMap", int32(0))
+	shad.UpdateUniform("projection", framebuffer.CubeProjection())
+	shad.UpdateUniform("environmentMap", int32(0))
 	src.Activate(0)
 
 	maxMipLevels := 5
@@ -32,20 +31,18 @@ func Prefilter(src, dest components.Texture) {
 		gl.Viewport(0, 0, mipWidth, mipHeight)
 
 		roughness := float32(mip) / float32(maxMipLevels-1)
-		shader.UpdateUniform("roughness", roughness)
+		shad.UpdateUniform("roughness", roughness)
 
 		for i, captureView := range framebuffer.CubeViews() {
-			shader.UpdateUniform("view", captureView)
+			shad.UpdateUniform("view", captureView)
 			gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_CUBE_MAP_POSITIVE_X+uint32(i), dest.ID(), int32(mip))
 			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 			primitives.DrawCube()
 		}
-
 	}
 	gl.Enable(gl.CULL_FACE)
 
 	if debug.CheckForError("prefilter - end") {
 		panic("crap")
 	}
-
 }
