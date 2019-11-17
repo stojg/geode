@@ -21,21 +21,20 @@ func Load(filename string) ([][]float32, [][]uint32, error) {
 	}
 	defer f.Close()
 
-	obj, num, err := parse(f)
+	// @todo this i just clumsy
+	obj, lineNum, err := parse(f)
 
 	if err != nil {
-		return nil, nil, fmt.Errorf("error in '%s' at line: %d", filename, num)
+		return nil, nil, fmt.Errorf("error in '%s' at line: %d", filename, lineNum)
 	}
 
-	perObjectVertices := make([][]float32, len(obj.Objects))
-	perObjectIndices := make([][]uint32, len(obj.Objects))
-
-	for _, object := range obj.Objects {
-		indices, uniqueVertices := calculateIndices(object)
-		perObjectVertices = append(perObjectVertices, uniqueVertices)
-		perObjectIndices = append(perObjectIndices, indices)
+	vertices := make([][]float32, len(obj.Objects))
+	indices := make([][]uint32, len(obj.Objects))
+	for i, object := range obj.Objects {
+		indices[i], vertices[i] = calculateIndices(object)
 	}
-	return perObjectVertices, perObjectIndices, nil
+
+	return vertices, indices, nil
 }
 
 func calculateIndices(object *object) ([]uint32, []float32) {
