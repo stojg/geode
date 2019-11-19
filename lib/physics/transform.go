@@ -68,7 +68,7 @@ func (t *Transform) LookAtRotation(point mgl32.Vec3, up mgl32.Vec3) mgl32.Quat {
 	right := direction.Cross(up)
 	up = right.Cross(direction)
 
-	// Because of the 1rst rotation, the up is probably completely screwed up.
+	// Because of the 1st rotation, the up is probably completely screwed up.
 	// Find the rotation between the "up" of the rotated object, and the desired up
 	upCur := rotDir.Rotate(mgl32.Vec3{0, 1, 0})
 	rotUp := mgl32.QuatBetweenVectors(upCur, up)
