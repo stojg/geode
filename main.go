@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/pkg/profile"
 	"github.com/stojg/geode/lib/components"
 	"github.com/stojg/geode/lib/core"
 	"github.com/stojg/geode/lib/lights"
@@ -16,12 +15,21 @@ import (
 )
 
 func main() {
+	//traceFile, err := os.Create("t.out")
+	//if err != nil {
+	//	panic(err)
+	//}
+	//defer traceFile.Close()
+
+	//if err := trace.Start(traceFile); err != nil {
+	//	panic(err)
+	//}
+	//defer trace.Stop()
+
 	rand.Seed(19)
 	l := newLogger("gl.log")
 
-	err := run(l)
-
-	if err != nil {
+	if err := run(l); err != nil {
 		l.ErrorLn(err)
 		if err := l.close(); err != nil {
 			fmt.Println(".. in addition the log file had problem closing", err)
@@ -118,8 +126,8 @@ func run(l components.Logger) error {
 	bot.SetPos(0, terrainA.Height(0, 0), 0)
 	engine.AddObject(bot)
 
-	defer profile.Start().Stop()
 	engine.Start()
+
 	return nil
 }
 
