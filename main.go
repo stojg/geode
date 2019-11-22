@@ -34,8 +34,8 @@ func main() {
 }
 
 func run(l components.Logger) error {
-	w := 1024
-	h := int(float32(w) / (4.0 / 3.0))
+	w := 1280
+	h := int(float32(w) / (16.0 / 9.0))
 	engine, err := core.NewEngine(w, h, "graphics", l)
 	if err != nil {
 		return err
