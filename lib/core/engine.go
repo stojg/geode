@@ -65,14 +65,19 @@ func (e *Engine) run() {
 	e.isRunning = true
 	defer e.window.Close()
 
-	const updateStep = 8 * time.Millisecond
+	const updateStep = 10 * time.Millisecond
 
-	var total, accumulator, debugTimer time.Duration
+	var total, accumulator time.Duration
+	var debugTimer time.Duration
 	var updatedFrames, renderedFrames int
 
 	currentTime := time.Now()
 
 	for e.isRunning {
+		if e.window.ShouldClose() {
+			e.isRunning = false
+		}
+
 		newTime := time.Now()
 		frameTime := newTime.Sub(currentTime)
 		currentTime = newTime
@@ -80,16 +85,11 @@ func (e *Engine) run() {
 		accumulator += frameTime
 		debugTimer += frameTime
 
-		if e.window.ShouldClose() {
-			e.isRunning = false
-		}
-
 		// The renderer produces time and the simulation consumes it in discrete dt sized steps.
+		input.Update()
+		e.scene.Input(updateStep)
+
 		for accumulator >= updateStep {
-			// @todo why all this input update, scene input and then scene update?
-			// need to figure out where this would fit in a "physics integrate loop" way
-			input.Update()
-			e.scene.Input(updateStep)
 			e.scene.Update(updateStep)
 			accumulator -= updateStep
 			total += updateStep
