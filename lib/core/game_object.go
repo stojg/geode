@@ -11,12 +11,14 @@ import (
 )
 
 func NewGameObject(rtype int) *GameObject {
-	return &GameObject{
+	g := &GameObject{
 		rtype:         rtype,
 		transform:     physics.NewTransform(),
 		modelEntities: make(map[components.Model][]components.Object),
 		childRtypes:   make(map[int][]components.Object),
 	}
+	g.transform.SetPos(mgl32.Vec3{0, 0, 0})
+	return g
 }
 
 type GameObject struct {
