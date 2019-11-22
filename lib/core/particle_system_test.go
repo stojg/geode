@@ -85,6 +85,7 @@ func Benchmark_simpleUpdater(b *testing.B) {
 func Test_calculateToCreate(t *testing.T) {
 	s := &ParticleSystem{
 		perSecond: 10.0,
+		data:      &particleData{},
 	}
 	s.Update(time.Second)
 
