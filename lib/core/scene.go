@@ -71,8 +71,6 @@ func (g *Scene) Input(elapsed time.Duration) {
 		g.state.SetFloat("x_exposure", g.exposure)
 		fmt.Printf("setting exposure to %0.1f\n", g.exposure)
 	}
-
-	g.rootObject().Input(elapsed)
 }
 
 func (g *Scene) Update(elapsed time.Duration) {

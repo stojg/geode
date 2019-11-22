@@ -64,15 +64,6 @@ func (g *GameObject) AddComponent(component components.Component) {
 	g.components = append(g.components, component)
 }
 
-func (g *GameObject) Input(elapsed time.Duration) {
-	for _, c := range g.components {
-		c.Input(elapsed)
-	}
-	for _, o := range g.children {
-		o.Input(elapsed)
-	}
-}
-
 func (g *GameObject) AllChildren() []components.Object {
 	var a []components.Object
 	for _, c := range g.children {

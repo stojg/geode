@@ -19,7 +19,7 @@ type FreeMove struct {
 	speed float32
 }
 
-func (c *FreeMove) Input(elapsed time.Duration) {
+func (c *FreeMove) Update(elapsed time.Duration) {
 	amount := float32(elapsed.Seconds()) * c.speed
 
 	if input.Key(glfw.KeyW) {

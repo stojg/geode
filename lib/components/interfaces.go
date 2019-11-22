@@ -69,7 +69,6 @@ type AABB interface {
 
 type Component interface {
 	Updatable
-	Input(time.Duration)
 	AddToEngine(state RenderState)
 	SetParent(Object)
 }
@@ -98,7 +97,6 @@ type Model interface {
 	AABB() AABB
 	Unbindable
 	Updatable
-	//ID() uint
 	Bind(Shader, RenderState)
 	Draw()
 	Material() Material
@@ -108,7 +106,6 @@ type Object interface {
 	Transformable
 	Updatable
 	Model() Model
-	Input(elapsed time.Duration)
 	AllChildren() []Object
 	IsType(int) bool
 	Type() int

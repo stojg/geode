@@ -85,7 +85,6 @@ func (e *Engine) run() {
 		accumulator += frameTime
 		debugTimer += frameTime
 
-		// The renderer produces time and the simulation consumes it in discrete dt sized steps.
 		input.Update()
 		e.scene.Input(updateStep)
 
