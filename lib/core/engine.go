@@ -63,17 +63,14 @@ func (e *Engine) AddObject(object components.Object) {
 
 func (e *Engine) run() {
 	e.isRunning = true
+	defer e.window.Close()
 
-	var renderFrames int
-	var frameCounter time.Duration
+	const updateStep = 8 * time.Millisecond
 
-	var t time.Duration
-	var dt = time.Millisecond
+	var total, accumulator, debugTimer time.Duration
+	var updatedFrames, renderedFrames int
 
 	currentTime := time.Now()
-	var accumulator time.Duration
-
-	defer e.window.Close()
 
 	for e.isRunning {
 		newTime := time.Now()
@@ -81,38 +78,45 @@ func (e *Engine) run() {
 		currentTime = newTime
 
 		accumulator += frameTime
+		debugTimer += frameTime
 
-		for accumulator >= frameTime {
-			if e.window.ShouldClose() {
-				e.isRunning = false
-			}
+		if e.window.ShouldClose() {
+			e.isRunning = false
+		}
+
+		// The renderer produces time and the simulation consumes it in discrete dt sized steps.
+		for accumulator >= updateStep {
+			// @todo why all this input update, scene input and then scene update?
+			// need to figure out where this would fit in a "physics integrate loop" way
 			input.Update()
-			e.scene.Input(dt)
-			e.scene.Update(dt)
-			accumulator -= dt
-			t += dt
-			frameCounter += dt
+			e.scene.Input(updateStep)
+			e.scene.Update(updateStep)
+			accumulator -= updateStep
+			total += updateStep
+			updatedFrames++
 		}
 
 		e.scene.Render(e.renderer)
+		renderedFrames++
+
 		e.window.Maintenance()
 
-		renderFrames++
-
-		if frameCounter >= time.Second*5 {
-			//fps := renderFrames/5)
-			secondsPerFrame := (time.Second * 5 / time.Duration(renderFrames)).Seconds()
+		if debugTimer >= time.Second*5 {
+			fps := renderedFrames / 5.0
+			ups := updatedFrames / 5.0
+			secondsPerFrame := (time.Second * 5 / time.Duration(renderedFrames)).Seconds()
 			msPerFrame := secondsPerFrame * 1000
 			percent := (msPerFrame / (1000 / 60)) * 100
-			dc := debug.GetDrawcalls() / uint64(renderFrames)
-			ss := debug.GetShaderSwitches() / uint64(renderFrames)
-			us := debug.GetUniformSet() / uint64(renderFrames)
-			vb := debug.GetVertexBind() / uint64(renderFrames)
-			logLine := fmt.Sprintf("%0.1fms - %0.0f%%, %d draw calls, %d shader switches, %d uniform updates, %d vertex binds, %d particles", msPerFrame, percent, dc, ss, us, vb, debug.GetParticles())
+			dc := debug.GetDrawcalls() / uint64(renderedFrames)
+			ss := debug.GetShaderSwitches() / uint64(renderedFrames)
+			us := debug.GetUniformSet() / uint64(renderedFrames)
+			vb := debug.GetVertexBind() / uint64(renderedFrames)
+			logLine := fmt.Sprintf("%s | %0.1fms - %0.0f%% (%d fps, %d ups), %d draw calls, %d shader switches, %d uniform updates, %d vertex binds, %d particles", total, msPerFrame, percent, fps, ups, dc, ss, us, vb, debug.GetParticles())
 			fmt.Println(logLine)
 			e.logger.Println(logLine)
-			renderFrames = 0
-			frameCounter = 0
+			renderedFrames = 0
+			debugTimer = 0
+			updatedFrames = 0
 		}
 	}
 }
