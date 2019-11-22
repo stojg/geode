@@ -19,16 +19,18 @@ const InstanceDataLength = 8
 const Gravity = -9.82
 
 type particleData struct {
-	aliveCount       int
-	velocity         [MaxParticles][3]float32
-	gravity          [MaxParticles]float32
-	position         [MaxParticles][3]float32
-	transparency     [MaxParticles]float32
-	rotation         [MaxParticles]float32
-	scale            [MaxParticles]float32
-	elapsedTime      [MaxParticles]float32
-	alive            [MaxParticles]bool
-	lifeLength       [MaxParticles]float32
+	aliveCount   int
+	velocity     [MaxParticles][3]float32
+	gravity      [MaxParticles]float32
+	position     [MaxParticles][3]float32
+	transparency [MaxParticles]float32
+	rotation     [MaxParticles]float32
+	scale        [MaxParticles]float32
+	elapsedTime  [MaxParticles]float32
+	//alive        [MaxParticles]bool
+	// how long the particle will be alive in seconds
+	lifeLength [MaxParticles]float32
+	// for ordering the particle so that they will be displayed correctly with the transparency
 	distanceToCamera [MaxParticles]float32
 	colour           [MaxParticles][3]float32
 }
@@ -37,7 +39,7 @@ func (pd *particleData) add(pos, vel, colour [3]float32, scale, rotAngle, gravit
 	if pd.aliveCount >= MaxParticles {
 		return
 	}
-	pd.alive[pd.aliveCount] = true
+	//pd.alive[pd.aliveCount] = true
 	pd.transparency[pd.aliveCount] = 1.0
 	pd.position[pd.aliveCount] = pos
 	pd.velocity[pd.aliveCount] = vel
@@ -52,7 +54,7 @@ func (pd *particleData) add(pos, vel, colour [3]float32, scale, rotAngle, gravit
 }
 
 func (pd *particleData) remove(id int) {
-	pd.alive[id] = false
+	//pd.alive[id] = false
 	pd.swap(id, pd.aliveCount-1)
 	pd.aliveCount--
 }
@@ -65,7 +67,7 @@ func (pd *particleData) swap(a, b int) {
 	pd.rotation[a], pd.rotation[b] = pd.rotation[b], pd.rotation[a]
 	pd.scale[a], pd.scale[b] = pd.scale[b], pd.scale[a]
 	pd.elapsedTime[a], pd.elapsedTime[b] = pd.elapsedTime[b], pd.elapsedTime[a]
-	pd.alive[a], pd.alive[b] = pd.alive[b], pd.alive[a]
+	//pd.alive[a], pd.alive[b] = pd.alive[b], pd.alive[a]
 	pd.lifeLength[a], pd.lifeLength[b] = pd.lifeLength[b], pd.lifeLength[a]
 	pd.distanceToCamera[a], pd.distanceToCamera[b] = pd.distanceToCamera[b], pd.distanceToCamera[a]
 	pd.colour[a], pd.colour[b] = pd.colour[b], pd.colour[a]
@@ -94,34 +96,19 @@ func NewParticleSystem(perSecond float64) *ParticleSystem {
 	}
 }
 
-func simpleUpdater(data *particleData, elapsed float32, camera components.Viewer) {
+func simpleUpdater(data *particleData, elapsed float32) {
 	for i := 0; i < data.aliveCount; i++ {
+		data.elapsedTime[i] += elapsed
+		if data.elapsedTime[i] > data.lifeLength[i] {
+			data.remove(i)
+			i--
+			continue
+		}
 		data.velocity[i][1] += data.gravity[i] * elapsed
-	}
-
-	for i := 0; i < data.aliveCount; i++ {
 		data.position[i][0] += data.velocity[i][0] * elapsed
 		data.position[i][1] += data.velocity[i][1] * elapsed
 		data.position[i][2] += data.velocity[i][2] * elapsed
-	}
-
-	for i := 0; i < data.aliveCount; i++ {
-		data.elapsedTime[i] += elapsed
-	}
-
-	for i := 0; i < data.aliveCount; i++ {
-		data.distanceToCamera[i] = camera.Pos().Sub(data.position[i]).Len()
-	}
-
-	for i := 0; i < data.aliveCount; i++ {
 		data.transparency[i] = 1 - data.elapsedTime[i]/data.lifeLength[i]
-	}
-
-	for i := 0; i < data.aliveCount; i++ {
-		alive := data.elapsedTime[i] < data.lifeLength[i]
-		if !alive {
-			data.remove(i)
-		}
 	}
 }
 
@@ -136,13 +123,13 @@ type ParticleSystem struct {
 }
 
 func (s *ParticleSystem) Update(elapsed time.Duration) {
+	simpleUpdater(s.data, float32(elapsed.Seconds()))
 	s.timeElapsed += elapsed.Seconds()
 }
 
 var instanceData = make([]float32, MaxParticles*InstanceDataLength)
 
 func (s *ParticleSystem) Draw(camera components.Viewer, shader components.Shader, state components.RenderState) {
-	elapsed := float32(s.timeElapsed)
 	toCreate := s.calculateToCreate()
 
 	posX := s.Transform().Pos()[0]
@@ -153,10 +140,12 @@ func (s *ParticleSystem) Draw(camera components.Viewer, shader components.Shader
 		s.data.add([3]float32{posX, posY, posZ}, [3]float32{rand.Float32()*1 - 0.5, rand.Float32() * 15, rand.Float32()*1 - 0.5}, colour, rand.Float32()*0.05+0.025, 0, 0.5, rand.Float32()*4+1)
 	}
 
-	simpleUpdater(s.data, elapsed, camera)
+	for i := 0; i < s.data.aliveCount; i++ {
+		s.data.distanceToCamera[i] = camera.Pos().Sub(s.data.position[i]).Len()
+	}
 	sort.Sort(s.data)
 
-	s.updateInstanceData()
+	s.updateDataForRenderer()
 	buffers.UpdateFloatVBO(s.vao, s.vbo, len(instanceData), instanceData, gl.STREAM_DRAW)
 
 	view := camera.View()
@@ -178,7 +167,7 @@ func (s *ParticleSystem) calculateToCreate() float64 {
 	return toCreate
 }
 
-func (s *ParticleSystem) updateInstanceData() {
+func (s *ParticleSystem) updateDataForRenderer() {
 	count := 0
 	for i := 0; i < s.data.aliveCount; i++ {
 		copy(instanceData[count:], s.data.position[i][0:3])

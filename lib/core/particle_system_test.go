@@ -13,46 +13,56 @@ func Test_simpleUpdater(t *testing.T) {
 	data.add([3]float32{1, 0, 0}, [3]float32{0, 0, 0}, [3]float32{1, 1, 1}, 0, 1, 1, 1)
 
 	cameraObject := NewGameObject(components.ResourceNA)
-	cameraObject.SetPos(0, 0, 0)
 	cam := components.NewCamera(75, 320, 240, 0.1, 512)
 	cameraObject.AddComponent(cam)
 
-	simpleUpdater(data, 0.1, cam)
+	simpleUpdater(data, 0.1)
 
-	if data.aliveCount != 1 {
+	if data.Len() != 1 {
 		t.Errorf("expected 1 alive particle")
 	}
 
-	if !data.alive[0] {
+	if data.elapsedTime[0] != 0.1 {
 		t.Errorf("expected particle idx 0 to be alive")
 	}
 
 	data.add([3]float32{2, 0, 0}, [3]float32{0, 0, 0}, [3]float32{1, 1, 1}, 0, 1, 1, 1)
 
-	if data.aliveCount != 2 {
+	if data.Len() != 2 {
 		t.Errorf("expected 2 alive particles")
 	}
 
-	if !data.alive[0] {
+	if data.elapsedTime[0] != 0.1 {
 		t.Errorf("expected particle idx 1 to be alive")
 	}
 
-	simpleUpdater(data, 1.0, cam)
+	// now we zoom past the alive state for th first particle
+	simpleUpdater(data, 1.0)
 
-	if data.aliveCount != 1 {
-		t.Errorf("expected 1 alive particles")
+	if data.Len() != 1 {
+		t.Errorf("expected 1 alive particlesx")
 	}
 
-	if !data.alive[0] {
-		t.Errorf("expected particle idx 0 to be alive")
+	if data.elapsedTime[0] != 1 {
+		t.Errorf("expected particle idx 0 to be %f old, got %f", 1.0, data.elapsedTime[0])
 	}
 
-	if data.alive[1] {
-		t.Errorf("expected particle idx 1 to be dead")
+	if data.elapsedTime[1] != 1.1 {
+		t.Errorf("expected particle idx 1 to be %f old, got %f", 1.1, data.elapsedTime[1])
 	}
 
 	if data.position[0][0] != 2.0 {
 		t.Errorf("expected idx 1 to have moved to idx 0 after idx 0 been killed")
+	}
+
+	simpleUpdater(data, 0.01)
+
+	if data.elapsedTime[0] != 1.01 {
+		t.Errorf("expected particle idx 0 to be %f old, got %f", 1.01, data.elapsedTime[0])
+	}
+
+	if data.elapsedTime[1] != 1.1 {
+		t.Errorf("expected particle idx 1 to be %f old, got %f", 1.1, data.elapsedTime[1])
 	}
 }
 
@@ -68,7 +78,7 @@ func Benchmark_simpleUpdater(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		data.add([3]float32{float32(i), 0, 0}, [3]float32{1, 0, 0}, [3]float32{1, 1, 1}, 0, 1, 1, 50)
-		simpleUpdater(data, 1, cam)
+		simpleUpdater(data, 1)
 	}
 }
 
