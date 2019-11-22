@@ -56,6 +56,22 @@ func Test_simpleUpdater(t *testing.T) {
 	}
 }
 
+func Benchmark_simpleUpdater(b *testing.B) {
+	data := &particleData{}
+
+	cameraObject := NewGameObject(components.ResourceNA)
+	cam := components.NewCamera(75, 320, 240, 0.1, 512)
+	cameraObject.AddComponent(cam)
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		data.add([3]float32{float32(i), 0, 0}, [3]float32{1, 0, 0}, [3]float32{1, 1, 1}, 0, 1, 1, 50)
+		simpleUpdater(data, 1, cam)
+	}
+}
+
 func Test_calculateToCreate(t *testing.T) {
 	s := &ParticleSystem{
 		perSecond: 10.0,
