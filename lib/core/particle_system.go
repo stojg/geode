@@ -148,10 +148,6 @@ func (s *ParticleSystem) Draw(camera components.Viewer, shader components.Shader
 	s.updateDataForRenderer()
 	buffers.UpdateFloatVBO(s.vao, s.vbo, len(instanceData), instanceData, gl.STREAM_DRAW)
 
-	view := camera.View()
-	s.state.SetVector3f("x_camRight", [3]float32{view[0], view[4], view[8]})
-	s.state.SetVector3f("x_camUp", [3]float32{view[1], view[5], view[9]})
-
 	gl.BindVertexArray(s.vao)
 	debug.AddVertexBind()
 	gl.DrawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, int32(s.data.aliveCount))

@@ -8,15 +8,15 @@ import (
 
 func NewRenderer(s components.RenderState) *Renderer {
 	r := &Renderer{
-		RenderState: s,
-		shader:      shader.NewShader("particle"),
+		state:  s,
+		shader: shader.NewShader("particle"),
 	}
 
 	return r
 }
 
 type Renderer struct {
-	components.RenderState
+	state  components.RenderState
 	shader components.Shader
 }
 
@@ -26,7 +26,11 @@ func (r *Renderer) Render(objects components.Renderable) {
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	gl.DepthMask(false)
 
-	objects.Render(r.RenderState.Camera(), r.shader, r.RenderState, components.ParticleRender)
+	view := r.state.Camera().View()
+	r.state.SetVector3f("x_camRight", [3]float32{view[0], view[4], view[8]})
+	r.state.SetVector3f("x_camUp", [3]float32{view[1], view[5], view[9]})
+
+	objects.Render(r.state.Camera(), r.shader, r.state, components.ParticleRender)
 
 	gl.DepthMask(true)
 	gl.Disable(gl.BLEND)
