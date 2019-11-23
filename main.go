@@ -122,7 +122,7 @@ func run(l components.Logger) error {
 
 	bot, err := loadModel("bot")
 	handleError(err)
-	bot.AddComponent(components.NewRotator(vec3(0, -1, 0), 15))
+	bot.AddComponent(components.NewSpinner(vec3(0, -1, 0), 15))
 	bot.SetPos(0, terrainA.Height(0, 0), 0)
 	engine.AddObject(bot)
 
