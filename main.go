@@ -59,7 +59,7 @@ func run(l components.Logger) error {
 
 	cameraObject := core.NewGameObject(components.ResourceNA)
 	cameraObject.SetPos(-10, terrainA.Height(10, -10)+20, -10)
-	cameraObject.AddComponent(components.NewCamera(75, engine.Width(), engine.Height(), 0.1, 512))
+	cameraObject.AddComponent(components.NewCamera(55, engine.Width(), engine.Height(), 0.1, 512))
 	cameraObject.AddComponent(components.NewFreeMove(4))
 	cameraObject.AddComponent(components.NewFreelook(engine.Width(), engine.Height()))
 	cameraObject.AddComponent(components.NewHeadHeight(terrainA))
