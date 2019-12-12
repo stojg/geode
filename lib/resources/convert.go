@@ -2,8 +2,6 @@ package resources
 
 import (
 	"math"
-
-	"github.com/go-gl/mathgl/mgl32"
 )
 
 // ConvertToVertices takes an slice of float32 and turns them into nice Vertexes.
@@ -27,6 +25,9 @@ func ConvertToVertices(meshdata []float32, indices []uint32) []Vertex {
 	// 2. calculate tangents from the texture UVs so we can properly use bumpmaps texture on meshes (we can calculate the bi-tangents
 	// in the vertex shader when we need it)
 
+	var edge1 [3]float32
+	var edge2 [3]float32
+	var tangent [3]float32
 	for indexPos := 0; indexPos < len(indices); indexPos += 3 {
 		// check if we already have calculated the tangents
 		if sqrLength(vertices[indices[indexPos]].Tangent) != 0 {
@@ -44,19 +45,23 @@ func ConvertToVertices(meshdata []float32, indices []uint32) []Vertex {
 
 		f := 1.0 / (deltaU1*deltaV2 - deltaU2*deltaV1)
 
-		edge1 := edge(v1, v0)
-		edge2 := edge(v2, v0)
+		edge1 = [3]float32{v1.Pos[0] - v0.Pos[0], v1.Pos[1] - v0.Pos[1], v1.Pos[2] - v0.Pos[2]}
+		edge2 = [3]float32{v2.Pos[0] - v0.Pos[0], v2.Pos[1] - v0.Pos[1], v2.Pos[2] - v0.Pos[2]}
 
-		tangent := [3]float32{
+		tangent = [3]float32{
 			f * (deltaV2*edge1[0] - deltaV1*edge2[0]),
 			f * (deltaV2*edge1[1] - deltaV1*edge2[1]),
 			f * (deltaV2*edge1[2] - deltaV1*edge2[2]),
 		}
-		tangent = normalise(tangent)
 
-		n := mgl32.Vec3(vertices[indices[indexPos]].Normal)
-		// check handiness
-		if n.Dot(mgl32.Vec3(tangent)) < 0.0 {
+		// normalise tangent
+		l := 1.0 / float32(math.Sqrt(float64(sqrLength(tangent))))
+		tangent[0] *= l
+		tangent[1] *= l
+		tangent[2] *= l
+
+		// check handiness with normal.Dot(tangent)
+		if vertices[indices[indexPos]].Normal[0]*tangent[0]+vertices[indices[indexPos]].Normal[1]*tangent[1]+vertices[indices[indexPos]].Normal[2]*tangent[2] < 0.0 {
 			tangent[0] *= -1
 			tangent[1] *= -1
 			tangent[2] *= -1
@@ -81,3 +86,7 @@ func normalise(vec [3]float32) [3]float32 {
 func sqrLength(vec [3]float32) float32 {
 	return vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]
 }
+
+//func isZero(vec [3]float32) bool {
+//	return vec[0] == 0 && vec[1] == 0 && vec[2] == 0
+//}
